@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Image\Bob.png" />
     <None Remove="Image\cardBack.jpg" />
     <None Remove="Image\character1.gif" />
     <None Remove="Image\character1.jpg" />
@@ -89,26 +90,23 @@
     <None Remove="Image\Deck\testTwo.png" />
     <None Remove="Image\Deck\ThreeSpade.png" />
     <None Remove="Image\Deck\TwoSpade.png" />
+    <None Remove="Image\Donald.png" />
+    <None Remove="Image\JOSEPH.png" />
+    <None Remove="Image\Khan.png" />
+    <None Remove="Image\NoCharacter.png" />
+    <None Remove="Image\Olaf.png" />
     <None Remove="Image\reteg.png" />
+    <None Remove="Image\Wanda.jpg" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Image\BOB.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Image\cardBack.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\character1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Image\character2.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Image\character3.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Image\character5.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Image\character6.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\chips.png">
@@ -282,16 +280,25 @@
     <Content Include="Image\Deck\TwoSpade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Image\DONALD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\JOSEPH.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\KHAN.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\NoCharacter.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\OLAF.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Image\reteg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Image\character1.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Image\character4.png">
+    <Content Include="Image\WANDA.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

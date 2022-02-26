@@ -7,7 +7,8 @@ namespace PokerGame.Model
         DIAMOND,
         CLUB,
         HEART,
-        SPADE
+        SPADE,
+        NOCARD
     }
 
     public enum CardRank
@@ -25,7 +26,18 @@ namespace PokerGame.Model
         JACK = 11,
         QUEEN = 12,
         KING = 13,
-        ACE = 14
+        ACE = 14,
+        NOCARD = 15
+    }
+
+    public enum CharacterTypes
+    {
+        BOB,
+        DONALD,
+        JOSEPH,
+        KHAN,
+        OLAF,
+        WANDA
     }
 
     public struct CardType
@@ -41,16 +53,14 @@ namespace PokerGame.Model
 
     public struct Card
     {
-        public Card(CardType cardType, bool isUpSideDown, bool isVisible)
+        public Card(CardType cardType, bool isUpSideDown)
         {
             this.cardType = cardType;
             this.isUpSideDown = isUpSideDown;
-            this.isVisible = isVisible;
         }
 
         public CardType cardType;
         public bool isUpSideDown;
-        public bool isVisible;
     }
 
     public enum Action
@@ -66,14 +76,14 @@ namespace PokerGame.Model
     {
         //public string PlayerName { private set; get; }
         public string StaticName { protected set; get; }
-        public string Character { protected set; get; }
+        public CharacterTypes Character { protected set; get; }
         public int BetChips { protected set; get; }
         public int Money { protected set; get; }
         public Action LastAction { protected set; get; }
         public bool InGame { protected set; get; }
         public Tuple<Card, Card> Hand { protected set; get; }
 
-        public Player(string staticName, string character, int money, Tuple<Card, Card> hand)
+        public Player(string staticName, CharacterTypes character, int money, Tuple<Card, Card> hand)
         {
             //PlayerName = playerName;
             StaticName = staticName;
@@ -88,11 +98,25 @@ namespace PokerGame.Model
         public abstract void ChosenAction(Action chosenAction, int betValue = 0);
     }
 
+    public class BotPlayer : Player
+    {
+        private static int _characterCounter = 1;
+        public BotPlayer(CharacterTypes character, int money, Tuple<Card, Card> hand) : base("Character" + _characterCounter.ToString(), character, money, hand)
+        {
+            _characterCounter++;
+        }
+
+        public override void ChosenAction(Action chosenAction, int betValue = 0)
+        {
+            
+        }
+    }
+
     public class MainPlayer : Player
     {
         public string PlayerName { private set; get; }
 
-        public MainPlayer(string playerName, string character, int money, Tuple<Card, Card> hand) : base("MainPlayer", character, money, hand)
+        public MainPlayer(string playerName, CharacterTypes character, int money, Tuple<Card, Card> hand) : base("MainPlayer", character, money, hand)
         {
             PlayerName = playerName;
         }

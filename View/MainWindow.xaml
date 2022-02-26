@@ -31,15 +31,15 @@
                     <ColumnDefinition Width="400"/>
                     <ColumnDefinition Width="400"/>
                 </Grid.ColumnDefinitions>
-                
-                <Grid Grid.Column="0">
+
+                <Grid Name="LeftTopCharacterGrid" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140"/>
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Name="LeftTopCharacterPicture" Grid.Column="0" Height="150" Margin="10,20,0,0">
-                        <Image Source="../Image/character1.jpg"/>
+                    <Label Grid.Column="0" Height="150" Margin="10,20,0,0">
+                        <Image Name="LeftTopCharacterProfilePicture" Source="../Image/NoCharacter.png"/>
                     </Label>
                     
                     <Grid Grid.Column="1" Width="200">
@@ -59,18 +59,18 @@
                                     <ColumnDefinition Width="60"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Label Name="LeftTopFstCard" Grid.Column="0">
-                                    <Image Source="../Image/Deck/testTwo.png"/>
+                                <Label Grid.Column="0">
+                                    <Image Name="LeftTopCharacterLeftHand" Source="../Image/Deck/testTwo.png"/>
                                 </Label>
-                                <Label Name="LeftTopSndCard"  Grid.Column="1">
-                                    <Image Source="../Image/Deck/testAce.png"/>
+                                <Label Grid.Column="1">
+                                    <Image Name="LeftTopCharacterRightHand" Source="../Image/Deck/testAce.png"/>
                                 </Label>
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                <TextBlock  Text="TESTING TEST Test"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="LeftTopCharacterNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="LeftTopCharacterMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="LeftTopCharacterLastActionTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                             </StackPanel>
                         </Grid>
 
@@ -80,10 +80,10 @@
                                 <RowDefinition Height="40"/>
                             </Grid.RowDefinitions>
 
-                            <Label Name="LeftTopChipsPicture" Grid.Row="0" VerticalAlignment="Bottom">
-                                <Image Source="../Image/chips.png" />
+                            <Label Grid.Row="0" VerticalAlignment="Bottom">
+                                <Image Name="LeftTopCharacterBetPicture" Source="../Image/chips.png" />
                             </Label>
-                            <TextBlock Name="LeftTopChipsValue" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                            <TextBlock Name="LeftTopCharacterBetTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
 
                         </Grid>
                     </Grid>
@@ -91,14 +91,14 @@
                 </Grid>
 
 
-                <Grid Grid.Column="1">
+                <Grid Name="MiddleTopCharacterGrid" Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140"/>
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
 
                     <Label Grid.Column="0" Height="180" Margin="10,0,0,0">
-                        <Image Source="../Image/character3.jpg" />
+                        <Image Name="MiddleTopCharacterProfilePicture" Source="../Image/NoCharacter.png" />
                     </Label>
 
                     <Grid Grid.Column="1" Width="200">
@@ -119,17 +119,17 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Label Grid.Column="0">
-                                    <Image Source="../Image/cardBack.jpg"/>
+                                    <Image Name="MiddleTopCharacterLeftHand" Source="../Image/cardBack.jpg"/>
                                 </Label>
                                 <Label Grid.Column="1">
-                                    <Image Source="../Image/cardBack.jpg"/>
+                                    <Image Name="MiddleTopCharacterRightHand" Source="../Image/cardBack.jpg"/>
                                 </Label>
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                <TextBlock  Text="TESTING TEST Test"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="MiddleTopCharacterNameTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="MiddleTopCharacterMoneyTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="MiddleTopCharacterLastActionTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                             </StackPanel>
                         </Grid>
 
@@ -140,9 +140,9 @@
                             </Grid.RowDefinitions>
 
                             <Label Grid.Row="0" VerticalAlignment="Bottom">
-                                <Image Source="../Image/chips.png" />
+                                <Image Name="MiddleTopCharacterBetPicture" Source="../Image/chips.png" />
                             </Label>
-                            <TextBlock Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                            <TextBlock Name="MiddleTopCharacterBetTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
 
                         </Grid>
                     </Grid>
@@ -150,14 +150,14 @@
                 </Grid>
 
 
-                <Grid Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,20,0">
+                <Grid Name="RightTopCharacterGrid" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,20,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200" />
                         <ColumnDefinition Width="140" />
                     </Grid.ColumnDefinitions>
 
                     <Label Grid.Column="1" Height="150" Margin="0, 20, 0, 0">
-                        <Image Source="../Image/character2.jpg" />
+                        <Image Name="RightTopCharacterProfilePicture" Source="../Image/NoCharacter.png" />
                     </Label>
 
                     <Grid Grid.Column="0" Width="200">
@@ -178,17 +178,17 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Label Grid.Column="0">
-                                    <Image Source="../Image/cardBack.jpg"/>
+                                    <Image Name="RightTopCharacterLeftHand" Source="../Image/cardBack.jpg"/>
                                 </Label>
                                 <Label Grid.Column="1">
-                                    <Image Source="../Image/cardBack.jpg"/>
+                                    <Image Name="RightTopCharacterRightHand" Source="../Image/cardBack.jpg"/>
                                 </Label>
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                <TextBlock  Text="TESTING TEST Test"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RigthTopCharacterNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RigthTopCharacterMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RigthTopCharacterLastActionTextBox" Text="PlaceHolder" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                             </StackPanel>
                         </Grid>
 
@@ -199,9 +199,9 @@
                             </Grid.RowDefinitions>
 
                             <Label Grid.Row="0" VerticalAlignment="Bottom">
-                                <Image Source="../Image/chips.png" />
+                                <Image Name="RightTopCharacterBetPicture" Source="../Image/chips.png" />
                             </Label>
-                            <TextBlock Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                            <TextBlock Name="RightTopCharacterBetTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
 
                         </Grid>
                     </Grid>
@@ -221,7 +221,7 @@
 
 
 
-                <Grid Grid.Column="0" Height="300" Margin="20,0,0,0">
+                <Grid Name="LeftBottomCharacterGrid" Grid.Column="0" Height="300" Margin="20,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150" />
                         <ColumnDefinition Width="150" />
@@ -234,13 +234,13 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Top">
-                            <TextBlock  Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock  Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock  Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="LeftBottomCharacterNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="LeftBottomCharacterMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="LeftBottomCharacterLastActionTextBox" Text="PlaceHolder"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
                         </StackPanel>
 
                         <Label Grid.Row="0" VerticalAlignment="Bottom">
-                            <Image Source="../Image/character6.jpg" />
+                            <Image Name="LeftBottomCharacterProfilePicture" Source="../Image/NoCharacter.png" />
                         </Label>
                     </Grid>
 
@@ -257,10 +257,10 @@
                             </Grid.ColumnDefinitions>
 
                             <Label Grid.Column="0">
-                                <Image Source="../Image/cardBack.jpg"/>
+                                <Image Name="LeftBottomLeftHand" Source="../Image/cardBack.jpg"/>
                             </Label>
                             <Label Grid.Column="1">
-                                <Image Source="../Image/cardBack.jpg"/>
+                                <Image Name="LeftBottomRightHand" Source="../Image/cardBack.jpg"/>
                             </Label>
                         </Grid>
 
@@ -271,9 +271,9 @@
                             </Grid.RowDefinitions>
 
                             <Label Grid.Row="0" VerticalAlignment="Top">
-                                <Image Source="../Image/chips.png" />
+                                <Image Name="LeftBottomCharacterBetPicture" Source="../Image/chips.png" />
                             </Label>
-                            <TextBlock Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
+                            <TextBlock Name="LeftBottomCharacterBetTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -282,7 +282,7 @@
 
 
 
-                <Grid Grid.Column="2" Height="300" Margin="0,0,20,0">
+                <Grid Name="RightBottomCharacterGrid" Grid.Column="2" Height="300" Margin="0,0,20,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150" />
                         <ColumnDefinition Width="150" />
@@ -295,13 +295,13 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Top">
-                            <TextBlock  Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock  Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock  Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="RightBottomCharacterNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="RightBottomCharacterMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="RightBottomCharacterLastActionTextBox" Text="PlaceHolder"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
                         </StackPanel>
 
                         <Label Grid.Row="0" VerticalAlignment="Bottom">
-                            <Image Source="../Image/character5.png" />
+                            <Image Name="RightBottomCharacterProfilePicture" Source="../Image/NoCharacter.png" />
                         </Label>
                     </Grid>
 
@@ -318,10 +318,10 @@
                             </Grid.ColumnDefinitions>
 
                             <Label Grid.Column="0">
-                                <Image Source="../Image/cardBack.jpg"/>
+                                <Image Name="RightBottomCharacterLeftHand" Source="../Image/cardBack.jpg"/>
                             </Label>
                             <Label Grid.Column="1">
-                                <Image Source="../Image/cardBack.jpg"/>
+                                <Image Name="RightBottomCharacterRightHand" Source="../Image/cardBack.jpg"/>
                             </Label>
                         </Grid>
 
@@ -332,9 +332,9 @@
                             </Grid.RowDefinitions>
 
                             <Label Grid.Row="0" VerticalAlignment="Top">
-                                <Image Source="../Image/chips.png" />
+                                <Image Name="RightBottomCharacterBetPicture" Source="../Image/chips.png" />
                             </Label>
-                            <TextBlock Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
+                            <TextBlock Name="RightBottomCharacterBetTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
 
                         </Grid>
 
@@ -348,7 +348,7 @@
                         <RowDefinition Height="200"/>
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" HorizontalAlignment="Center" Margin="0,40,0,0">
+                    <Grid Name="MiddleSectionGrid" Grid.Row="0" HorizontalAlignment="Center" Margin="0,40,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="80"/>
@@ -359,19 +359,19 @@
                         </Grid.ColumnDefinitions>
 
                         <Label Grid.Column="0">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleFirstCardPicture" Source="../Image/cardBack.jpg"/>
                         </Label>
                         <Label Grid.Column="1">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleSecondCardPicture" Source="../Image/cardBack.jpg"/>
                         </Label>
                         <Label Grid.Column="2">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleThirdCardPicture" Source="../Image/cardBack.jpg"/>
                         </Label>
                         <Label Grid.Column="3">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleFourthCardPicture" Source="../Image/cardBack.jpg"/>
                         </Label>
                         <Label Grid.Column="4">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleFifthCardPicture" Source="../Image/cardBack.jpg"/>
                         </Label>
 
                         <Grid Grid.Column="5" HorizontalAlignment="Center">
@@ -381,9 +381,9 @@
                             </Grid.RowDefinitions>
 
                             <Label Grid.Row="0" VerticalAlignment="Top">
-                                <Image Source="../Image/chips.png" />
+                                <Image Name="AllBetPicture" Source="../Image/chips.png" />
                             </Label>
-                            <TextBlock Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
+                            <TextBlock Name="AllBetValueTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
                         </Grid>
                     </Grid>
 
@@ -394,7 +394,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Label Grid.Column="0" Height="180" Margin="10,0,0,30">
-                            <Image Source="../Image/character4.png" />
+                            <Image Name="MainPlayerProfilePicture" Source="../Image/NoCharacter.png" />
                         </Label>
 
                         <Grid Grid.Column="1" Width="230" HorizontalAlignment="Left">
@@ -414,18 +414,18 @@
                                         <ColumnDefinition Width="60"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Label Name="MainLeftHandSide" Grid.Column="0">
-                                        <Image Name="TestImageName" Source="../Image/cardBack.jpg"/>
+                                    <Label Grid.Column="0">
+                                        <Image Name="MainPlayerLeftHand" Source="../Image/cardBack.jpg"/>
                                     </Label>
                                     <Label Grid.Column="1">
-                                        <!--<Image Source="../Image/cardBack.jpg"/>-->
+                                        <Image Name="MainPlayerRightHand" Source="../Image/cardBack.jpg"/>
                                     </Label>
                                 </Grid>
 
                                 <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                    <TextBlock  Text="TESTING TEST Test"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                    <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                    <TextBlock Text="TESTING TEST"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                    <TextBlock Name="MainPlayerNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                    <TextBlock Name="MainPlayerMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                    <TextBlock Name="MainPlayerLastActionTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                                 </StackPanel>
                             </Grid>
 
@@ -436,9 +436,9 @@
                                 </Grid.RowDefinitions>
 
                                 <Label Grid.Row="0" VerticalAlignment="Bottom">
-                                    <Image Source="../Image/chips.png" />
+                                    <Image Name="MainPlayerBetPicture" Source="../Image/chips.png" />
                                 </Label>
-                                <TextBlock Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                                <TextBlock Name="MainPlayerBetTextBox" Grid.Row="1" Text="200"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
                             </Grid>
                         </Grid>
                     </Grid>
