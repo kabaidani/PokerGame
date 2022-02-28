@@ -34,6 +34,19 @@ namespace PokerGame.ViewModel
 
         public event EventHandler<PokerPlayerEventArgs> ShowCardsEvent;
         public event EventHandler<PlayersEventArg> InitCharacters;
+        public event EventHandler CardAllocationEvent;
+
+        private void OnCardAllocationEvent()
+        {
+            if (CardAllocationEvent != null)
+            {
+                CardAllocationEvent(this, EventArgs.Empty);
+            }
+        }
+        private void OnCardAllocation(object sender, EventArgs e)
+        {
+            OnCardAllocationEvent();
+        }
 
         private void OnInitCharacters(List<Player> players)
         {
@@ -55,6 +68,7 @@ namespace PokerGame.ViewModel
         {
             _model = model;
             _model.GeneratePlayers();
+            _model.CardAllocation += OnCardAllocation;
             TestButtonCommand = new DelegateCommand(p => TestCommand(_model.p));
         }
 
@@ -65,7 +79,7 @@ namespace PokerGame.ViewModel
 
         private void TestCommand(Player player)
         {
-            //OnShowCardsEvent(player);
+            OnShowCardsEvent(player);
         }
     }
 }

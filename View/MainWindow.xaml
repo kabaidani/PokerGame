@@ -38,7 +38,7 @@
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Column="0" Height="150" Margin="10,20,0,0">
+                    <Label Grid.Column="0" Height="150" Margin="30,20,0,0">
                         <Image Name="LeftTopCharacterProfilePicture" Source="../Image/NoCharacter.png"/>
                     </Label>
                     
@@ -97,7 +97,7 @@
                         <ColumnDefinition Width="200"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Column="0" Height="180" Margin="10,0,0,0">
+                    <Label Grid.Column="0" Height="140" Margin="30,0,0,40">
                         <Image Name="MiddleTopCharacterProfilePicture" Source="../Image/NoCharacter.png" />
                     </Label>
 
@@ -107,7 +107,7 @@
                             <ColumnDefinition Width="70"/>
                         </Grid.ColumnDefinitions>
 
-                        <Grid Grid.Column="0" >
+                        <Grid Grid.Column="0" Margin="0,0,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="100"/>
                                 <RowDefinition Height="100"/>
@@ -126,7 +126,7 @@
                                 </Label>
                             </Grid>
 
-                            <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Left">
                                 <TextBlock Name="MiddleTopCharacterNameTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                                 <TextBlock Name="MiddleTopCharacterMoneyTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                                 <TextBlock Name="MiddleTopCharacterLastActionTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
@@ -186,9 +186,9 @@
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                <TextBlock Name="RigthTopCharacterNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="RigthTopCharacterMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="RigthTopCharacterLastActionTextBox" Text="PlaceHolder" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RightTopCharacterNameTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RightTopCharacterMoneyTextBox" Text="PlaceHolder"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RightTopCharacterLastActionTextBox" Text="PlaceHolder" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
                             </StackPanel>
                         </Grid>
 
@@ -229,7 +229,7 @@
 
                     <Grid Grid.Column="0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="150"/>
+                            <RowDefinition Height="140"/>
                             <RowDefinition Height="150"/>
                         </Grid.RowDefinitions>
 
@@ -257,10 +257,10 @@
                             </Grid.ColumnDefinitions>
 
                             <Label Grid.Column="0">
-                                <Image Name="LeftBottomLeftHand" Source="../Image/cardBack.jpg"/>
+                                <Image Name="LeftBottomCharacterLeftHand" Source="../Image/cardBack.jpg"/>
                             </Label>
                             <Label Grid.Column="1">
-                                <Image Name="LeftBottomRightHand" Source="../Image/cardBack.jpg"/>
+                                <Image Name="LeftBottomCharacterRightHand" Source="../Image/cardBack.jpg"/>
                             </Label>
                         </Grid>
 
@@ -290,7 +290,7 @@
 
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="150"/>
+                            <RowDefinition Height="140"/>
                             <RowDefinition Height="150"/>
                         </Grid.RowDefinitions>
 
@@ -393,7 +393,7 @@
                             <ColumnDefinition Width="300"/>
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Height="180" Margin="10,0,0,30">
+                        <Label Grid.Column="0" Height="150" Margin="60,0,0,30">
                             <Image Name="MainPlayerProfilePicture" Source="../Image/NoCharacter.png" />
                         </Label>
 
