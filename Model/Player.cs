@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PokerGame.Model
 {
     public enum CardSuit
     {
+        NOCARD,
         DIAMOND,
         CLUB,
         HEART,
-        SPADE,
-        NOCARD
+        SPADE
     }
 
     public enum CardRank
     {
+        NOCARD = 0,
         TWO = 2,
         THREE = 3,
         FOUR = 4,
@@ -25,8 +27,7 @@ namespace PokerGame.Model
         JACK = 11,
         QUEEN = 12,
         KING = 13,
-        ACE = 14,
-        NOCARD = 15
+        ACE = 14
     }
 
     public enum CharacterTypes
@@ -39,6 +40,18 @@ namespace PokerGame.Model
         WANDA
     }
 
+    public struct Hand
+    {
+        public Card leftHand;
+        public Card rightHand;
+
+        public Hand(Card leftHand, Card rightHand)
+        {
+            this.leftHand = leftHand;
+            this.rightHand = rightHand;
+        }
+    }
+
     public struct CardType
     {
         public CardType(CardSuit cardSuit, CardRank cardRank)
@@ -46,7 +59,7 @@ namespace PokerGame.Model
             this.cardSuit = cardSuit;
             this.cardRank = cardRank;
         }
-        public CardSuit cardSuit; // Consider to use Proprtys
+        public CardSuit cardSuit;
         public CardRank cardRank;
     }
 
@@ -71,6 +84,7 @@ namespace PokerGame.Model
         NOACTION
     }
 
+
     public abstract class Player
     {
         //public string PlayerName { private set; get; }
@@ -80,9 +94,9 @@ namespace PokerGame.Model
         public int Money { protected set; get; }
         public Action LastAction { protected set; get; }
         public bool InGame { protected set; get; }
-        public Tuple<Card, Card> Hand { protected set; get; }
+        public Hand hand; // the set should be more safer
 
-        public Player(string staticName, CharacterTypes character, int money, Tuple<Card, Card> hand)
+        public Player(string staticName, CharacterTypes character, int money)
         {
             //PlayerName = playerName;
             StaticName = staticName;
@@ -91,7 +105,15 @@ namespace PokerGame.Model
             Money = money;
             LastAction = Action.NOACTION;
             InGame = true;
-            Hand = hand;
+        }
+
+        public int CollectBet()
+        {
+            if (!this.InGame) return 0;
+
+            int ammount = BetChips;
+            BetChips = 0;
+            return ammount;
         }
 
         public abstract void ChosenAction(Action chosenAction, int betValue = 0);
@@ -100,7 +122,7 @@ namespace PokerGame.Model
     public class BotPlayer : Player
     {
         private static int _characterCounter = 1;
-        public BotPlayer(CharacterTypes character, int money, Tuple<Card, Card> hand) : base("Character" + _characterCounter.ToString(), character, money, hand)
+        public BotPlayer(CharacterTypes character, int money) : base("Character" + _characterCounter.ToString(), character, money)
         {
             _characterCounter++;
         }
@@ -115,7 +137,7 @@ namespace PokerGame.Model
     {
         public string PlayerName { private set; get; }
 
-        public MainPlayer(string playerName, CharacterTypes character, int money, Tuple<Card, Card> hand) : base("MainPlayer", character, money, hand)
+        public MainPlayer(string playerName, CharacterTypes character, int money) : base("MainPlayer", character, money)
         {
             PlayerName = playerName;
         }
@@ -139,5 +161,57 @@ namespace PokerGame.Model
             }
         }
 
+    }
+
+    public class MiddleField
+    {
+        public List<Card> CommonityCards { private set; get; }
+        public int CommonityBet { private set; get; }
+        private int _comCardsNumber;
+
+        public static Card CardGenerator(Random rand, bool isUpdsideDown = true)
+        {
+            int tmpCardSuit = rand.Next(1, 4);
+            int tmpCardRank = rand.Next(2, 14);
+            Card result = new Card(new CardType((CardSuit)tmpCardSuit, (CardRank)tmpCardRank), isUpdsideDown);
+            return result;
+        }
+
+        public MiddleField()
+        {
+            _comCardsNumber = 0;
+            CommonityCards = new List<Card>();
+            Random rand = new Random(); // Check if this is more effective than construct every time
+            for(int i = 0; i<5; i++)
+            {
+                if(i < 3)
+                {
+                    CommonityCards.Add(CardGenerator(rand, false));
+                    _comCardsNumber++;
+                }
+                else
+                {
+                    CommonityCards.Add(CardGenerator(rand));
+                }
+            }
+        }
+
+        public void UnfoldNextCard()
+        {
+            if (_comCardsNumber == 5) return;
+            _comCardsNumber++;
+            CommonityCards[_comCardsNumber] = new Card(CommonityCards[_comCardsNumber].cardType, false);
+        }
+
+        public void CollectBets(List<Player> players)
+        {
+            int ammount = 0;
+            foreach(var player in players)
+            {
+                ammount += player.CollectBet();
+            }
+
+            CommonityBet += ammount;
+        }
     }
 }

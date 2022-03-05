@@ -387,7 +387,7 @@
                         </Grid>
                     </Grid>
 
-                    <Grid Grid.Row="1" HorizontalAlignment="Center">
+                    <Grid Name="MainPlayerGrid" Grid.Row="1" HorizontalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="180"/>
                             <ColumnDefinition Width="300"/>

@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace PokerGame.Model
 {
     public class PokerModel
     {
-
-        public event EventHandler CardAllocation;
+        public event EventHandler<PlayersEventArg> CardAllocation;
 
         private void OnCardAllocation()
         {
             if (CardAllocation != null)
             {
-                CardAllocation(this, EventArgs.Empty);
+                CardAllocation(this, new PlayersEventArg(playerContainer));
             }
         }
 
@@ -31,43 +31,56 @@ namespace PokerGame.Model
         public List<Player> playerContainer; 
         public MainPlayer p;
 
-        private Card CardGenerator(Random rand, bool isUpdsideDown = true)
-        {
-            int tmpCardSuit = rand.Next(0, 3);
-            int tmpCardRank = rand.Next(2,14);
-            Card result = new Card(new CardType((CardSuit)tmpCardSuit, (CardRank)tmpCardRank), isUpdsideDown);
-            return result;
-        }
+        //private Card CardGenerator(Random rand, bool isUpdsideDown = true)
+        //{
+        //    int tmpCardSuit = rand.Next(1, 4);
+        //    int tmpCardRank = rand.Next(2,14);
+        //    Card result = new Card(new CardType((CardSuit)tmpCardSuit, (CardRank)tmpCardRank), isUpdsideDown);
+        //    return result;
+        //}
 
         public void GeneratePlayers()
         {
             playerContainer = new List<Player>();
             Random rand = new Random();
 
-            var cardLHS = CardGenerator(rand, false);
-            var cardRHS = CardGenerator(rand, false);
-
-            p = new MainPlayer("Daniel", CharacterTypes.BOB, StartingMoney, new Tuple<Card, Card>(cardLHS, cardRHS));
+            p = new MainPlayer("Daniel", CharacterTypes.BOB, StartingMoney);
 
             for(int i = 0; i < PlayersNum; i++)
             {
                 int tempCharacterType = rand.Next(0, 5);
                 CharacterTypes character = (CharacterTypes)tempCharacterType;
-
-                cardLHS = CardGenerator(rand, false);
-                cardRHS = CardGenerator(rand, false);
-                playerContainer.Add(new BotPlayer(character, StartingMoney, new Tuple<Card, Card>(cardLHS, cardRHS)));
+                playerContainer.Add(new BotPlayer(character, StartingMoney));
                 
             }
 
             playerContainer.Add(p);
-            
+
         }
 
-        public async void AsyncStartRound()
+        public void StartRound()
         {
-            await Task.Delay(3000);
+            foreach (var player in playerContainer)
+            {
+                Random rand = new Random(); // look for if it is worth to create every time
+                player.hand.leftHand = MiddleField.CardGenerator(rand, false);
+                player.hand.rightHand = MiddleField.CardGenerator(rand, false);
+            }
+            playerContainer[playerContainer.Count - 1].hand.leftHand.isUpSideDown = false;
+            playerContainer[playerContainer.Count - 1].hand.rightHand.isUpSideDown = false;
+
             OnCardAllocation();
+
+
+            //foreach (var player in playerContainer)
+            //{
+            //    Random rand = new Random(); // look for if it is worth to create every time
+            //    player.hand.rightHand = CardGenerator(rand, true);
+            //}
+            //playerContainer[playerContainer.Count - 1].hand.rightHand.isUpSideDown = false;
+            //OnCardAllocation();
+
         }
+
     }
 }

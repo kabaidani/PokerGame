@@ -18,15 +18,6 @@ namespace PokerGame.ViewModel
         public static string MainPlayer = "MainPlayer";
     }
 
-    public class PlayersEventArg : EventArgs
-    {
-        public PlayersEventArg(List<Player> players)
-        {
-            Players = players;
-        }
-        public List<Player> Players { get; private set; }
-    }
-
     public class PokerViewModel : ViewModelBase
     {
         private PokerModel _model;
@@ -34,13 +25,13 @@ namespace PokerGame.ViewModel
 
         public event EventHandler<PokerPlayerEventArgs> ShowCardsEvent;
         public event EventHandler<PlayersEventArg> InitCharacters;
-        public event EventHandler CardAllocationEvent;
+        public event EventHandler<PlayersEventArg> CardAllocationEvent;
 
         private void OnCardAllocationEvent()
         {
             if (CardAllocationEvent != null)
             {
-                CardAllocationEvent(this, EventArgs.Empty);
+                CardAllocationEvent(this, new PlayersEventArg(_model.playerContainer));
             }
         }
         private void OnCardAllocation(object sender, EventArgs e)
