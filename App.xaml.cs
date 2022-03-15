@@ -11,6 +11,7 @@ using PokerGame.Model;
 using PokerGame.ViewModel;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Controls;
 
 namespace PokerGame
 {
@@ -23,6 +24,8 @@ namespace PokerGame
         private PokerModel _model;
         private PokerViewModel _viewModel;
 
+        private Brush _deffaultBackground = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
+
         private List<Action<Player, int>> functionList;
 
         public App()
@@ -32,21 +35,9 @@ namespace PokerGame
 
 
 
-        private void OnShowCardsEvent(object sender, PokerPlayerEventArgs e) // We could narrow down the eventArg reference
+        private void OnShowCardsEvent(object sender,PokerPlayerEventArgs e) // We could narrow down the eventArg reference
         {
-            _model.StartRound();
-            //string urlSource = "";
-            //if (e.Player.Hand.Item1.isUpSideDown)
-            //{
-            //    urlSource = "../../Image/cardBack.jpg";
-            //} else
-            //{
-            //    string rank = ((int)e.Player.Hand.Item1.cardType.cardRank).ToString();
-            //    string tmp = e.Player.Hand.Item2.cardType.cardSuit.ToString();
-            //    urlSource = "../../Image/Deck/" + rank + tmp + ".png";
-            //}
-            //_mainWindow.TestImageName.Visibility = Visibility.Visible;
-            //_mainWindow.TestImageName.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
+            _model.TestUnFoldMiddleCards();
         }
 
         private string LeftHandCardUrlGenerator(Player p)
@@ -130,7 +121,7 @@ namespace PokerGame
             string urlSource = "../../Image/" + p.Character.ToString() + ".png";
             _mainWindow.LeftTopCharacterProfilePicture.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
 
-            _mainWindow.LeftTopCharacterLastActionTextBox.Text = "";
+            _mainWindow.LeftTopCharacterLastActionTextBox.Text = p.LastAction.ToString();
         }
 
         private void InitMiddleTopCharacter(Player p, int whichHand)
@@ -187,7 +178,7 @@ namespace PokerGame
             string urlSource = "../../Image/" + p.Character.ToString() + ".png";
             _mainWindow.MiddleTopCharacterProfilePicture.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
 
-            _mainWindow.MiddleTopCharacterLastActionTextBox.Text = "";
+            _mainWindow.MiddleTopCharacterLastActionTextBox.Text = p.LastAction.ToString();
         }
 
         private void InitRightTopCharacter(Player p, int whichHand)
@@ -243,8 +234,7 @@ namespace PokerGame
 
             string urlSource = "../../Image/" + p.Character.ToString() + ".png";
             _mainWindow.RightTopCharacterProfilePicture.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
-
-            _mainWindow.RightTopCharacterLastActionTextBox.Text = "";
+            _mainWindow.RightTopCharacterLastActionTextBox.Text = p.LastAction.ToString();
         }
 
         private void InitRightBottomCharacter(Player p, int whichHand)
@@ -300,8 +290,7 @@ namespace PokerGame
 
             string urlSource = "../../Image/" + p.Character.ToString() + ".png";
             _mainWindow.RightBottomCharacterProfilePicture.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
-
-            _mainWindow.RightBottomCharacterLastActionTextBox.Text = "";
+            _mainWindow.RightBottomCharacterLastActionTextBox.Text = p.LastAction.ToString();
         }
 
         private void InitLeftBottomCharacter(Player p, int whichHand)
@@ -358,7 +347,7 @@ namespace PokerGame
             string urlSource = "../../Image/" + p.Character.ToString() + ".png";
             _mainWindow.LeftBottomCharacterProfilePicture.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
 
-            _mainWindow.LeftBottomCharacterLastActionTextBox.Text = "";
+            _mainWindow.LeftBottomCharacterLastActionTextBox.Text = p.LastAction.ToString();
         }
 
         private void InitMainPlayer(Player p, int whichHand)
@@ -415,7 +404,7 @@ namespace PokerGame
             string urlSource = "../../Image/" + p.Character.ToString() + ".png";
             _mainWindow.MainPlayerProfilePicture.Source = new BitmapImage(new Uri(urlSource, UriKind.Relative));
 
-            _mainWindow.MainPlayerLastActionTextBox.Text = "";
+            _mainWindow.MainPlayerLastActionTextBox.Text = p.LastAction.ToString();
         }
 
         private void OnInitCharacters(object sender, PlayersEventArg e)
@@ -431,15 +420,28 @@ namespace PokerGame
             //Character5
             _mainWindow.LeftBottomCharacterGrid.Visibility = Visibility.Hidden;
             //MiddleSection
-            _mainWindow.MiddleSectionGrid.Visibility = Visibility.Hidden;
+            _mainWindow.MiddleFirstCardPicture.Visibility = Visibility.Hidden;
+            _mainWindow.MiddleSecondCardPicture.Visibility = Visibility.Hidden;
+            _mainWindow.MiddleThirdCardPicture.Visibility = Visibility.Hidden;
+            _mainWindow.MiddleFourthCardPicture.Visibility = Visibility.Hidden;
+            _mainWindow.MiddleFifthCardPicture.Visibility = Visibility.Hidden;
+            _mainWindow.AllBetPicture.Visibility = Visibility.Hidden;
+            _mainWindow.AllBetValueTextBox.Visibility = Visibility.Hidden;
             //MainPlayer
             _mainWindow.MainPlayerGrid.Visibility = Visibility.Hidden;
 
 
             functionList = new List<Action<Player, int>>();
 
-            functionList.Add((p, i) => InitMiddleTopCharacter(p, i)); // 0
-            functionList.Add((p, i) => InitLeftTopCharacter(p, i)); // 1
+            //functionList.Add((p, i) => InitMiddleTopCharacter(p, i)); // 0
+            //functionList.Add((p, i) => InitLeftTopCharacter(p, i)); // 1
+            //functionList.Add((p, i) => InitRightTopCharacter(p, i)); // 2
+            //functionList.Add((p, i) => InitRightBottomCharacter(p, i)); // 3
+            //functionList.Add((p, i) => InitLeftBottomCharacter(p, i)); // 4
+            //functionList.Add((p, i) => InitMainPlayer(p, i)); // 5
+
+            functionList.Add((p, i) => InitLeftTopCharacter(p, i)); // 0
+            functionList.Add((p, i) => InitMiddleTopCharacter(p, i)); // 1
             functionList.Add((p, i) => InitRightTopCharacter(p, i)); // 2
             functionList.Add((p, i) => InitRightBottomCharacter(p, i)); // 3
             functionList.Add((p, i) => InitLeftBottomCharacter(p, i)); // 4
@@ -462,10 +464,10 @@ namespace PokerGame
         private async void AsyncOnCardAllocationEvent(object sender, PlayersEventArg e)
         {
 
-            int delayTime = 350;
-            GetCard(1, delayTime, e.Players, 0);
-            await Task.Delay(delayTime);
+            int delayTime = 200;
             GetCard(0, delayTime, e.Players, 0);
+            await Task.Delay(delayTime);
+            GetCard(1, delayTime, e.Players, 0);
             await Task.Delay(delayTime);
             GetCard(2, delayTime, e.Players, 0);
             await Task.Delay(delayTime);
@@ -475,9 +477,9 @@ namespace PokerGame
             await Task.Delay(delayTime);
             GetCard(4, delayTime, e.Players, 0);
             await Task.Delay(delayTime);
-            GetCard(1, delayTime, e.Players);
-            await Task.Delay(delayTime);
             GetCard(0, delayTime, e.Players);
+            await Task.Delay(delayTime);
+            GetCard(1, delayTime, e.Players);
             await Task.Delay(delayTime);
             GetCard(2, delayTime, e.Players);
             await Task.Delay(delayTime);
@@ -489,15 +491,202 @@ namespace PokerGame
 
         }
 
+        private string ComminityCardUrlGenerator(Card card)
+        {
+            string rank = ((int)card.cardType.cardRank).ToString();
+            string suit = card.cardType.cardSuit.ToString();
+            return "../../Image/Deck/" + rank + suit + ".png";
+        }
+
+        private void OnUnFoldCardEvent(object sender, CommonityCardsEventArgs e)
+        {
+            //First
+            if (!e.CommonityCards[0].isUpSideDown)
+            {
+                string url = ComminityCardUrlGenerator(e.CommonityCards[0]);
+                _mainWindow.MiddleFirstCardPicture.Visibility = Visibility.Visible;
+                _mainWindow.MiddleFirstCardPicture.Source = new BitmapImage(new Uri(url, UriKind.Relative));
+            } else
+            {
+                _mainWindow.MiddleFirstCardPicture.Visibility = Visibility.Hidden;
+            }
+
+            //Second
+            if (!e.CommonityCards[1].isUpSideDown)
+            {
+                string url = ComminityCardUrlGenerator(e.CommonityCards[1]);
+                _mainWindow.MiddleSecondCardPicture.Visibility = Visibility.Visible;
+                _mainWindow.MiddleSecondCardPicture.Source = new BitmapImage(new Uri(url, UriKind.Relative));
+            }
+            else
+            {
+                _mainWindow.MiddleSecondCardPicture.Visibility = Visibility.Hidden;
+            }
+
+            //Third
+            if (!e.CommonityCards[2].isUpSideDown)
+            {
+                string url = ComminityCardUrlGenerator(e.CommonityCards[2]);
+                _mainWindow.MiddleThirdCardPicture.Visibility = Visibility.Visible;
+                _mainWindow.MiddleThirdCardPicture.Source = new BitmapImage(new Uri(url, UriKind.Relative));
+            }
+            else
+            {
+                _mainWindow.MiddleThirdCardPicture.Visibility = Visibility.Hidden;
+            }
+
+            //Fourth
+            if (!e.CommonityCards[3].isUpSideDown)
+            {
+                string url = ComminityCardUrlGenerator(e.CommonityCards[3]);
+                _mainWindow.MiddleFourthCardPicture.Visibility = Visibility.Visible;
+                _mainWindow.MiddleFourthCardPicture.Source = new BitmapImage(new Uri(url, UriKind.Relative));
+            }
+            else
+            {
+                _mainWindow.MiddleFourthCardPicture.Visibility = Visibility.Hidden;
+            }
+
+            //Fifth
+            if (!e.CommonityCards[4].isUpSideDown)
+            {
+                string url = ComminityCardUrlGenerator(e.CommonityCards[4]);
+                _mainWindow.MiddleFifthCardPicture.Visibility = Visibility.Visible;
+                _mainWindow.MiddleFifthCardPicture.Source = new BitmapImage(new Uri(url, UriKind.Relative));
+            }
+            else
+            {
+                _mainWindow.MiddleFifthCardPicture.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void OnPlayerActionEvent(object sender, ActionEvenArgs e)
+        {
+            if(e.Player.StaticName == "MainPlayer")
+            {
+                InitMainPlayer(e.Player, 1);
+            }else if (e.Player.StaticName == "Character1")
+            {
+                InitLeftTopCharacter(e.Player,1);
+            }
+            else if (e.Player.StaticName == "Character2")
+            {
+                InitMiddleTopCharacter(e.Player, 1);
+            }
+            else if (e.Player.StaticName == "Character3")
+            {
+                InitRightTopCharacter(e.Player, 1);
+            }
+            else if (e.Player.StaticName == "Character4")
+            {
+                InitRightBottomCharacter(e.Player, 1);
+            }
+            else if (e.Player.StaticName == "Character5")
+            {
+                InitLeftBottomCharacter(e.Player, 1);
+            }
+        }
+
+        private void SignLeftTopCharacter()
+        {
+            if (_mainWindow.LeftTopCharacterProfilePictureLabel.Background != Brushes.LightGreen)
+            {
+                _mainWindow.LeftTopCharacterProfilePictureLabel.Background = Brushes.LightGreen;
+            }else
+            {
+                _mainWindow.LeftTopCharacterProfilePictureLabel.Background = _deffaultBackground;
+            }
+        }
+        private void SignMiddleTopCharacter()
+        {
+            if (_mainWindow.MiddleTopCharacterProfilePictureLabel.Background != Brushes.LightGreen)
+            {
+                _mainWindow.MiddleTopCharacterProfilePictureLabel.Background = Brushes.LightGreen;
+            }
+            else
+            {
+                _mainWindow.MiddleTopCharacterProfilePictureLabel.Background = _deffaultBackground;
+            }
+        }
+        private void SignRightTopCharacter()
+        {
+            if (_mainWindow.RightTopCharacterProfilePictureLabel.Background != Brushes.LightGreen)
+            {
+                _mainWindow.RightTopCharacterProfilePictureLabel.Background = Brushes.LightGreen;
+            }
+            else
+            {
+                _mainWindow.RightTopCharacterProfilePictureLabel.Background = _deffaultBackground;
+            }
+        }
+        private void SignRightBottomCharacter()
+        {
+            if (_mainWindow.RightBottomCharacterProfilePictureLabel.Background != Brushes.LightGreen)
+            {
+                _mainWindow.RightBottomCharacterProfilePictureLabel.Background = Brushes.LightGreen;
+            }
+            else
+            {
+                _mainWindow.RightBottomCharacterProfilePictureLabel.Background = _deffaultBackground;
+            }
+        }
+        private void SignLeftBottomCharacter()
+        {
+            if (_mainWindow.LeftBottomCharacterProfilePictureLabel.Background != Brushes.LightGreen)
+            {
+                _mainWindow.LeftBottomCharacterProfilePictureLabel.Background = Brushes.LightGreen;
+            }
+            else
+            {
+                _mainWindow.LeftBottomCharacterProfilePictureLabel.Background = _deffaultBackground;
+            }
+        }
+
+        private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
+        {
+            if (e.Player.StaticName == "Character1")
+            {
+                SignLeftTopCharacter();
+            }
+            if (e.Player.StaticName == "Character2")
+            {
+                SignMiddleTopCharacter();
+            }
+            if (e.Player.StaticName == "Character3")
+            {
+                SignRightTopCharacter();
+            }
+            if (e.Player.StaticName == "Character4")
+            {
+                SignRightBottomCharacter();
+            }
+            if (e.Player.StaticName == "Character5")
+            {
+                SignLeftBottomCharacter();
+            }
+        }
+
         private void App_Startup(object sender, StartupEventArgs e)
         {
             _model = new PokerModel(5);
             _viewModel = new PokerViewModel(_model);
             _mainWindow = new MainWindow();
             _viewModel.ShowCardsEvent += OnShowCardsEvent;
-            _viewModel.InitCharacters += OnInitCharacters;
+            //_viewModel.InitCharacters += OnInitCharacters;
+            _viewModel.UnFoldCardEvent += OnUnFoldCardEvent;
+            _viewModel.PlayerActionEvent += OnPlayerActionEvent;
             _viewModel.CardAllocationEvent += AsyncOnCardAllocationEvent;
+            _viewModel.SignPlayerEvent += OnSignPlayerEvent;
+
             _mainWindow.DataContext = _viewModel;
+
+            _mainWindow.MiddleTopCharacterGrid.DataContext = _viewModel.MiddleTopCharacter;
+            _mainWindow.LeftTopCharacterGrid.DataContext = _viewModel.LeftTopCharacter;
+            _mainWindow.RightTopCharacterGrid.DataContext = _viewModel.RightTopCharacter;
+            _mainWindow.RightBottomCharacterGrid.DataContext = _viewModel.RightBottomCharacter;
+            _mainWindow.MainPlayerGrid.DataContext = _viewModel.MainPlayer;
+            _mainWindow.LeftBottomCharacterGrid.DataContext = _viewModel.LeftBottomCharacter;
+
             _viewModel.InitCharacterEventRaise();
 
 

@@ -95,9 +95,11 @@ namespace PokerGame.Model
         public Action LastAction { protected set; get; }
         public bool InGame { protected set; get; }
         public Hand hand; // the set should be more safer
+        public int RaiseBet { set; get; }
 
         public Player(string staticName, CharacterTypes character, int money)
         {
+            RaiseBet = 0;
             //PlayerName = playerName;
             StaticName = staticName;
             Character = character;
@@ -116,7 +118,8 @@ namespace PokerGame.Model
             return ammount;
         }
 
-        public abstract void ChosenAction(Action chosenAction, int betValue = 0);
+        public abstract void PlayerAction(ref int actualLicitBet, Action chosenAction = Action.NOACTION);
+
     }
 
     public class BotPlayer : Player
@@ -127,10 +130,40 @@ namespace PokerGame.Model
             _characterCounter++;
         }
 
-        public override void ChosenAction(Action chosenAction, int betValue = 0)
+        public override void PlayerAction(ref int actualLicitBet, Action chosenAction = Action.NOACTION)
         {
-            
+            Random rand = new Random();
+            chosenAction = (Action)rand.Next(0, 4);
+            LastAction = chosenAction;
+            if (chosenAction == Action.FOLD)
+            {
+                this.hand.leftHand.cardType.cardRank = CardRank.NOCARD;
+                this.hand.leftHand.cardType.cardSuit = CardSuit.NOCARD;
+                this.LastAction = Action.FOLD;
+                this.InGame = false;
+                //Event for fold
+            }
+            else if (chosenAction == Action.CALL)
+            {
+                Money -= actualLicitBet;
+                BetChips += actualLicitBet;
+                //Event for call
+            }
+            else if (chosenAction == Action.CHECK)
+            {
+                //Event for check
+            }
+            else if (chosenAction == Action.RAISE)
+            {
+                // need to thro an error if RaiseBet < 2*actualLicitBet
+                Money -= RaiseBet;
+                actualLicitBet = RaiseBet;
+                BetChips += actualLicitBet;
+                //Event for raise
+            }
+            else if (chosenAction == Action.NOACTION) { }
         }
+
     }
 
     public class MainPlayer : Player
@@ -142,23 +175,32 @@ namespace PokerGame.Model
             PlayerName = playerName;
         }
 
-        public override void ChosenAction(Action chosenAction, int betValue = 0)
+        public override void PlayerAction(ref int actualLicitBet, Action chosenAction = Action.NOACTION)
         {
+            LastAction = chosenAction;
             if (chosenAction == Action.FOLD)
             {
+                this.hand.leftHand.cardType.cardRank = CardRank.NOCARD;
+                this.hand.leftHand.cardType.cardSuit = CardSuit.NOCARD;
+                this.LastAction = Action.FOLD;
+                this.InGame = false;
                 //Event for fold
             } else if (chosenAction == Action.CALL)
             {
-                Money -= betValue;
+                Money -= actualLicitBet;
+                BetChips += actualLicitBet;
                 //Event for call
             } else if (chosenAction == Action.CHECK)
             {
                 //Event for check
             } else if (chosenAction == Action.RAISE)
             {
-                Money -= betValue;
+                // need to thro an error if RaiseBet < 2*actualLicitBet
+                Money -= RaiseBet;
+                actualLicitBet = RaiseBet;
+                BetChips += actualLicitBet;
                 //Event for raise
-            }
+            } else if (chosenAction == Action.NOACTION) { }
         }
 
     }
@@ -199,8 +241,8 @@ namespace PokerGame.Model
         public void UnfoldNextCard()
         {
             if (_comCardsNumber == 5) return;
-            _comCardsNumber++;
             CommonityCards[_comCardsNumber] = new Card(CommonityCards[_comCardsNumber].cardType, false);
+            _comCardsNumber++;
         }
 
         public void CollectBets(List<Player> players)

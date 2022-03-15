@@ -7,9 +7,49 @@ using System.Diagnostics;
 
 namespace PokerGame.Model
 {
+    public class ActionEvenArgs : EventArgs
+    {
+        public Player Player { get; private set; }
+
+        public ActionEvenArgs(Player player)
+        {
+            Player = player;
+        }
+    }
+
     public class PokerModel
     {
         public event EventHandler<PlayersEventArg> CardAllocation;
+        public event EventHandler<CommonityCardsEventArgs> UnfoldCardEvent;
+        public event EventHandler<ActionEvenArgs> PlayerActionEvent;
+        public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
+
+        private int _actualLicitBet = 100;
+        public int getActualLicitBet() { return _actualLicitBet; }
+
+        private void OnSignPlayerEvent(Player player)
+        {
+            if(SignPlayerEvent != null)
+            {
+                SignPlayerEvent(this, new PokerPlayerEventArgs(player));
+            }
+        }
+
+        private void OnPlayerActionEvent(Player player)
+        {
+            if( PlayerActionEvent != null)
+            {
+                PlayerActionEvent(this, new ActionEvenArgs(player));
+            }
+        }
+
+        private void OnUnfoldCardEvent(List<Card> commonityCards)
+        {
+            if(UnfoldCardEvent != null)
+            {
+                UnfoldCardEvent(this, new CommonityCardsEventArgs(commonityCards));
+            }
+        }
 
         private void OnCardAllocation()
         {
@@ -24,20 +64,17 @@ namespace PokerGame.Model
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
             PlayersNum = playersNumber;
             StartingMoney = startingMoney;
+            _middleFieldSection = new MiddleField();
         }
 
-        public int StartingMoney { private get; set; }
+        public int StartingMoney { private get; set; } // Not sure if it is okey
         public int PlayersNum { private get; set; }
         public List<Player> playerContainer; 
         public MainPlayer p;
 
-        //private Card CardGenerator(Random rand, bool isUpdsideDown = true)
-        //{
-        //    int tmpCardSuit = rand.Next(1, 4);
-        //    int tmpCardRank = rand.Next(2,14);
-        //    Card result = new Card(new CardType((CardSuit)tmpCardSuit, (CardRank)tmpCardRank), isUpdsideDown);
-        //    return result;
-        //}
+
+        public MiddleField _middleFieldSection; // need to be private but needs to handle the events
+
 
         public void GeneratePlayers()
         {
@@ -60,25 +97,44 @@ namespace PokerGame.Model
 
         public void StartRound()
         {
+            _actualLicitBet = 200;
             foreach (var player in playerContainer)
             {
                 Random rand = new Random(); // look for if it is worth to create every time
-                player.hand.leftHand = MiddleField.CardGenerator(rand, false);
-                player.hand.rightHand = MiddleField.CardGenerator(rand, false);
+                player.hand.leftHand = MiddleField.CardGenerator(rand);
+                player.hand.rightHand = MiddleField.CardGenerator(rand);
             }
-            playerContainer[playerContainer.Count - 1].hand.leftHand.isUpSideDown = false;
-            playerContainer[playerContainer.Count - 1].hand.rightHand.isUpSideDown = false;
-
-            OnCardAllocation();
-
-
-            //foreach (var player in playerContainer)
-            //{
-            //    Random rand = new Random(); // look for if it is worth to create every time
-            //    player.hand.rightHand = CardGenerator(rand, true);
-            //}
+            //playerContainer[playerContainer.Count - 1].hand.leftHand.isUpSideDown = false;
             //playerContainer[playerContainer.Count - 1].hand.rightHand.isUpSideDown = false;
-            //OnCardAllocation();
+            OnCardAllocation();
+        }
+
+        public void TestUnFoldMiddleCards()
+        {
+            _middleFieldSection.UnfoldNextCard();
+            OnUnfoldCardEvent(_middleFieldSection.CommonityCards);
+        }
+        
+
+        public void MainPlayerAction(Action action)
+        {
+            p.PlayerAction(ref _actualLicitBet, action);
+            OnPlayerActionEvent(p);
+        }
+
+        public async void AsyncFirstRound()
+        {
+            StartRound();
+            await Task.Delay(200 * 12);
+            for(int i = 0; i<playerContainer.Count-1; i++)
+            {
+                OnSignPlayerEvent(playerContainer[i]);
+                await Task.Delay(1000);
+                playerContainer[i].PlayerAction(ref _actualLicitBet);
+                OnPlayerActionEvent(playerContainer[i]);
+                OnSignPlayerEvent(playerContainer[i]);
+            }
+
 
         }
 
