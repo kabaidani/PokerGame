@@ -19,7 +19,7 @@ namespace PokerGame.Model
 
     public class PokerModel
     {
-        public event EventHandler<PlayersEventArg> CardAllocation;
+        public event EventHandler<PokerPlayerEventArgs> CardAllocation;
         public event EventHandler<CommonityCardsEventArgs> UnfoldCardEvent;
         public event EventHandler<ActionEvenArgs> PlayerActionEvent;
         public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
@@ -51,11 +51,11 @@ namespace PokerGame.Model
             }
         }
 
-        private void OnCardAllocation()
+        private void OnCardAllocation(Player player)
         {
             if (CardAllocation != null)
             {
-                CardAllocation(this, new PlayersEventArg(playerContainer));
+                CardAllocation(this, new PokerPlayerEventArgs(player));
             }
         }
 
@@ -64,7 +64,7 @@ namespace PokerGame.Model
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
             PlayersNum = playersNumber;
             StartingMoney = startingMoney;
-            _middleFieldSection = new MiddleField();
+            MiddleFieldSection = new MiddleField();
         }
 
         public int StartingMoney { private get; set; } // Not sure if it is okey
@@ -73,7 +73,7 @@ namespace PokerGame.Model
         public MainPlayer p;
 
 
-        public MiddleField _middleFieldSection; // need to be private but needs to handle the events
+        public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
 
 
         public void GeneratePlayers()
@@ -83,36 +83,58 @@ namespace PokerGame.Model
 
             p = new MainPlayer("Daniel", CharacterTypes.BOB, StartingMoney);
 
-            for(int i = 0; i < PlayersNum; i++)
+            for(int i = 0; i < 5; i++)
             {
                 int tempCharacterType = rand.Next(0, 5);
                 CharacterTypes character = (CharacterTypes)tempCharacterType;
                 playerContainer.Add(new BotPlayer(character, StartingMoney));
-                
+                if(i == 3)
+                {
+                    playerContainer.Add(p);
+                }
             }
 
-            playerContainer.Add(p);
 
         }
 
-        public void StartRound()
+        public async void AsyncStartRound()
         {
             _actualLicitBet = 200;
-            foreach (var player in playerContainer)
+            int delayTime = 150;
+            for(int i = 0; i<playerContainer.Count; i++)
             {
                 Random rand = new Random(); // look for if it is worth to create every time
-                player.hand.leftHand = MiddleField.CardGenerator(rand);
-                player.hand.rightHand = MiddleField.CardGenerator(rand);
+                await Task.Delay(delayTime);
+                playerContainer[i].hand.leftHand = MiddleField.CardGenerator(rand);
+                OnCardAllocation(playerContainer[i]);
             }
-            //playerContainer[playerContainer.Count - 1].hand.leftHand.isUpSideDown = false;
-            //playerContainer[playerContainer.Count - 1].hand.rightHand.isUpSideDown = false;
-            OnCardAllocation();
+
+
+            for (int i = 0; i < playerContainer.Count; i++)
+            {
+                Random rand = new Random(); // look for if it is worth to create every time
+                await Task.Delay(delayTime);
+                playerContainer[i].hand.rightHand = MiddleField.CardGenerator(rand);
+                OnCardAllocation(playerContainer[i]);
+            }
         }
 
-        public void TestUnFoldMiddleCards()
+        public async void AsyncTestUnFoldMiddleCards()
         {
-            _middleFieldSection.UnfoldNextCard();
-            OnUnfoldCardEvent(_middleFieldSection.CommonityCards);
+            if(MiddleFieldSection.CommonityCards.Count == 0)
+            {
+                for(int i = 0; i<3; i++)
+                {
+                    MiddleFieldSection.UnfoldNextCard();
+                    await Task.Delay(200);
+                    OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                }
+            }
+            else if (MiddleFieldSection.CommonityCards.Count < 5)
+            {
+                MiddleFieldSection.UnfoldNextCard();
+                OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+            }
         }
         
 
@@ -124,7 +146,7 @@ namespace PokerGame.Model
 
         public async void AsyncFirstRound()
         {
-            StartRound();
+            //StartRound();
             await Task.Delay(200 * 12);
             for(int i = 0; i<playerContainer.Count-1; i++)
             {

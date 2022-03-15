@@ -6,8 +6,7 @@ using System.Collections;
 
 namespace PokerGame.ViewModel
 {
-
-    public static class Characters
+    public static class Characters // Shoould be solved by mapped values eg.: {("Character1", "LeftTopCharacter")}
     {
         public static string Charcter1 = "LeftTopCharacter";
         public static string Charcter2 = "MiddleTopCharacter";
@@ -25,12 +24,7 @@ namespace PokerGame.ViewModel
         public DelegateCommand CallOrCheckButtonCommand { get; set; }
         public DelegateCommand RaiseButtonCommand { get; set; }
 
-        public event EventHandler<PokerPlayerEventArgs> ShowCardsEvent;
         public event EventHandler<PlayersEventArg> InitCharacters;
-        public event EventHandler<PlayersEventArg> CardAllocationEvent;
-
-        public event EventHandler<CommonityCardsEventArgs> UnFoldCardEvent;
-        public event EventHandler<ActionEvenArgs> PlayerActionEvent;
         public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
 
 
@@ -40,6 +34,7 @@ namespace PokerGame.ViewModel
         public PlayerDatas RightBottomCharacter;
         public PlayerDatas MainPlayer;
         public PlayerDatas LeftBottomCharacter;
+        public CommonitySectionDatas MiddleSection;
 
         public string CheckOrCallButtonContext
         {
@@ -102,16 +97,28 @@ namespace PokerGame.ViewModel
 
 
 
-        private void OnCardAllocationEvent()
+
+        private void OnCardAllocation(object sender, PokerPlayerEventArgs e)
         {
-            if (CardAllocationEvent != null)
+            if(e.Player.StaticName == "Character1")
             {
-                CardAllocationEvent(this, new PlayersEventArg(_model.playerContainer));
+                LeftTopCharacter.PropertyChange();
+            } else if (e.Player.StaticName == "Character2")
+            {
+                MiddleTopCharacter.PropertyChange();
+            } else if (e.Player.StaticName == "Character3")
+            {
+                RightTopCharacter.PropertyChange();
+            } else if (e.Player.StaticName == "Character4")
+            {
+                RightBottomCharacter.PropertyChange();
+            } else if (e.Player.StaticName == "Character5")
+            {
+                LeftBottomCharacter.PropertyChange();
+            } else if (e.Player.StaticName == "MainPlayer")
+            {
+                MainPlayer.PropertyChange();
             }
-        }
-        private void OnCardAllocation(object sender, EventArgs e)
-        {
-            OnCardAllocationEvent();
         }
 
         private void OnInitCharacters(List<Player> players)
@@ -124,10 +131,7 @@ namespace PokerGame.ViewModel
 
         private void OnShowCardsEvent(Player player)
         {
-            if(ShowCardsEvent != null)
-            {
-                ShowCardsEvent(this, new PokerPlayerEventArgs(player));
-            }
+
         }
 
         public PokerViewModel(PokerModel model)
@@ -136,7 +140,7 @@ namespace PokerGame.ViewModel
             _model.GeneratePlayers();
             _model.CardAllocation += OnCardAllocation;
 
-            FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
+            FoldButtonCommand = new DelegateCommand(p =>  _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE));
 
@@ -148,8 +152,9 @@ namespace PokerGame.ViewModel
             MiddleTopCharacter = new PlayerDatas(_model.playerContainer[1]);
             RightTopCharacter = new PlayerDatas(_model.playerContainer[2]);
             RightBottomCharacter = new PlayerDatas(_model.playerContainer[3]);
-            MainPlayer = new PlayerDatas(_model.playerContainer[4]);
             LeftBottomCharacter = new PlayerDatas(_model.playerContainer[5]);
+            MainPlayer = new PlayerDatas(_model.playerContainer[4]);
+            MiddleSection = new CommonitySectionDatas(_model.MiddleFieldSection);
         }
 
         private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
@@ -162,10 +167,7 @@ namespace PokerGame.ViewModel
 
         private void OnPlayerActionEvent(object sender, ActionEvenArgs e)
         {
-            if (PlayerActionEvent != null)
-            {
-                PlayerActionEvent(this, e);
-            }
+            MainPlayer.PropertyChange();
         }
 
 
@@ -183,10 +185,7 @@ namespace PokerGame.ViewModel
 
         public void OnUnFoldCardEvent(Object sender, CommonityCardsEventArgs e)
         {
-            if (UnFoldCardEvent != null)
-            {
-                UnFoldCardEvent(this, e);
-            }
+            MiddleSection.PropertyChange();
         }
 
         public void InitCharacterEventRaise()

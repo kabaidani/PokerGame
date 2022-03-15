@@ -3,13 +3,28 @@ using PokerGame.Model;
 
 namespace PokerGame.ViewModel
 {
-    public class PlayerDatas
+
+    public class PlayerDatas : ViewModelBase
     {
         private Player _player;
         
         public PlayerDatas(Player player)
         {
             _player = player;
+        }
+
+        public Visibility GridVisibility
+        {
+            get
+            {
+                if (!_player.InGame)
+                {
+                    return Visibility.Hidden;
+                }else
+                {
+                    return Visibility.Visible;
+                }
+            }
         }
 
         public string ProfilePictureURL
@@ -136,6 +151,21 @@ namespace PokerGame.ViewModel
                 if (_player.LastAction == Action.NOACTION) return "";
                 return _player.LastAction.ToString();
             }
+        }
+
+        public void PropertyChange()
+        {
+            OnPropertyChanged("LeftHandVisibility");
+            OnPropertyChanged("RightHandVisibility");
+            OnPropertyChanged("LeftHandCardUrl");
+            OnPropertyChanged("RightHandCardUrl");
+            OnPropertyChanged("BetPictureAndValueVisibility");
+            OnPropertyChanged("BetPictureUrl");
+            OnPropertyChanged("BetValue");
+            OnPropertyChanged("CharacterNameText");
+            OnPropertyChanged("MoneyTextBox");
+            OnPropertyChanged("LastActionTextBox");
+            OnPropertyChanged("GridVisibility");
         }
     }
 }

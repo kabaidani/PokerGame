@@ -182,6 +182,10 @@ namespace PokerGame.Model
             {
                 this.hand.leftHand.cardType.cardRank = CardRank.NOCARD;
                 this.hand.leftHand.cardType.cardSuit = CardSuit.NOCARD;
+
+                this.hand.rightHand.cardType.cardRank = CardRank.NOCARD;
+                this.hand.rightHand.cardType.cardSuit = CardSuit.NOCARD;
+
                 this.LastAction = Action.FOLD;
                 this.InGame = false;
                 //Event for fold
@@ -209,7 +213,6 @@ namespace PokerGame.Model
     {
         public List<Card> CommonityCards { private set; get; }
         public int CommonityBet { private set; get; }
-        private int _comCardsNumber;
 
         public static Card CardGenerator(Random rand, bool isUpdsideDown = true)
         {
@@ -221,28 +224,14 @@ namespace PokerGame.Model
 
         public MiddleField()
         {
-            _comCardsNumber = 0;
             CommonityCards = new List<Card>();
-            Random rand = new Random(); // Check if this is more effective than construct every time
-            for(int i = 0; i<5; i++)
-            {
-                if(i < 3)
-                {
-                    CommonityCards.Add(CardGenerator(rand, false));
-                    _comCardsNumber++;
-                }
-                else
-                {
-                    CommonityCards.Add(CardGenerator(rand));
-                }
-            }
         }
 
         public void UnfoldNextCard()
         {
-            if (_comCardsNumber == 5) return;
-            CommonityCards[_comCardsNumber] = new Card(CommonityCards[_comCardsNumber].cardType, false);
-            _comCardsNumber++;
+            if (CommonityCards.Count == 5) return;
+            Random rand = new Random();
+            CommonityCards.Add(CardGenerator(rand, false));
         }
 
         public void CollectBets(List<Player> players)

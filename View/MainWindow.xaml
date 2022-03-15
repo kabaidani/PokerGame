@@ -32,7 +32,7 @@
                     <ColumnDefinition Width="400"/>
                 </Grid.ColumnDefinitions>
 
-                <Grid Name="LeftTopCharacterGrid" Grid.Column="0">
+                <Grid Name="LeftTopCharacterGrid" Grid.Column="0" Visibility="{Binding GridVisibility}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140"/>
                         <ColumnDefinition Width="200"/>
@@ -91,7 +91,7 @@
                 </Grid>
 
 
-                <Grid Name="MiddleTopCharacterGrid" Grid.Column="1" >
+                <Grid Name="MiddleTopCharacterGrid" Grid.Column="1" Visibility="{Binding GridVisibility}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="140"/>
                         <ColumnDefinition Width="200"/>
@@ -150,7 +150,7 @@
                 </Grid>
 
 
-                <Grid Name="RightTopCharacterGrid" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,20,0">
+                <Grid Name="RightTopCharacterGrid" Grid.Column="2" Visibility="{Binding GridVisibility}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,20,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200" />
                         <ColumnDefinition Width="140" />
@@ -221,7 +221,7 @@
 
 
 
-                <Grid Name="LeftBottomCharacterGrid" Grid.Column="0" Height="300" Margin="20,0,0,0">
+                <Grid Name="LeftBottomCharacterGrid" Visibility="{Binding GridVisibility}" Grid.Column="0" Height="300" Margin="20,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150" />
                         <ColumnDefinition Width="150" />
@@ -282,7 +282,7 @@
 
 
 
-                <Grid Name="RightBottomCharacterGrid" Grid.Column="2" Height="300" Margin="0,0,20,0">
+                <Grid Name="RightBottomCharacterGrid" Visibility="{Binding GridVisibility}" Grid.Column="2" Height="300" Margin="0,0,20,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150" />
                         <ColumnDefinition Width="150" />
@@ -359,19 +359,19 @@
                         </Grid.ColumnDefinitions>
 
                         <Label Grid.Column="0">
-                            <Image Name="MiddleFirstCardPicture" Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleFirstCardPicture" Source="{Binding FirstCardUrl}" Visibility="{Binding FirstCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="1">
-                            <Image Name="MiddleSecondCardPicture" Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleSecondCardPicture" Source="{Binding SecondCardUrl}" Visibility="{Binding SecondCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="2">
-                            <Image Name="MiddleThirdCardPicture" Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleThirdCardPicture" Source="{Binding ThirdCardUrl}" Visibility="{Binding ThirdCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="3">
-                            <Image Name="MiddleFourthCardPicture" Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleFourthCardPicture" Source="{Binding FourthCardUrl}" Visibility="{Binding FourthCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="4">
-                            <Image Name="MiddleFifthCardPicture" Source="../Image/cardBack.jpg"/>
+                            <Image Name="MiddleFifthCardPicture" Source="{Binding FifthCardUrl}" Visibility="{Binding FifthCardVisibility}"/>
                         </Label>
 
                         <Grid Grid.Column="5" HorizontalAlignment="Center">
@@ -381,9 +381,9 @@
                             </Grid.RowDefinitions>
 
                             <Label Grid.Row="0" VerticalAlignment="Top">
-                                <Image Name="AllBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
+                                <Image Name="AllBetPicture" Source="{Binding CommonityBetPictureUrl}" Visibility="{Binding CommonityBetPictureAndValueVisibility}"/>
                             </Label>
-                            <TextBlock Name="AllBetValueTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
+                            <TextBlock Name="AllBetValueTextBox" Grid.Row="1" Text="{Binding CommonityBetValue}" Visibility="{Binding CommonityBetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
                         </Grid>
                     </Grid>
 
@@ -584,19 +584,19 @@
                             <ColumnDefinition Width="60"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Source="{Binding FirstCardUrl}" Visibility="{Binding FirstThreeCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="1">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Source="{Binding SecondCardUrl}" Visibility="{Binding FirstThreeCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="2">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Source="{Binding ThirdCardUrl}" Visibility="{Binding FirstThreeCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="3">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Source="{Binding FourthCardUrl}" Visibility="{Binding FourthCardVisibility}"/>
                         </Label>
                         <Label Grid.Column="4">
-                            <Image Source="../Image/cardBack.jpg"/>
+                            <Image Source="{Binding FifthCardUrl}" Visibility="{Binding FifthCardVisibility}"/>
                         </Label>
                     </Grid>
 

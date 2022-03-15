@@ -37,7 +37,7 @@ namespace PokerGame
 
         private void OnShowCardsEvent(object sender,PokerPlayerEventArgs e) // We could narrow down the eventArg reference
         {
-            _model.TestUnFoldMiddleCards();
+            _model.AsyncTestUnFoldMiddleCards();
         }
 
         private string LeftHandCardUrlGenerator(Player p)
@@ -671,12 +671,12 @@ namespace PokerGame
             _model = new PokerModel(5);
             _viewModel = new PokerViewModel(_model);
             _mainWindow = new MainWindow();
-            _viewModel.ShowCardsEvent += OnShowCardsEvent;
+            //_viewModel.ShowCardsEvent += OnShowCardsEvent;
             //_viewModel.InitCharacters += OnInitCharacters;
-            _viewModel.UnFoldCardEvent += OnUnFoldCardEvent;
-            _viewModel.PlayerActionEvent += OnPlayerActionEvent;
-            _viewModel.CardAllocationEvent += AsyncOnCardAllocationEvent;
-            _viewModel.SignPlayerEvent += OnSignPlayerEvent;
+            //_viewModel.UnFoldCardEvent += OnUnFoldCardEvent;
+            //_viewModel.PlayerActionEvent += OnPlayerActionEvent;
+            //_viewModel.CardAllocationEvent += AsyncOnCardAllocationEvent;
+            //_viewModel.SignPlayerEvent += OnSignPlayerEvent;
 
             _mainWindow.DataContext = _viewModel;
 
@@ -686,11 +686,14 @@ namespace PokerGame
             _mainWindow.RightBottomCharacterGrid.DataContext = _viewModel.RightBottomCharacter;
             _mainWindow.MainPlayerGrid.DataContext = _viewModel.MainPlayer;
             _mainWindow.LeftBottomCharacterGrid.DataContext = _viewModel.LeftBottomCharacter;
+            _mainWindow.MiddleSectionGrid.DataContext = _viewModel.MiddleSection; 
 
             _viewModel.InitCharacterEventRaise();
 
 
             _mainWindow.Show();
+
+            _model.AsyncStartRound();
         }
     }
 }
