@@ -7,15 +7,6 @@ using System.Diagnostics;
 
 namespace PokerGame.Model
 {
-    public class ActionEvenArgs : EventArgs
-    {
-        public Player Player { get; private set; }
-
-        public ActionEvenArgs(Player player)
-        {
-            Player = player;
-        }
-    }
 
     public class PokerModel
     {
@@ -23,9 +14,20 @@ namespace PokerGame.Model
         public event EventHandler<CommonityCardsEventArgs> UnfoldCardEvent;
         public event EventHandler<ActionEvenArgs> PlayerActionEvent;
         public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
+        public event EventHandler RefreshRemainTime;
 
-        private int _actualLicitBet = 100;
+        private int _actualLicitBet;
+
+        public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
+
+        private void OnRefreshRemainTime()
+        {
+            if(RefreshRemainTime != null)
+            {
+                RefreshRemainTime(this, EventArgs.Empty);
+            }
+        }
 
         private void OnSignPlayerEvent(Player player)
         {
@@ -99,6 +101,7 @@ namespace PokerGame.Model
 
         public async void AsyncStartRound()
         {
+            RemaineTime = 10000;
             _actualLicitBet = 200;
             int delayTime = 150;
             for(int i = 0; i<playerContainer.Count; i++)
@@ -117,6 +120,8 @@ namespace PokerGame.Model
                 playerContainer[i].hand.rightHand = MiddleField.CardGenerator(rand);
                 OnCardAllocation(playerContainer[i]);
             }
+            
+            AsyncRound(1);
         }
 
         public async void AsyncTestUnFoldMiddleCards()
@@ -144,20 +149,71 @@ namespace PokerGame.Model
             OnPlayerActionEvent(p);
         }
 
-        public async void AsyncFirstRound()
+
+        public async void AsyncRound(int numberOfRound)
         {
-            //StartRound();
-            await Task.Delay(200 * 12);
-            for(int i = 0; i<playerContainer.Count-1; i++)
+            if (numberOfRound == 5)
             {
+                await Task.Delay(500);
+                MiddleFieldSection.CollectBets(playerContainer);
+                OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                return;
+            }
+            for(int i = 0; i<playerContainer.Count; i++)
+            {
+                playerContainer[i].Signed = true;
                 OnSignPlayerEvent(playerContainer[i]);
-                await Task.Delay(1000);
+
+
+                //for (int j = 0; j < 200; j++)
+                //{
+                //    await Task.Delay(50);
+                //    RemaineTime -= 50;
+                //    OnRefreshRemainTime();
+                //}
+                await Task.Delay(10000);
+
                 playerContainer[i].PlayerAction(ref _actualLicitBet);
                 OnPlayerActionEvent(playerContainer[i]);
+
+
+                playerContainer[i].Signed = false;
+                await Task.Delay(150);
                 OnSignPlayerEvent(playerContainer[i]);
+                
+                RemaineTime = 10000;
+                OnRefreshRemainTime();
+
+            }
+
+            await Task.Delay(500);
+            MiddleFieldSection.CollectBets(playerContainer);
+            await Task.Delay(500);
+
+            if (numberOfRound == 1)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    MiddleFieldSection.UnfoldNextCard();
+                    await Task.Delay(200);
+                    OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                }
+            } 
+            else if (numberOfRound < 4)
+            {
+                MiddleFieldSection.UnfoldNextCard();
+                OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
             }
 
 
+            await Task.Delay(400);
+            AsyncRound(++numberOfRound);
+
+        }
+
+        public void GameOn()
+        {
+            AsyncStartRound();
         }
 
     }

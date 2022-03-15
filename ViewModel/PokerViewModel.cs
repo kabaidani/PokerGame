@@ -25,8 +25,6 @@ namespace PokerGame.ViewModel
         public DelegateCommand RaiseButtonCommand { get; set; }
 
         public event EventHandler<PlayersEventArg> InitCharacters;
-        public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
-
 
         public PlayerDatas LeftTopCharacter;
         public PlayerDatas MiddleTopCharacter;
@@ -35,6 +33,50 @@ namespace PokerGame.ViewModel
         public PlayerDatas MainPlayer;
         public PlayerDatas LeftBottomCharacter;
         public CommonitySectionDatas MiddleSection;
+
+
+        private string _timeRowColor = "Green";
+        public string TimeRowColor
+        {
+            get { return _timeRowColor; }
+            set
+            {
+                if(value != _timeRowColor)
+                {
+                    _timeRowColor = value;
+                    OnPropertyChanged("TimeRowColor");
+                }
+            }
+        }
+        
+
+        public int TimeForRound
+        {
+            get
+            {
+                return 10000;
+            }
+        }
+
+        private int _remainTime = 10000;
+        public int RemainTime
+        {
+            get
+            {
+                return _remainTime;
+            }
+
+            set
+            {
+                if(value != _remainTime)
+                {
+                    _remainTime = value;
+                    OnPropertyChanged("RemainTime");
+                }
+            }
+        }
+
+
 
         public string CheckOrCallButtonContext
         {
@@ -147,6 +189,7 @@ namespace PokerGame.ViewModel
             _model.UnfoldCardEvent += OnUnFoldCardEvent;
             _model.PlayerActionEvent += OnPlayerActionEvent;
             _model.SignPlayerEvent += OnSignPlayerEvent;
+            _model.RefreshRemainTime += OnRefreshRemainTime;
 
             LeftTopCharacter = new PlayerDatas(_model.playerContainer[0]);
             MiddleTopCharacter = new PlayerDatas(_model.playerContainer[1]);
@@ -157,17 +200,77 @@ namespace PokerGame.ViewModel
             MiddleSection = new CommonitySectionDatas(_model.MiddleFieldSection);
         }
 
+        private void OnRefreshRemainTime(object sender, EventArgs e)
+        {
+            if(_model.RemaineTime < 10000 / 4)
+            {
+                TimeRowColor = "Red";
+            }else if (_model.RemaineTime < 10000 / 2)
+            {
+                TimeRowColor = "Orange";
+            }
+            else
+            {
+                TimeRowColor = "Green";
+            }
+
+            RemainTime = _model.RemaineTime;
+        }
+
         private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
         {
-            if (SignPlayerEvent != null)
+            if (e.Player.StaticName == "Character1")
             {
-                SignPlayerEvent(this, e);
+                LeftTopCharacter.PropertyChange("ProfilePictureURL");
+            }
+            else if (e.Player.StaticName == "Character2")
+            {
+                MiddleTopCharacter.PropertyChange("ProfilePictureURL");
+            }
+            else if (e.Player.StaticName == "Character3")
+            {
+                RightTopCharacter.PropertyChange("ProfilePictureURL");
+            }
+            else if (e.Player.StaticName == "Character4")
+            {
+                RightBottomCharacter.PropertyChange("ProfilePictureURL");
+            }
+            else if (e.Player.StaticName == "Character5")
+            {
+                LeftBottomCharacter.PropertyChange("ProfilePictureURL");
+            }
+            else if (e.Player.StaticName == "MainPlayer")
+            {
+                MainPlayer.PropertyChange("ProfilePictureURL");
             }
         }
 
         private void OnPlayerActionEvent(object sender, ActionEvenArgs e)
         {
-            MainPlayer.PropertyChange();
+            if (e.Player.StaticName == "Character1")
+            {
+                LeftTopCharacter.PropertyChange();
+            }
+            else if (e.Player.StaticName == "Character2")
+            {
+                MiddleTopCharacter.PropertyChange();
+            }
+            else if (e.Player.StaticName == "Character3")
+            {
+                RightTopCharacter.PropertyChange();
+            }
+            else if (e.Player.StaticName == "Character4")
+            {
+                RightBottomCharacter.PropertyChange();
+            }
+            else if (e.Player.StaticName == "Character5")
+            {
+                LeftBottomCharacter.PropertyChange();
+            }
+            else if (e.Player.StaticName == "MainPlayer")
+            {
+                MainPlayer.PropertyChange();
+            }
         }
 
 
@@ -185,6 +288,13 @@ namespace PokerGame.ViewModel
 
         public void OnUnFoldCardEvent(Object sender, CommonityCardsEventArgs e)
         {
+            LeftTopCharacter.PropertyChange();
+            MiddleTopCharacter.PropertyChange();
+            RightTopCharacter.PropertyChange();
+            LeftBottomCharacter.PropertyChange();
+            MainPlayer.PropertyChange();
+            RightBottomCharacter.PropertyChange();
+
             MiddleSection.PropertyChange();
         }
 

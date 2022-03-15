@@ -31,7 +31,14 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                return "../../Image/" + _player.Character.ToString() + ".png";
+                if (_player.Signed)
+                {
+                    return "../../Image/SignedCharacters/" + _player.Character.ToString() + ".png";
+                }
+                else
+                {
+                    return "../../Image/" + _player.Character.ToString() + ".png";
+                }
             }
         }
 
@@ -153,19 +160,27 @@ namespace PokerGame.ViewModel
             }
         }
 
-        public void PropertyChange()
+        
+        public void PropertyChange(string propertyName = "")
         {
-            OnPropertyChanged("LeftHandVisibility");
-            OnPropertyChanged("RightHandVisibility");
-            OnPropertyChanged("LeftHandCardUrl");
-            OnPropertyChanged("RightHandCardUrl");
-            OnPropertyChanged("BetPictureAndValueVisibility");
-            OnPropertyChanged("BetPictureUrl");
-            OnPropertyChanged("BetValue");
-            OnPropertyChanged("CharacterNameText");
-            OnPropertyChanged("MoneyTextBox");
-            OnPropertyChanged("LastActionTextBox");
-            OnPropertyChanged("GridVisibility");
+            if(propertyName == "")
+            {
+                OnPropertyChanged("LeftHandVisibility");
+                OnPropertyChanged("RightHandVisibility");
+                OnPropertyChanged("LeftHandCardUrl");
+                OnPropertyChanged("RightHandCardUrl");
+                OnPropertyChanged("BetPictureAndValueVisibility");
+                OnPropertyChanged("BetPictureUrl");
+                OnPropertyChanged("BetValue");
+                OnPropertyChanged("CharacterNameText");
+                OnPropertyChanged("MoneyTextBox");
+                OnPropertyChanged("LastActionTextBox");
+                OnPropertyChanged("GridVisibility");
+            }
+            else
+            {
+                OnPropertyChanged(propertyName);
+            }
         }
     }
 }

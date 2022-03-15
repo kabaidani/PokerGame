@@ -96,9 +96,11 @@ namespace PokerGame.Model
         public bool InGame { protected set; get; }
         public Hand hand; // the set should be more safer
         public int RaiseBet { set; get; }
+        public bool Signed { set; get; }
 
         public Player(string staticName, CharacterTypes character, int money)
         {
+            Signed = false;
             RaiseBet = 0;
             //PlayerName = playerName;
             StaticName = staticName;
@@ -133,14 +135,17 @@ namespace PokerGame.Model
         public override void PlayerAction(ref int actualLicitBet, Action chosenAction = Action.NOACTION)
         {
             Random rand = new Random();
-            chosenAction = (Action)rand.Next(0, 4);
+            chosenAction = Action.CALL;//(Action)rand.Next(0, 4);
             LastAction = chosenAction;
             if (chosenAction == Action.FOLD)
             {
                 this.hand.leftHand.cardType.cardRank = CardRank.NOCARD;
                 this.hand.leftHand.cardType.cardSuit = CardSuit.NOCARD;
+
+                this.hand.rightHand.cardType.cardRank = CardRank.NOCARD;
+                this.hand.rightHand.cardType.cardSuit = CardSuit.NOCARD;
+                
                 this.LastAction = Action.FOLD;
-                this.InGame = false;
                 //Event for fold
             }
             else if (chosenAction == Action.CALL)

@@ -96,7 +96,13 @@
     <None Remove="Image\NoCharacter.png" />
     <None Remove="Image\Olaf.png" />
     <None Remove="Image\reteg.png" />
-    <None Remove="Image\Wanda.jpg" />
+    <None Remove="Image\SignedCharacters\BOB.png" />
+    <None Remove="Image\SignedCharacters\DONALD.png" />
+    <None Remove="Image\SignedCharacters\JOSEPH.png" />
+    <None Remove="Image\SignedCharacters\KHAN.png" />
+    <None Remove="Image\SignedCharacters\OLAF.png" />
+    <None Remove="Image\SignedCharacters\WANDA.png" />
+    <None Remove="Image\WANDA.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -298,7 +304,25 @@
     <Content Include="Image\reteg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Image\WANDA.jpg">
+    <Content Include="Image\SignedCharacters\BOB.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\DONALD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\JOSEPH.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\KHAN.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\OLAF.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\WANDA.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\WANDA.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
