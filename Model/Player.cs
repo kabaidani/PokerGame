@@ -84,6 +84,13 @@ namespace PokerGame.Model
         NOACTION
     }
 
+    public struct Role
+    {
+        public bool dealer;
+        public bool bigBlind;
+        public bool smallBlind;
+    }
+
 
     public abstract class Player
     {
@@ -97,9 +104,11 @@ namespace PokerGame.Model
         public Hand hand; // the set should be more safer
         public int RaiseBet { set; get; }
         public bool Signed { set; get; }
+        public Role Role;
 
         public Player(string staticName, CharacterTypes character, int money)
         {
+            Role = new Role();
             Signed = false;
             RaiseBet = 0;
             //PlayerName = playerName;
@@ -118,6 +127,35 @@ namespace PokerGame.Model
             int ammount = BetChips;
             BetChips = 0;
             return ammount;
+        }
+
+        public void TakeMandatoryBet(int blindValue)
+        {
+            if (Role.bigBlind)
+            {
+                if(Money > blindValue)
+                {
+                    Money -= blindValue;
+                    BetChips = blindValue;
+                } else
+                {
+                    BetChips = Money;
+                    Money = 0;
+                }
+            }else if (Role.smallBlind)
+            {
+                int smallBlindValue = blindValue / 2;
+                if (Money > smallBlindValue)
+                {
+                    Money -= smallBlindValue;
+                    BetChips = smallBlindValue;
+                }
+                else
+                {
+                    BetChips = Money;
+                    Money = 0;
+                }
+            }
         }
 
         public abstract void PlayerAction(ref int actualLicitBet, Action chosenAction = Action.NOACTION);

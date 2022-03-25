@@ -2,6 +2,7 @@
 
 namespace PokerGame.Model
 {
+
     public class PokerPlayerEventArgs : EventArgs
         {
             public PokerPlayerEventArgs(Player player)

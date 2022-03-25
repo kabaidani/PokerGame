@@ -160,7 +160,30 @@ namespace PokerGame.ViewModel
             }
         }
 
-        
+        public string DealerChipPicture
+        {
+            get
+            {
+                return "../../Image/dealerChip.png";
+            }
+        }
+
+        public Visibility DealerChipPictureVisibility
+        {
+            get
+            {
+                if (_player.Role.dealer)
+                {
+                    return Visibility.Visible;
+                }else
+                {
+                    return Visibility.Hidden;
+                }
+            }
+        }
+
+
+
         public void PropertyChange(string propertyName = "")
         {
             if(propertyName == "")
@@ -176,6 +199,8 @@ namespace PokerGame.ViewModel
                 OnPropertyChanged("MoneyTextBox");
                 OnPropertyChanged("LastActionTextBox");
                 OnPropertyChanged("GridVisibility");
+                OnPropertyChanged("DealerChipPicture");
+                OnPropertyChanged("DealerChipPictureVisibility");
             }
             else
             {

@@ -190,6 +190,7 @@ namespace PokerGame.ViewModel
             _model.PlayerActionEvent += OnPlayerActionEvent;
             _model.SignPlayerEvent += OnSignPlayerEvent;
             _model.RefreshRemainTime += OnRefreshRemainTime;
+            _model.DealerChipPass += OnDealerChipPass;
 
             LeftTopCharacter = new PlayerDatas(_model.playerContainer[0]);
             MiddleTopCharacter = new PlayerDatas(_model.playerContainer[1]);
@@ -215,6 +216,16 @@ namespace PokerGame.ViewModel
             }
 
             RemainTime = _model.RemaineTime;
+        }
+
+        private void OnDealerChipPass(object sender, EventArgs e)
+        {
+            LeftTopCharacter.PropertyChange("DealerChipPictureVisibility");
+            MiddleTopCharacter.PropertyChange("DealerChipPictureVisibility");
+            RightTopCharacter.PropertyChange("DealerChipPictureVisibility");
+            LeftBottomCharacter.PropertyChange("DealerChipPictureVisibility");
+            MainPlayer.PropertyChange("DealerChipPictureVisibility");
+            RightBottomCharacter.PropertyChange("DealerChipPictureVisibility");
         }
 
         private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
