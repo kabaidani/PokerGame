@@ -283,9 +283,9 @@
                             <Label Grid.Row="0" VerticalAlignment="Top">
                                 <Image Name="LeftBottomCharacterBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                             </Label>
-                            
+
                             <TextBlock Name="LeftBottomCharacterBetTextBox" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" Grid.Row="1"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
-                            
+
                             <Label Grid.Row="2" Height="40">
                                 <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                             </Label>
@@ -456,7 +456,7 @@
                                 <Label Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Left">
                                     <Image Name="MainPlayerBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                                 </Label>
-                                
+
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -467,7 +467,7 @@
                                         <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                                     </Label>
                                 </Grid>
-                                
+
                             </Grid>
                         </Grid>
                     </Grid>
@@ -491,7 +491,7 @@
                 <Grid Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
 
-                        <Button Content="Fold" Width="175"  FontWeight="Bold" Command="{Binding FoldButtonCommand}">
+                        <Button Content="Fold" Width="175"  FontWeight="Bold" Command="{Binding FoldButtonCommand}" IsEnabled="{Binding IsButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Red"/>
@@ -518,7 +518,7 @@
 
 
 
-                        <Button Content="{Binding CheckOrCallButtonContext}" Width="175" FontWeight="Bold" Command="{Binding CallOrCheckButtonCommand}" CommandParameter="{Binding CheckOrCallButtonContext}">
+                        <Button Content="{Binding CallButtonContextUpdate}" Width="175" FontWeight="Bold" Command="{Binding CallOrCheckButtonCommand}" CommandParameter="{Binding CheckOrCallButtonContext}" IsEnabled="{Binding IsButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="#FF9933"/>
@@ -542,7 +542,7 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Button Content="Raise" Width="175" FontWeight="Bold" Command="{Binding RaiseButtonCommand}">
+                        <Button Content="Raise" Width="175" FontWeight="Bold" Command="{Binding RaiseButtonCommand}" IsEnabled="{Binding IsButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Green"/>
@@ -629,7 +629,7 @@
                         </Label>
                     </Grid>
 
-                    <TextBlock Grid.Column="1" Text="40/60" VerticalAlignment="Center" FontSize="30" HorizontalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Text="{Binding BlindValues}" VerticalAlignment="Center" FontSize="30" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,0,25,0"/>
                 </Grid>
 
                 <ProgressBar Grid.Row="1" Minimum="0" Maximum="{Binding TimeForRound}" Value="{Binding RemainTime}" Foreground="{Binding TimeRowColor}"/>

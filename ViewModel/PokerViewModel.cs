@@ -3,18 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using PokerGame.Model;
 using System.Collections;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace PokerGame.ViewModel
 {
-    public static class Characters // Shoould be solved by mapped values eg.: {("Character1", "LeftTopCharacter")}
-    {
-        public static string Charcter1 = "LeftTopCharacter";
-        public static string Charcter2 = "MiddleTopCharacter";
-        public static string Charcter3 = "RightTopCharacter";
-        public static string Charcter4 = "RightBottomCharacter";
-        public static string Charcter5 = "LeftBottomCharacter";
-        public static string MainPlayer = "MainPlayer";
-    }
 
     public class PokerViewModel : ViewModelBase
     {
@@ -35,6 +28,7 @@ namespace PokerGame.ViewModel
         public CommonitySectionDatas MiddleSection;
 
 
+
         private string _timeRowColor = "Green";
         public string TimeRowColor
         {
@@ -48,7 +42,6 @@ namespace PokerGame.ViewModel
                 }
             }
         }
-        
 
         public int TimeForRound
         {
@@ -77,18 +70,26 @@ namespace PokerGame.ViewModel
         }
 
 
-
-        public string CheckOrCallButtonContext
+        public string CallButtonContextUpdate
         {
             get
             {
-                if( _model.getActualLicitBet() != 0)
+                if (_model.getActualLicitBet() != 0)
                 {
                     return "Call (" + _model.getActualLicitBet().ToString() + ")";
-                }else
+                }
+                else
                 {
                     return "Check";
                 }
+            }
+        }
+
+        public bool IsButtonActive
+        {
+            get
+            {
+                return _model.MainplayerTurn;
             }
         }
 
@@ -137,30 +138,18 @@ namespace PokerGame.ViewModel
         }
 
 
-
+        public string BlindValues
+        {
+            get
+            {
+                return "€ " + _model.BlindValue.ToString() + " / " + (_model.BlindValue / 2).ToString();
+            }
+        }
 
 
         private void OnCardAllocation(object sender, PokerPlayerEventArgs e)
         {
-            if(e.Player.StaticName == "Character1")
-            {
-                LeftTopCharacter.PropertyChange();
-            } else if (e.Player.StaticName == "Character2")
-            {
-                MiddleTopCharacter.PropertyChange();
-            } else if (e.Player.StaticName == "Character3")
-            {
-                RightTopCharacter.PropertyChange();
-            } else if (e.Player.StaticName == "Character4")
-            {
-                RightBottomCharacter.PropertyChange();
-            } else if (e.Player.StaticName == "Character5")
-            {
-                LeftBottomCharacter.PropertyChange();
-            } else if (e.Player.StaticName == "MainPlayer")
-            {
-                MainPlayer.PropertyChange();
-            }
+            _characters[e.Player.StaticName].PropertyChange();
         }
 
         private void OnInitCharacters(List<Player> players)
@@ -176,6 +165,8 @@ namespace PokerGame.ViewModel
 
         }
 
+        private Dictionary<string, PlayerDatas> _characters;
+
         public PokerViewModel(PokerModel model)
         {
             _model = model;
@@ -186,19 +177,36 @@ namespace PokerGame.ViewModel
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE));
 
+
             _model.UnfoldCardEvent += OnUnFoldCardEvent;
             _model.PlayerActionEvent += OnPlayerActionEvent;
             _model.SignPlayerEvent += OnSignPlayerEvent;
             _model.RefreshRemainTime += OnRefreshRemainTime;
             _model.DealerChipPass += OnDealerChipPass;
+            _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
 
-            LeftTopCharacter = new PlayerDatas(_model.playerContainer[0]);
-            MiddleTopCharacter = new PlayerDatas(_model.playerContainer[1]);
-            RightTopCharacter = new PlayerDatas(_model.playerContainer[2]);
-            RightBottomCharacter = new PlayerDatas(_model.playerContainer[3]);
-            LeftBottomCharacter = new PlayerDatas(_model.playerContainer[5]);
-            MainPlayer = new PlayerDatas(_model.playerContainer[4]);
+            _characters = new Dictionary<string, PlayerDatas>();
+            
+            RightTopCharacter = new PlayerDatas(_model.playerContainer[0]);
+            _characters[_model.playerContainer[0].StaticName] = RightTopCharacter;
+            RightBottomCharacter = new PlayerDatas(_model.playerContainer[1]);
+            _characters[_model.playerContainer[1].StaticName] = RightBottomCharacter;
+            MainPlayer = new PlayerDatas(_model.playerContainer[2]);
+            _characters[_model.playerContainer[2].StaticName] = MainPlayer;
+            LeftBottomCharacter = new PlayerDatas(_model.playerContainer[3]);
+            _characters[_model.playerContainer[3].StaticName] = LeftBottomCharacter;
+            LeftTopCharacter = new PlayerDatas(_model.playerContainer[4]);
+            _characters[_model.playerContainer[4].StaticName] = LeftTopCharacter;
+            MiddleTopCharacter = new PlayerDatas(_model.playerContainer[5]);
+            _characters[_model.playerContainer[5].StaticName] = MiddleTopCharacter;
+
+
             MiddleSection = new CommonitySectionDatas(_model.MiddleFieldSection);
+            }
+
+        private void OnMainPlayerTurnEvent(object sender, EventArgs e)
+        {
+            OnPropertyChanged("IsButtonActive");
         }
 
         private void OnRefreshRemainTime(object sender, EventArgs e)
@@ -228,60 +236,15 @@ namespace PokerGame.ViewModel
             RightBottomCharacter.PropertyChange("DealerChipPictureVisibility");
         }
 
+
         private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
         {
-            if (e.Player.StaticName == "Character1")
-            {
-                LeftTopCharacter.PropertyChange("ProfilePictureURL");
-            }
-            else if (e.Player.StaticName == "Character2")
-            {
-                MiddleTopCharacter.PropertyChange("ProfilePictureURL");
-            }
-            else if (e.Player.StaticName == "Character3")
-            {
-                RightTopCharacter.PropertyChange("ProfilePictureURL");
-            }
-            else if (e.Player.StaticName == "Character4")
-            {
-                RightBottomCharacter.PropertyChange("ProfilePictureURL");
-            }
-            else if (e.Player.StaticName == "Character5")
-            {
-                LeftBottomCharacter.PropertyChange("ProfilePictureURL");
-            }
-            else if (e.Player.StaticName == "MainPlayer")
-            {
-                MainPlayer.PropertyChange("ProfilePictureURL");
-            }
+            _characters[e.Player.StaticName].PropertyChange("ProfilePictureURL");
         }
 
         private void OnPlayerActionEvent(object sender, ActionEvenArgs e)
         {
-            if (e.Player.StaticName == "Character1")
-            {
-                LeftTopCharacter.PropertyChange();
-            }
-            else if (e.Player.StaticName == "Character2")
-            {
-                MiddleTopCharacter.PropertyChange();
-            }
-            else if (e.Player.StaticName == "Character3")
-            {
-                RightTopCharacter.PropertyChange();
-            }
-            else if (e.Player.StaticName == "Character4")
-            {
-                RightBottomCharacter.PropertyChange();
-            }
-            else if (e.Player.StaticName == "Character5")
-            {
-                LeftBottomCharacter.PropertyChange();
-            }
-            else if (e.Player.StaticName == "MainPlayer")
-            {
-                MainPlayer.PropertyChange();
-            }
+            _characters[e.Player.StaticName].PropertyChange();
         }
 
 
@@ -314,10 +277,5 @@ namespace PokerGame.ViewModel
             OnInitCharacters(_model.playerContainer);
         }
 
-        //private void TestCommand(Player player)
-        //{
-        //    //_model.TestUnFoldMiddleCards();
-        //    OnShowCardsEvent(player);
-        //}
     }
 }
