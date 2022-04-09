@@ -46,6 +46,7 @@ namespace PokerGame
             _mainWindow.MainPlayerGrid.DataContext = _viewModel.MainPlayer;
             _mainWindow.LeftBottomCharacterGrid.DataContext = _viewModel.LeftBottomCharacter;
             _mainWindow.MiddleSectionGrid.DataContext = _viewModel.MiddleSection;
+            _mainWindow.StatusCards.DataContext = _viewModel.StatusCards;
 
             _viewModel.InitCharacterEventRaise();
 

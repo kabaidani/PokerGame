@@ -597,14 +597,14 @@
                 </Grid.RowDefinitions>
 
 
-                <Grid Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <Grid  Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="320"/>
                         <ColumnDefinition Width="180"/>
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
+                    <Grid Name="StatusCards" Grid.Column="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="60"/>
                             <ColumnDefinition Width="60"/>
@@ -613,19 +613,19 @@
                             <ColumnDefinition Width="60"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0">
-                            <Image Source="{Binding FirstCardUrl}" Visibility="{Binding FirstThreeCardVisibility}"/>
+                            <Image Source="{Binding FirstCardUrl}"/>
                         </Label>
                         <Label Grid.Column="1">
-                            <Image Source="{Binding SecondCardUrl}" Visibility="{Binding FirstThreeCardVisibility}"/>
+                            <Image Source="{Binding SecondCardUrl}"/>
                         </Label>
                         <Label Grid.Column="2">
-                            <Image Source="{Binding ThirdCardUrl}" Visibility="{Binding FirstThreeCardVisibility}"/>
+                            <Image Source="{Binding ThirdCardUrl}"/>
                         </Label>
                         <Label Grid.Column="3">
-                            <Image Source="{Binding FourthCardUrl}" Visibility="{Binding FourthCardVisibility}"/>
+                            <Image Source="{Binding FourthCardUrl}"/>
                         </Label>
                         <Label Grid.Column="4">
-                            <Image Source="{Binding FifthCardUrl}" Visibility="{Binding FifthCardVisibility}"/>
+                            <Image Source="{Binding FifthCardUrl}"/>
                         </Label>
                     </Grid>
 

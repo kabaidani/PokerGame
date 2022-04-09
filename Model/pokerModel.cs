@@ -10,7 +10,6 @@ using System.Linq;
 
 namespace PokerGame.Model
 {
-    public enum PokerHandRanks { ROYALFLUSH, STRAIGHTFLUSH, FOUROFAKIND, FULLHOUSE, FLUSH, STRAIGHT, THREEOFAKIND, TWOPAIR, HIGHCARD }
     public class PokerModel
     {
         public event EventHandler<PokerPlayerEventArgs> CardAllocation;
@@ -20,12 +19,15 @@ namespace PokerGame.Model
         public event EventHandler RefreshRemainTime;
         public event EventHandler DealerChipPass;
         public event EventHandler MainPlayerTurnEvent;
+        public event EventHandler<CommonityCardsEventArgs> CheckCombinationEvent; //need to change the name of the template parameter
 
         public bool MainplayerTurn { get; private set; }
         public int StartingMoney { private get; set; } // Not sure if it is okey
         public int PlayersNum { private get; set; }
         public List<Player> playerContainer; 
         public MainPlayer p;
+        public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
+        public StatusCards StatusCards { get; private set; }
 
         private enum Role { DEALER, SMALLBLIND, BIGBLIND}
 
@@ -41,239 +43,6 @@ namespace PokerGame.Model
 
         public Tuple<PokerHandRanks, List<Card>> _mainPlayerHandRank;
 
-        private bool CardsEqual(Card lhs, Card rhs, int checkLevel)
-        {
-            if(checkLevel == 0)
-            {
-                if (lhs.cardType.cardSuit == rhs.cardType.cardSuit &&
-                   lhs.cardType.cardRank == rhs.cardType.cardRank) return true;
-                return false;
-            }
-            if (checkLevel == 1)
-            {
-                if (lhs.cardType.cardSuit == rhs.cardType.cardSuit) return true;
-                return false;
-            }
-            if (checkLevel == 2)
-            {
-                if (lhs.cardType.cardRank == rhs.cardType.cardRank) return true;
-                return false;
-            }
-            return false;
-
-        }
-
-        public Card WeakestCard(List<Card> cards)
-        {
-            CardRank cardRank = CardRank.ACE;
-            int idx = 0;
-            for(int i = 0; i<cards.Count; i++)
-            {
-                if(cards[i].cardType.cardRank < cardRank)
-                {
-                    cardRank = cards[i].cardType.cardRank;
-                    idx = i;
-                }
-            }
-            return cards[idx];
-        }
-
-        private Tuple<bool, Card> CardsContain(List<Card> cards, Card card, int checkLevel)
-        {
-            foreach(var c in cards)
-            {
-                if(CardsEqual(c, card, checkLevel))
-                {
-                    return new Tuple<bool, Card>(true, c);
-                }
-            }
-            return new Tuple<bool, Card>(false, new Card());
-        }
-
-        private Tuple<int, List<Card>> CardRankOccureNumber(List<Card> hand, CardRank rank)
-        {
-            int result = 0;
-            List<Card> resultList = new List<Card>();
-            foreach(var card in hand)
-            {
-                if (card.cardType.cardRank == rank)
-                {
-                    resultList.Add(card);
-                    result++;
-                }
-            }
-
-            return new Tuple<int, List<Card>>(result, resultList);
-        }
-
-
-        private int CardNumberInList(List<Card> cards, Card card)
-        {
-            int result = 0;
-            foreach(var c in cards)
-            {
-                if (CardsEqual(c, card, 2)) result++;
-            }
-            return result;
-        }
-
-        public bool CheckRoyalFlush(List<Card> hand, ref List<Card> result) //export this
-        {
-            for(int i = 0; i<hand.Count-4; i++)
-            {
-                result.Clear();
-                var suit = hand[i].cardType.cardSuit;
-                var containedRes = CardsContain(hand, new Card(new CardType(suit, CardRank.TEN), false), 0);
-                if (containedRes.Item1) result.Add(containedRes.Item2);
-                else continue;
-                containedRes = CardsContain(hand, new Card(new CardType(suit, CardRank.JACK), false), 0);
-                if (containedRes.Item1) result.Add(containedRes.Item2);
-                else continue;
-                containedRes = CardsContain(hand, new Card(new CardType(suit, CardRank.QUEEN), false), 0);
-                if (containedRes.Item1) result.Add(containedRes.Item2);
-                else continue;
-                containedRes = CardsContain(hand, new Card(new CardType(suit, CardRank.KING), false), 0);
-                if (containedRes.Item1) result.Add(containedRes.Item2);
-                else continue;
-                containedRes = CardsContain(hand, new Card(new CardType(suit, CardRank.ACE), false), 0);
-                if (containedRes.Item1) result.Add(containedRes.Item2);
-                else continue;
-
-                return true;
-            }
-            return false;
-        }
-
-        public bool CheckStraightFlush(List<Card> hand, ref List<Card> result) //export this
-        {
-            foreach(var card in hand)
-            {
-                result.Clear();
-                int idx = 1;
-                bool res = true;
-                while(idx < 5 && res)
-                {
-                    var containedRes = CardsContain(hand, new Card(new CardType(card.cardType.cardSuit, card.cardType.cardRank + idx), false), 0);
-                    if (containedRes.Item1)
-                    {
-                        result.Add(card);
-                        idx++;
-                    }
-                    else
-                    {
-                        res = false;
-                    }
-                }
-                if (res) return true;
-            }
-            return false;
-        }
-
-        public bool CheckFourOfAKind(List<Card> hand, ref List<Card> result)
-        {
-            return CheckParNumberKind(hand, 4, ref result);
-        }
-
-        public bool CheckFlush(List<Card> hand, ref List<Card> result)
-        {
-            for(int i = 0; i<hand.Count; i++)
-            {
-                result.Clear();
-                int number = 1;
-                result.Add(hand[i]);
-                for (int j = i+1; j<hand.Count; j++)
-                {
-                    if (CardsEqual(hand[i], hand[j], 1))
-                    {
-                        number++;
-                        result.Add(hand[j]);
-                    }
-                }
-                if (number >= 5) return true;
-            }
-            return false;
-        }
-
-        public bool CheckStraight(List<Card> hand, ref List<Card> result)
-        {
-            foreach(var refCard in hand)
-            {
-                bool res = true;
-                for(int j = 1; j<5 && res; j++)
-                {
-                    res &= CardsContain(hand, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank + j), false), 2).Item1;
-                }
-                if (res) return true;
-            }
-            return false;
-        }
-
-        public bool CheckThreeOfAKind(List<Card> hand, ref List<Card> result)
-        {
-            return CheckParNumberKind(hand, 3, ref result);
-        }
-
-        public bool CheckTwoPair(List<Card> hand, ref List<Card> result)
-        {
-            for(int i = 0; i<hand.Count; i++)
-            {
-                var card = hand[i];
-                var containedRes = CardRankOccureNumber(hand, card.cardType.cardRank);
-                if (containedRes.Item1 >= 2)
-                {
-                    for(int j = i+1; j<hand.Count; j++)
-                    {
-                        if (hand[j].cardType.cardRank == card.cardType.cardRank) continue;
-                        var containedRes2 = CardRankOccureNumber(hand, hand[j].cardType.cardRank);
-                        if (containedRes2.Item1 >= 2)
-                        {
-                            result = containedRes.Item2.Concat(containedRes2.Item2).ToList();
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        public bool CheckPair(List<Card> hand, ref List<Card> result)
-        {
-            return CheckParNumberKind(hand, 2, ref result);
-        }
-
-        public bool CheckHighCard(List<Card> hand, ref List<Card> result)
-        {
-            result.Clear();
-            var tempList = hand.OrderBy(p => p.cardType.cardRank).ToList();
-            int idx = 0;
-            CardRank rank = CardRank.NOCARD;
-            for(int i = 0; i<hand.Count; i++)
-            {
-                if(rank < hand[i].cardType.cardRank)
-                {
-                    rank = hand[i].cardType.cardRank;
-                    idx = i;
-                }
-            }
-            result.Add(hand[idx]);
-            return true;
-        }
-
-        private bool CheckParNumberKind(List<Card> hand, int p, ref List<Card> result)
-        {
-            result.Clear();
-            foreach (var card in hand)
-            {
-                var containedRes = CardRankOccureNumber(hand, card.cardType.cardRank);
-                if (containedRes.Item1 >= p)
-                {
-                    result = containedRes.Item2;
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
 
@@ -283,6 +52,21 @@ namespace PokerGame.Model
             if(MainPlayerTurnEvent != null)
             {
                 MainPlayerTurnEvent(this, EventArgs.Empty);
+            }
+        }
+
+        private void OnCheckCombinationEvent()
+        {
+            if(CheckCombinationEvent != null)
+            {
+                List<Card> cards = new List<Card>();
+                cards.Add(p.hand.leftHand);
+                cards.Add(p.hand.rightHand);
+                cards.AddRange(MiddleFieldSection.CommonityCards);
+                List<Card> res = new List<Card>();
+                StatusCards.checkPokerCombination(cards, ref res);
+
+                CheckCombinationEvent(this, new CommonityCardsEventArgs(res));
             }
         }
 
@@ -341,29 +125,7 @@ namespace PokerGame.Model
             PlayersNum = playersNumber;
             StartingMoney = startingMoney;
             MiddleFieldSection = new MiddleField();
-        }
-
-
-        private void NextPlayer(Role role, ref int idx)
-        {
-            for(int i = 1; i<playerContainer.Count; i++)
-            {
-                idx = (idx + i) % playerContainer.Count;
-                if (playerContainer[idx].InGame)
-                {
-                    if(role == Role.DEALER)
-                    {
-                        playerContainer[idx].Role.dealer = true;
-                    }else if (role == Role.BIGBLIND)
-                    {
-                        playerContainer[idx].Role.bigBlind = true;
-                    }else if (role == Role.SMALLBLIND)
-                    {
-                        playerContainer[idx].Role.smallBlind = true;
-                    }
-                    return;
-                }
-            }
+            StatusCards = new StatusCards();
         }
 
         private void NextRoles()
@@ -374,8 +136,6 @@ namespace PokerGame.Model
 
             OnDealerChipRound();
         }
-
-        public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
 
 
         public void GeneratePlayers()
@@ -440,6 +200,11 @@ namespace PokerGame.Model
                 Random rand = new Random(); // look for if it is worth to create every time
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.leftHand = MiddleField.CardGenerator(rand);
+                if (playerContainer[i] == p)
+                {
+                    playerContainer[i].hand.leftHand.isUpSideDown = false;
+                    OnCheckCombinationEvent();
+                }
                 OnCardAllocation(playerContainer[i]);
             }
 
@@ -448,17 +213,24 @@ namespace PokerGame.Model
                 Random rand = new Random(); // look for if it is worth to create every time
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.rightHand = MiddleField.CardGenerator(rand);
+                if (playerContainer[i] == p)
+                {
+                    playerContainer[i].hand.rightHand.isUpSideDown = false;
+                    OnCheckCombinationEvent();
+                }
                 OnCardAllocation(playerContainer[i]);
             }
             AsyncRound(1);
         }
 
+
+
         public async void AsyncTestUnFoldMiddleCards()
         {
             _end = false;
-            if(MiddleFieldSection.CommonityCards.Count == 0)
+            if (MiddleFieldSection.CommonityCards.Count == 0)
             {
-                for(int i = 0; i<3; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     MiddleFieldSection.UnfoldNextCard();
                     await Task.Delay(200);
@@ -470,8 +242,9 @@ namespace PokerGame.Model
                 MiddleFieldSection.UnfoldNextCard();
                 OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
             }
+            OnCheckCombinationEvent();
         }
-        
+
 
         public void MainPlayerAction(Action action)
         {
@@ -498,9 +271,9 @@ namespace PokerGame.Model
                 _end = true;
                 for (int j = 0; j < 200 && _end; j++)
                 {
-                    await Task.Delay(30);
+                    await Task.Delay(5);
                     RemaineTime -= 10;
-                    OnRefreshRemainTime();
+                    //OnRefreshRemainTime();
                 }
                 //await Task.Delay(10000);
                 playerContainer[i].PlayerAction(ref _actualLicitBet);
@@ -528,11 +301,13 @@ namespace PokerGame.Model
                     await Task.Delay(200);
                     OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
                 }
+                OnCheckCombinationEvent();
             } 
             else if (numberOfRound < 4)
             {
                 MiddleFieldSection.UnfoldNextCard();
                 OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                OnCheckCombinationEvent();
             }
 
             playerContainer = ChangePlayersOrder(playerContainer);

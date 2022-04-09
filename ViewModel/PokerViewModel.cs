@@ -26,6 +26,7 @@ namespace PokerGame.ViewModel
         public PlayerDatas MainPlayer;
         public PlayerDatas LeftBottomCharacter;
         public CommonitySectionDatas MiddleSection;
+        public StatusCardsDatas StatusCards;
 
 
 
@@ -173,7 +174,7 @@ namespace PokerGame.ViewModel
             _model.GeneratePlayers();
             _model.CardAllocation += OnCardAllocation;
 
-            FoldButtonCommand = new DelegateCommand(p =>  _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
+            FoldButtonCommand = new DelegateCommand(p => _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE));
 
@@ -184,9 +185,10 @@ namespace PokerGame.ViewModel
             _model.RefreshRemainTime += OnRefreshRemainTime;
             _model.DealerChipPass += OnDealerChipPass;
             _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
+            _model.CheckCombinationEvent += OnCombinationEvent;
 
             _characters = new Dictionary<string, PlayerDatas>();
-            
+
             RightTopCharacter = new PlayerDatas(_model.playerContainer[0]);
             _characters[_model.playerContainer[0].StaticName] = RightTopCharacter;
             RightBottomCharacter = new PlayerDatas(_model.playerContainer[1]);
@@ -202,11 +204,19 @@ namespace PokerGame.ViewModel
 
 
             MiddleSection = new CommonitySectionDatas(_model.MiddleFieldSection);
-            }
+            StatusCards = new StatusCardsDatas();
+
+        }
 
         private void OnMainPlayerTurnEvent(object sender, EventArgs e)
         {
             OnPropertyChanged("IsButtonActive");
+        }
+
+        private void OnCombinationEvent(object sender, CommonityCardsEventArgs e)
+        {
+            StatusCards.statusCards = e.CommonityCards;
+            StatusCards.PropertyChange();
         }
 
         private void OnRefreshRemainTime(object sender, EventArgs e)
