@@ -166,6 +166,15 @@ namespace PokerGame.ViewModel
 
         }
 
+        private void OnRefreshPlayers(object sender, EventArgs e)
+        {
+            foreach(var character in _characters)
+            {
+                character.Value.PropertyChange();
+            }
+        }
+
+
         private Dictionary<string, PlayerDatas> _characters;
 
         public PokerViewModel(PokerModel model)
@@ -182,10 +191,12 @@ namespace PokerGame.ViewModel
             _model.UnfoldCardEvent += OnUnFoldCardEvent;
             _model.PlayerActionEvent += OnPlayerActionEvent;
             _model.SignPlayerEvent += OnSignPlayerEvent;
+            _model.RoundOverForPlayersEvent += OnRoundOverForPlayersEvent;
             _model.RefreshRemainTime += OnRefreshRemainTime;
             _model.DealerChipPass += OnDealerChipPass;
             _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
             _model.CheckCombinationEvent += OnCombinationEvent;
+            _model.RefreshPlayers += OnRefreshPlayers;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -250,6 +261,14 @@ namespace PokerGame.ViewModel
         private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
         {
             _characters[e.Player.StaticName].PropertyChange("ProfilePictureURL");
+        }
+
+        private void OnRoundOverForPlayersEvent(object sender, PlayersEventArg e)
+        {
+            foreach (var player in e.Players)
+            {
+                _characters[player.StaticName].RoundOverUpdate();
+            }
         }
 
         private void OnPlayerActionEvent(object sender, ActionEvenArgs e)

@@ -16,10 +16,13 @@ namespace PokerGame.Model
         public event EventHandler<CommonityCardsEventArgs> UnfoldCardEvent;
         public event EventHandler<ActionEvenArgs> PlayerActionEvent;
         public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
+        public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent;
         public event EventHandler RefreshRemainTime;
         public event EventHandler DealerChipPass;
         public event EventHandler MainPlayerTurnEvent;
         public event EventHandler<CommonityCardsEventArgs> CheckCombinationEvent; //need to change the name of the template parameter
+        public event EventHandler RefreshPlayers;
+
 
         public bool MainplayerTurn { get; private set; }
         public int StartingMoney { private get; set; } // Not sure if it is okey
@@ -45,6 +48,14 @@ namespace PokerGame.Model
 
         public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
+
+        private void OnRefreshPlayers()
+        {
+            if(RefreshPlayers != null)
+            {
+                RefreshPlayers(this, EventArgs.Empty);
+            }
+        }
 
         private void OnMainPlayerTurn(bool mainPlayerTurn)
         {
@@ -83,6 +94,14 @@ namespace PokerGame.Model
             if(RefreshRemainTime != null)
             {
                 RefreshRemainTime(this, EventArgs.Empty);
+            }
+        }
+
+        private void OnRoundOverForPlayersEvent(List<Player> players)
+        {
+            if(RoundOverForPlayersEvent != null)
+            {
+                RoundOverForPlayersEvent(this, new PlayersEventArg(players));
             }
         }
 
@@ -253,13 +272,33 @@ namespace PokerGame.Model
             OnPlayerActionEvent(p);
         }
 
+
+
+        private void CheckWinner()
+        {
+            List<Player> winners = new List<Player>();
+            foreach (var player in playerContainer) winners.Add(player);
+            winners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
+            winners.Reverse();
+            winners = winners.Where(p => winners[0].CompareTo(p, MiddleFieldSection.CommonityCards) == 0).Select(p => p).ToList();
+            int winningPrice = MiddleFieldSection.CommonityBet / winners.Count;
+            foreach(var player in winners)
+            {
+                player.gainPrize(winningPrice);
+                player.Signed = true;
+            }
+        }
+
         public async void AsyncRound(int numberOfRound)
         {
             if (numberOfRound == 5)
             {
                 await Task.Delay(500);
                 MiddleFieldSection.CollectBets(playerContainer);
-                OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                foreach (var p in playerContainer) p.UnfoldHand();
+                CheckWinner();
+                OnRoundOverForPlayersEvent(playerContainer);
+                MiddleFieldSection.CollectBets(playerContainer);
                 return;
             }
             for (int i = 0; i<playerContainer.Count; i++)

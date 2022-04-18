@@ -7,10 +7,12 @@ namespace PokerGame.ViewModel
     public class PlayerDatas : ViewModelBase
     {
         private Player _player;
+        private bool _roundOverState;
         
         public PlayerDatas(Player player)
         {
             _player = player;
+            _roundOverState = false;
         }
 
         public Visibility GridVisibility
@@ -155,6 +157,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
+                if (_roundOverState) return _player.PokerHandRanks.ToString();
                 if (_player.LastAction == Action.NOACTION) return "";
                 return _player.LastAction.ToString();
             }
@@ -182,8 +185,6 @@ namespace PokerGame.ViewModel
             }
         }
 
-
-
         public void PropertyChange(string propertyName = "")
         {
             if(propertyName == "")
@@ -206,6 +207,16 @@ namespace PokerGame.ViewModel
             {
                 OnPropertyChanged(propertyName);
             }
+        }
+
+        public void RoundOverUpdate()
+        {
+            OnPropertyChanged("LeftHandCardUrl");
+            OnPropertyChanged("RightHandCardUrl");
+            _roundOverState = true;
+            OnPropertyChanged("LastActionTextBox");
+            OnPropertyChanged("ProfilePictureURL");
+
         }
     }
 }

@@ -19,20 +19,20 @@ namespace PokerGame.Model
             return new Tuple<bool, Card>(false, new Card());
         }
 
-        private static Card WeakestCard(List<Card> cards)
-        {
-            CardRank cardRank = CardRank.ACE;
-            int idx = 0;
-            for (int i = 0; i < cards.Count; i++)
-            {
-                if (cards[i].cardType.cardRank < cardRank)
-                {
-                    cardRank = cards[i].cardType.cardRank;
-                    idx = i;
-                }
-            }
-            return cards[idx];
-        }
+        //private static Card WeakestCard(List<Card> cards)
+        //{
+        //    CardRank cardRank = CardRank.ACE;
+        //    int idx = 0;
+        //    for (int i = 0; i < cards.Count; i++)
+        //    {
+        //        if (cards[i].cardType.cardRank < cardRank)
+        //        {
+        //            cardRank = cards[i].cardType.cardRank;
+        //            idx = i;
+        //        }
+        //    }
+        //    return cards[idx];
+        //}
 
         private static bool CardsEqual(Card lhs, Card rhs, int checkLevel)
         {
@@ -71,12 +71,12 @@ namespace PokerGame.Model
             return new Tuple<int, List<Card>>(result, resultList);
         }
 
-        private int CardNumberInList(List<Card> cards, Card card)
+        private static int CardNumberInList(List<Card> cards, Card card)
         {
             int result = 0;
             foreach (var c in cards)
             {
-                if (CardsEqual(c, card, 2)) result++;
+                if (c.cardType.cardRank == card.cardType.cardRank) result++;
             }
             return result;
         }
@@ -89,11 +89,13 @@ namespace PokerGame.Model
                 var containedRes = CardRankOccureNumber(hand, card.cardType.cardRank);
                 if (containedRes.Item1 >= p)
                 {
-                    result = containedRes.Item2;
-                    return true;
+                    if(result.Count == 0 || result[0].cardType.cardRank < containedRes.Item2[0].cardType.cardRank)
+                    {
+                        result = containedRes.Item2;
+                    }
                 }
             }
-            return false;
+            return result.Count != 0;
         }
 
         public static bool CheckRoyalFlush(List<Card> hand, ref List<Card> result)
@@ -125,15 +127,17 @@ namespace PokerGame.Model
 
         public static bool CheckStraightFlush(List<Card> hand, ref List<Card> result) //export this
         {
-            foreach (var card in hand)
+            var sortedHand = hand.OrderBy(p => p.cardType.cardRank).ToList();
+            for(int i = sortedHand.Count - 1; i>=0; i--)
             {
+                var card = sortedHand[i];
                 result.Clear();
                 int idx = 1;
                 bool res = true;
                 result.Add(card);
                 while (idx < 5 && res)
                 {
-                    var containedRes = CardsContain(hand, new Card(new CardType(card.cardType.cardSuit, card.cardType.cardRank + idx), false), 0);
+                    var containedRes = CardsContain(hand, new Card(new CardType(card.cardType.cardSuit, card.cardType.cardRank - idx), false), 0);
                     if (containedRes.Item1)
                     {
                         result.Add(containedRes.Item2);
@@ -144,6 +148,7 @@ namespace PokerGame.Model
                         res = false;
                     }
                 }
+                result.Reverse();
                 if (res) return true;
             }
             return false;
@@ -162,7 +167,8 @@ namespace PokerGame.Model
                     var containedRes = CardRankOccureNumber(hand, card.cardType.cardRank);
                     if(containedRes.Item1 >= 2)
                     {
-                        result = tempList.Concat(containedRes.Item2).ToList();
+                        for (int i = 0; i < 2; i++) tempList.Add(containedRes.Item2[i]);
+                        result = tempList;
                         return true;
                     }
                 }
@@ -172,12 +178,14 @@ namespace PokerGame.Model
 
         public static bool CheckFlush(List<Card> hand, ref List<Card> result)
         {
+            hand = hand.OrderBy(p => p.cardType.cardRank).ToList();
+            hand.Reverse();
             for (int i = 0; i < hand.Count; i++)
             {
                 result.Clear();
                 int number = 1;
                 result.Add(hand[i]);
-                for (int j = i + 1; j < hand.Count; j++)
+                for (int j = i + 1; j < hand.Count && result.Count < 5; j++)
                 {
                     if (CardsEqual(hand[i], hand[j], 1))
                     {
@@ -185,7 +193,11 @@ namespace PokerGame.Model
                         result.Add(hand[j]);
                     }
                 }
-                if (number >= 5) return true;
+                if (number >= 5)
+                {
+                    result.Reverse();
+                    return true;
+                }
             }
             return false;
         }
@@ -231,21 +243,27 @@ namespace PokerGame.Model
 
         public static bool CheckStraight(List<Card> hand, ref List<Card> result)
         {
-            foreach (var refCard in hand)
+            hand = hand.OrderBy(p => p.cardType.cardRank).ToList();
+            for(int i = hand.Count - 1; i>=0; i--)
             {
+                var refCard = hand[i];
                 bool res = true;
                 result.Clear();
                 result.Add(refCard);
                 for (int j = 1; j < 5 && res; j++) // it should be a while loop
                 {
-                    var containedRes = CardsContain(hand, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank + j), false), 2);
+                    var containedRes = CardsContain(hand, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank - j), false), 2);
                     res = containedRes.Item1;
                     if (containedRes.Item1)
                     {
                         result.Add(containedRes.Item2);
                     }
                 }
-                if (res) return true;
+                if (res)
+                {
+                    result.Reverse();
+                    return true;
+                }
             }
             return false;
         }
@@ -308,5 +326,59 @@ namespace PokerGame.Model
             }
         }
 
+        public static CardRank FullHouseRankThreeOfKind(List<Card> list)
+        {
+            for(int i = 0; i<list.Count; i++)
+            {
+                if(CardNumberInList(list, list[i]) == 3)
+                {
+                    return list[i].cardType.cardRank;
+                }
+            }
+            throw new PokerGameException("The given cards are not full house, can not find three of kind");
+        }
+
+        public static CardRank FullHouseRankPair(List<Card> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (CardNumberInList(list, list[i]) == 2)
+                {
+                    return list[i].cardType.cardRank;
+                }
+            }
+            throw new PokerGameException("The given cards are not full house, can not find a pair");
+        }
+
+        public static CardRank TwoPairHigher(List<Card> list)
+        {
+            CardRank result = list[0].cardType.cardRank;
+            for(int i = 1; i<list.Count; i++)
+            {
+                if(list[i].cardType.cardRank > result)
+                {
+                    result = list[i].cardType.cardRank;
+                }
+            }
+            return result;
+        }
+        public static CardRank TwoPairLower(List<Card> list)
+        {
+            CardRank result = list[0].cardType.cardRank;
+            for (int i = 1; i < list.Count; i++)
+            {
+                if (list[i].cardType.cardRank < result)
+                {
+                    result = list[i].cardType.cardRank;
+                }
+            }
+            return result;
+        }
+
+    }
+
+    public class PokerGameException : Exception
+    {
+        public PokerGameException(string message) : base(message) { }
     }
 }
