@@ -12,11 +12,12 @@ namespace PokerGame.Model
 {
     public class PokerModel
     {
-        public event EventHandler<PokerPlayerEventArgs> CardAllocation;
-        public event EventHandler<CommonityCardsEventArgs> UnfoldCardEvent;
-        public event EventHandler<ActionEvenArgs> PlayerActionEvent;
-        public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent;
+        public event EventHandler<PokerPlayerEventArgs> CardAllocation; //Good
+        public event EventHandler UpdateMiddleSectionEvent; //Good
+        public event EventHandler<PokerPlayerEventArgs> PlayerActionEvent; //Good
+        public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent; // Good
         public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent;
+        public event EventHandler<PlayersEventArg> AvaragePlayersUpdateEvent;
         public event EventHandler RefreshRemainTime;
         public event EventHandler DealerChipPass;
         public event EventHandler MainPlayerTurnEvent;
@@ -48,6 +49,14 @@ namespace PokerGame.Model
 
         public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
+        
+        private void OnAvaragePlayersUpdateEvent()
+        {
+            if(AvaragePlayersUpdateEvent != null)
+            {
+                AvaragePlayersUpdateEvent(this, new PlayersEventArg(playerContainer));
+            }
+        }
 
         private void OnRefreshPlayers()
         {
@@ -117,15 +126,15 @@ namespace PokerGame.Model
         {
             if( PlayerActionEvent != null)
             {
-                PlayerActionEvent(this, new ActionEvenArgs(player));
+                PlayerActionEvent(this, new PokerPlayerEventArgs(player));
             }
         }
 
-        private void OnUnfoldCardEvent(List<Card> commonityCards)
+        private void OnUpdateMiddleSectionEvent() //We don't need to pass th list of the cards
         {
-            if(UnfoldCardEvent != null)
+            if(UpdateMiddleSectionEvent != null)
             {
-                UnfoldCardEvent(this, new CommonityCardsEventArgs(commonityCards));
+                UpdateMiddleSectionEvent(this, EventArgs.Empty);
             }
         }
 
@@ -207,9 +216,20 @@ namespace PokerGame.Model
             OnPlayerActionEvent(playerContainer[_bigBlind]);
         }
 
+        private void EndOfTheRoundUpdates()
+        {
+            foreach(var player in playerContainer)
+            {
+                player.RoundEndFoldCards();
+            }
+            MiddleFieldSection.ClearTheSection();
+            OnAvaragePlayersUpdateEvent();
+            OnUpdateMiddleSectionEvent();
+        }
+
         public async void AsyncStartRound()
         {
-            RemaineTime = 10000;
+            RemaineTime = 10000; //needs to handle
             _actualLicitBet = 200;
             int delayTime = 150;
 
@@ -253,13 +273,13 @@ namespace PokerGame.Model
                 {
                     MiddleFieldSection.UnfoldNextCard();
                     await Task.Delay(200);
-                    OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                    OnUpdateMiddleSectionEvent();
                 }
             }
             else if (MiddleFieldSection.CommonityCards.Count < 5)
             {
                 MiddleFieldSection.UnfoldNextCard();
-                OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                OnUpdateMiddleSectionEvent();
             }
             OnCheckCombinationEvent();
         }
@@ -289,16 +309,23 @@ namespace PokerGame.Model
             }
         }
 
-        public async void AsyncRound(int numberOfRound)
+        public async void AsyncRound(int numberOfRound) //Refactor this function
         {
             if (numberOfRound == 5)
             {
                 await Task.Delay(500);
                 MiddleFieldSection.CollectBets(playerContainer);
-                foreach (var p in playerContainer) p.UnfoldHand();
+                foreach (var player in playerContainer) player.UnfoldHand();
                 CheckWinner();
-                OnRoundOverForPlayersEvent(playerContainer);
                 MiddleFieldSection.CollectBets(playerContainer);
+                OnRoundOverForPlayersEvent(playerContainer);
+                //if (playerContainer.Count > 1) AsyncStartRound();
+
+                await Task.Delay(1000);
+                EndOfTheRoundUpdates();
+                await Task.Delay(1000);
+                OnUpdateMiddleSectionEvent();
+                OnAvaragePlayersUpdateEvent();
                 return;
             }
             for (int i = 0; i<playerContainer.Count; i++)
@@ -308,9 +335,9 @@ namespace PokerGame.Model
                 OnSignPlayerEvent(playerContainer[i]);
 
                 _end = true;
-                for (int j = 0; j < 200 && _end; j++)
+                for (int j = 0; j < 50 && _end; j++)
                 {
-                    await Task.Delay(5);
+                    await Task.Delay(2);
                     RemaineTime -= 10;
                     //OnRefreshRemainTime();
                 }
@@ -338,15 +365,15 @@ namespace PokerGame.Model
                 {
                     MiddleFieldSection.UnfoldNextCard();
                     await Task.Delay(200);
-                    OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
+                    OnUpdateMiddleSectionEvent();
                 }
                 OnCheckCombinationEvent();
             } 
             else if (numberOfRound < 4)
             {
                 MiddleFieldSection.UnfoldNextCard();
-                OnUnfoldCardEvent(MiddleFieldSection.CommonityCards);
-                OnCheckCombinationEvent();
+                OnUpdateMiddleSectionEvent();
+                OnCheckCombinationEvent(); //Event that needs to look after it
             }
 
             playerContainer = ChangePlayersOrder(playerContainer);

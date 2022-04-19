@@ -13,6 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 
+// Further TODOs :
+// Some pokerhand combinations to long to take place in the UI in LastAction label
+// In the end round the dealer button goes to the next player, it could be problematic if the player out of the game
 namespace PokerGame
 {
     /// <summary>

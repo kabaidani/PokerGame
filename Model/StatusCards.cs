@@ -19,21 +19,6 @@ namespace PokerGame.Model
             return new Tuple<bool, Card>(false, new Card());
         }
 
-        //private static Card WeakestCard(List<Card> cards)
-        //{
-        //    CardRank cardRank = CardRank.ACE;
-        //    int idx = 0;
-        //    for (int i = 0; i < cards.Count; i++)
-        //    {
-        //        if (cards[i].cardType.cardRank < cardRank)
-        //        {
-        //            cardRank = cards[i].cardType.cardRank;
-        //            idx = i;
-        //        }
-        //    }
-        //    return cards[idx];
-        //}
-
         private static bool CardsEqual(Card lhs, Card rhs, int checkLevel)
         {
             if (checkLevel == 0)

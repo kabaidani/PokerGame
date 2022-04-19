@@ -4,97 +4,6 @@ using System.Linq;
 
 namespace PokerGame.Model
 {
-    public enum CardSuit
-    {
-        NOCARD,
-        DIAMOND,
-        CLUB,
-        HEART,
-        SPADE
-    }
-
-    public enum CardRank
-    {
-        NOCARD = 0,
-        TWO = 2,
-        THREE = 3,
-        FOUR = 4,
-        FIVE = 5,
-        SIX = 6,
-        SEVEN = 7,
-        EIGHT = 8,
-        NINE = 9,
-        TEN = 10,
-        JACK = 11,
-        QUEEN = 12,
-        KING = 13,
-        ACE = 14
-    }
-
-    public enum CharacterTypes
-    {
-        BOB,
-        DONALD,
-        JOSEPH,
-        KHAN,
-        OLAF,
-        WANDA
-    }
-
-    public struct Hand
-    {
-        public Card leftHand;
-        public Card rightHand;
-
-        public Hand(Card leftHand, Card rightHand)
-        {
-            this.leftHand = leftHand;
-            this.rightHand = rightHand;
-        }
-    }
-
-    public struct CardType
-    {
-        public CardType(CardSuit cardSuit, CardRank cardRank)
-        {
-            this.cardSuit = cardSuit;
-            this.cardRank = cardRank;
-        }
-        public CardSuit cardSuit;
-        public CardRank cardRank;
-    }
-
-    public struct Card
-    {
-        public Card(CardType cardType, bool isUpSideDown)
-        {
-            this.cardType = cardType;
-            this.isUpSideDown = isUpSideDown;
-            signed = false;
-        }
-
-        public CardType cardType;
-        public bool isUpSideDown;
-        public bool signed;
-    }
-
-    public enum Action
-    {
-        NOACTION,
-        FOLD,
-        RAISE,
-        CALL,
-        CHECK
-    }
-
-    public struct Role
-    {
-        public bool dealer;
-        public bool bigBlind;
-        public bool smallBlind;
-    }
-
-
     public abstract class Player
     {
         //public string PlayerName { private set; get; }
@@ -172,7 +81,14 @@ namespace PokerGame.Model
                 }
             }
         }
-        public List<Card> combinationCards;
+
+        public void RoundEndFoldCards()
+        {
+            hand.leftHand = new Card();
+            hand.rightHand = new Card();
+        }
+
+        public List<Card> combinationCards; // This is not in the good place
 
         public PokerHandRanks CheckCombination(List<Card> commonityCards)
         {
@@ -514,42 +430,5 @@ namespace PokerGame.Model
             } else if (chosenAction == Action.NOACTION) { }
         }
 
-    }
-
-    public class MiddleField
-    {
-        public List<Card> CommonityCards { private set; get; }
-        public int CommonityBet { private set; get; }
-
-        public static Card CardGenerator(Random rand, bool isUpdsideDown = true)
-        {
-            int tmpCardSuit = rand.Next(1, 4);
-            int tmpCardRank = rand.Next(2, 14);
-            Card result = new Card(new CardType((CardSuit)tmpCardSuit, (CardRank)tmpCardRank), isUpdsideDown);
-            return result;
-        }
-
-        public MiddleField()
-        {
-            CommonityCards = new List<Card>();
-        }
-
-        public void UnfoldNextCard()
-        {
-            if (CommonityCards.Count == 5) return;
-            Random rand = new Random();
-            CommonityCards.Add(CardGenerator(rand, false));
-        }
-
-        public void CollectBets(List<Player> players)
-        {
-            int ammount = 0;
-            foreach(var player in players)
-            {
-                ammount += player.CollectBet();
-            }
-
-            CommonityBet += ammount;
-        }
     }
 }

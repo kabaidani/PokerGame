@@ -211,12 +211,9 @@ namespace PokerGame.ViewModel
 
         public void RoundOverUpdate()
         {
-            OnPropertyChanged("LeftHandCardUrl");
-            OnPropertyChanged("RightHandCardUrl");
             _roundOverState = true;
-            OnPropertyChanged("LastActionTextBox");
-            OnPropertyChanged("ProfilePictureURL");
-
+            PropertyChange("ProfilePictureURL");
+            OnPropertyChanged("");
         }
     }
 }

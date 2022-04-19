@@ -161,11 +161,6 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private void OnShowCardsEvent(Player player)
-        {
-
-        }
-
         private void OnRefreshPlayers(object sender, EventArgs e)
         {
             foreach(var character in _characters)
@@ -188,7 +183,7 @@ namespace PokerGame.ViewModel
             RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE));
 
 
-            _model.UnfoldCardEvent += OnUnFoldCardEvent;
+            _model.UpdateMiddleSectionEvent += OnUpdateMiddleSectionEvent;
             _model.PlayerActionEvent += OnPlayerActionEvent;
             _model.SignPlayerEvent += OnSignPlayerEvent;
             _model.RoundOverForPlayersEvent += OnRoundOverForPlayersEvent;
@@ -197,6 +192,7 @@ namespace PokerGame.ViewModel
             _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
             _model.CheckCombinationEvent += OnCombinationEvent;
             _model.RefreshPlayers += OnRefreshPlayers;
+            _model.AvaragePlayersUpdateEvent += OnAvaragePlayersUpdateEvent;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -271,7 +267,15 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private void OnPlayerActionEvent(object sender, ActionEvenArgs e)
+        private void OnAvaragePlayersUpdateEvent(object sender, PlayersEventArg e)
+        {
+            foreach (var player in e.Players)
+            {
+                _characters[player.StaticName].PropertyChange();
+            }
+        }
+
+        private void OnPlayerActionEvent(object sender, PokerPlayerEventArgs e)
         {
             _characters[e.Player.StaticName].PropertyChange();
         }
@@ -289,15 +293,8 @@ namespace PokerGame.ViewModel
             }
         }
 
-        public void OnUnFoldCardEvent(Object sender, CommonityCardsEventArgs e)
+        public void OnUpdateMiddleSectionEvent(Object sender, EventArgs e)
         {
-            LeftTopCharacter.PropertyChange();
-            MiddleTopCharacter.PropertyChange();
-            RightTopCharacter.PropertyChange();
-            LeftBottomCharacter.PropertyChange();
-            MainPlayer.PropertyChange();
-            RightBottomCharacter.PropertyChange();
-
             MiddleSection.PropertyChange();
         }
 
