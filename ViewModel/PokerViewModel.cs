@@ -163,10 +163,15 @@ namespace PokerGame.ViewModel
 
         private void OnRefreshPlayers(object sender, EventArgs e)
         {
-            foreach(var character in _characters)
+            foreach (var character in _characters)
             {
                 character.Value.PropertyChange();
             }
+        }
+
+        private void OnRefreshGivenPlayers(object sender, PlayersEventArg e)
+        {
+            foreach (var p in e.Players) _characters[p.StaticName].PropertyChange();
         }
 
 
@@ -192,7 +197,7 @@ namespace PokerGame.ViewModel
             _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
             _model.CheckCombinationEvent += OnCombinationEvent;
             _model.RefreshPlayers += OnRefreshPlayers;
-            _model.AvaragePlayersUpdateEvent += OnAvaragePlayersUpdateEvent;
+            _model.RefreshGivenPlayers += OnRefreshGivenPlayers;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -267,13 +272,13 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private void OnAvaragePlayersUpdateEvent(object sender, PlayersEventArg e)
-        {
-            foreach (var player in e.Players)
-            {
-                _characters[player.StaticName].PropertyChange();
-            }
-        }
+        //private void OnAveragePlayersUpdateEvent(object sender, PlayersEventArg e)
+        //{
+        //    foreach (var player in e.Players)
+        //    {
+        //        _characters[player.StaticName].PropertyChange();
+        //    }
+        //}
 
         private void OnPlayerActionEvent(object sender, PokerPlayerEventArgs e)
         {

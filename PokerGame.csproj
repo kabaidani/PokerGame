@@ -95,6 +95,7 @@
     <None Remove="Image\JOSEPH.png" />
     <None Remove="Image\Khan.png" />
     <None Remove="Image\NoCharacter.png" />
+    <None Remove="Image\NOONE.png" />
     <None Remove="Image\Olaf.png" />
     <None Remove="Image\reteg.png" />
     <None Remove="Image\SignedCharacters\BOB.png" />
@@ -300,6 +301,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\NoCharacter.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\NOONE.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\OLAF.png">

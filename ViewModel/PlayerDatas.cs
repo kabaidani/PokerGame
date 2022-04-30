@@ -19,13 +19,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (!_player.InGame)
-                {
-                    return Visibility.Hidden;
-                }else
-                {
-                    return Visibility.Visible;
-                }
+                return Visibility.Visible; // Maybe it will always be Visible
             }
         }
 
@@ -33,7 +27,11 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_player.Signed)
+                if (!_player.InGame)
+                {
+                    return "../../Image/NOONE.png";
+                }
+                else if (_player.Signed)
                 {
                     return "../../Image/SignedCharacters/" + _player.Character.ToString() + ".png";
                 }
@@ -48,7 +46,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if(_player.hand.leftHand.cardType.cardRank == CardRank.NOCARD)
+                if(!_player.InGame || _player.hand.leftHand.cardType.cardRank == CardRank.NOCARD)
                 {
                     return Visibility.Hidden;
                 }
@@ -63,7 +61,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_player.hand.rightHand.cardType.cardRank == CardRank.NOCARD)
+                if (!_player.InGame || _player.hand.rightHand.cardType.cardRank == CardRank.NOCARD)
                 {
                     return Visibility.Hidden;
                 }
@@ -78,7 +76,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_player.hand.leftHand.isUpSideDown)
+                if (!_player.InGame || _player.hand.leftHand.isUpSideDown)
                 {
                     return "../Image/cardBack.png";
                 } else
@@ -94,7 +92,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_player.hand.rightHand.isUpSideDown)
+                if (!_player.InGame || _player.hand.rightHand.isUpSideDown)
                 {
                     return "../Image/cardBack.png";
                 }
@@ -111,7 +109,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_player.BetChips == 0)
+                if (!_player.InGame || _player.BetChips == 0)
                 {
                     return Visibility.Hidden;
                 }else
@@ -133,6 +131,8 @@ namespace PokerGame.ViewModel
         {
             get
             {
+                if (!_player.InGame) return "";
+
                 return _player.BetChips.ToString();
             }
         }
@@ -141,6 +141,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
+                if (!_player.InGame) return "";
                 return _player.Character.ToString();
             }
         }
@@ -149,6 +150,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
+                if (!_player.InGame) return "";
                 return "€ " + _player.Money.ToString();
             }
         }
@@ -158,7 +160,7 @@ namespace PokerGame.ViewModel
             get
             {
                 if (_roundOverState) return _player.PokerHandRanks.ToString();
-                if (_player.LastAction == Action.NOACTION) return "";
+                if (!_player.InGame || _player.LastAction == Action.NOACTION) return "";
                 return _player.LastAction.ToString();
             }
         }
@@ -202,6 +204,7 @@ namespace PokerGame.ViewModel
                 OnPropertyChanged("GridVisibility");
                 OnPropertyChanged("DealerChipPicture");
                 OnPropertyChanged("DealerChipPictureVisibility");
+                OnPropertyChanged("ProfilePictureURL");
             }
             else
             {

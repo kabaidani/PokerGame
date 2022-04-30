@@ -12,7 +12,7 @@ namespace PokerGame.Model
         public int BetChips { protected set; get; }
         public int Money { protected set; get; }
         public Action LastAction { protected set; get; }
-        public bool InGame { protected set; get; }
+        public bool InGame { set; get; } //should set the set property protected
         public Hand hand; // the set should be more safer
         public int RaiseBet { set; get; }
         public bool Signed { set; get; }
@@ -336,6 +336,11 @@ namespace PokerGame.Model
                 }
             }
             throw new PokerGameException("not able to find to suitable combination");
+        }
+        
+        public void CheckIfInGame()
+        {
+            if (Money <= 0) InGame = false;
         }
 
         public abstract void PlayerAction(ref int actualLicitBet, Action chosenAction = Action.NOACTION);

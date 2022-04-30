@@ -16,28 +16,31 @@ namespace PokerGame.Model
         public event EventHandler UpdateMiddleSectionEvent; //Good
         public event EventHandler<PokerPlayerEventArgs> PlayerActionEvent; //Good
         public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent; // Good
-        public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent;
-        public event EventHandler<PlayersEventArg> AvaragePlayersUpdateEvent;
+        public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent; //Good
+        public event EventHandler<PokerPlayerEventArgs> OutOfGamePlayerEvent;
+        //public event EventHandler<PlayersEventArg> AveragePlayersUpdateEvent; //Deprecated
         public event EventHandler RefreshRemainTime;
         public event EventHandler DealerChipPass;
         public event EventHandler MainPlayerTurnEvent;
         public event EventHandler<CommonityCardsEventArgs> CheckCombinationEvent; //need to change the name of the template parameter
         public event EventHandler RefreshPlayers;
+        public event EventHandler<PlayersEventArg> RefreshGivenPlayers;
 
 
         public bool MainplayerTurn { get; private set; }
         public int StartingMoney { private get; set; } // Not sure if it is okey
         public int PlayersNum { private get; set; }
-        public List<Player> playerContainer; 
+        public List<Player> playerContainer;
+        public List<Player> playersOutOfTheGame;
         public MainPlayer p;
         public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
         public StatusCards StatusCards { get; private set; }
 
         private enum Role { DEALER, SMALLBLIND, BIGBLIND}
 
-        private int _dealer;
-        private int _smallBlind;
-        private int _bigBlind;
+        //private int _dealer;
+        //private int _smallBlind;
+        //private int _bigBlind;
 
         private int _blindValue = 100;
         public int BlindValue { get { return _blindValue; } }
@@ -50,11 +53,20 @@ namespace PokerGame.Model
         public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
         
-        private void OnAvaragePlayersUpdateEvent()
+
+        private void OnRefreshGivenPlayers(List<Player> refreshedPlayers)
         {
-            if(AvaragePlayersUpdateEvent != null)
+            if(RefreshGivenPlayers != null)
             {
-                AvaragePlayersUpdateEvent(this, new PlayersEventArg(playerContainer));
+                RefreshGivenPlayers(this, new PlayersEventArg(refreshedPlayers));
+            }
+        }
+
+        private void OnOutOfGamePlayerEvent(Player p)
+        {
+            if(OutOfGamePlayerEvent != null)
+            {
+                OutOfGamePlayerEvent(this, new PokerPlayerEventArgs(p));
             }
         }
 
@@ -147,23 +159,24 @@ namespace PokerGame.Model
         }
 
 
-        public PokerModel(int playersNumber, int startingMoney = 2000)
+        public PokerModel(int playersNumber, int startingMoney = 800)
         {
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
             PlayersNum = playersNumber;
             StartingMoney = startingMoney;
             MiddleFieldSection = new MiddleField();
             StatusCards = new StatusCards();
+            playersOutOfTheGame = new List<Player>();
         }
 
-        private void NextRoles()
-        {
-            playerContainer[_dealer].Role.dealer = true;
-            playerContainer[_bigBlind].Role.bigBlind = true;
-            playerContainer[_smallBlind].Role.smallBlind = true;
+        //private void NextRoles()
+        //{
+        //    playerContainer[_dealer].Role.dealer = true;
+        //    playerContainer[_bigBlind].Role.bigBlind = true;
+        //    playerContainer[_smallBlind].Role.smallBlind = true;
 
-            OnDealerChipRound();
-        }
+        //    OnDealerChipRound();
+        //}
 
 
         public void GeneratePlayers()
@@ -183,37 +196,64 @@ namespace PokerGame.Model
                     playerContainer.Add(p);
                 }
             }
-            _dealer = 3;
             playerContainer[3].Role.dealer = true;
-            _smallBlind = 4;
             playerContainer[4].Role.smallBlind = true;
-            _bigBlind = 5;
             playerContainer[5].Role.bigBlind = true;
         }
 
-        private List<Player> ChangePlayersOrder(List<Player> players)
+        private int GetDealer()
+        {
+            for(int i = 0; i<playerContainer.Count; i++)
+            {
+                if (playerContainer[i].Role.dealer) return i;
+            }
+            throw new PokerGameException("Dealer can not be found");
+        }
+
+        private int GetSmallBlind()
+        {
+            for (int i = 0; i < playerContainer.Count; i++)
+            {
+                if (playerContainer[i].Role.smallBlind) return i;
+            }
+            throw new PokerGameException("Small blind can not be found");
+        }
+
+        private int GetBigBlind()
+        {
+            for (int i = 0; i < playerContainer.Count; i++)
+            {
+                if (playerContainer[i].Role.bigBlind) return i;
+            }
+            throw new PokerGameException("Big blind can not be found");
+        }
+
+
+        private void ChangePlayersOrder()
         {
             List<Player> result = new List<Player>();
-            playerContainer[_dealer].Role.dealer = false;
-            playerContainer[_smallBlind].Role.smallBlind = false;
-            playerContainer[_bigBlind].Role.bigBlind = false;
-            for (int i = 0; i<players.Count-1; i++)
+            playerContainer[GetDealer()].Role.dealer = false;
+            playerContainer[GetSmallBlind()].Role.smallBlind = false;
+            playerContainer[GetBigBlind()].Role.bigBlind = false;
+            CheckPlayersInGame();
+            for (int i = 0; i< playerContainer.Count-1; i++)
             {
-                result.Add(players[i + 1]);
+                result.Add(playerContainer[i + 1]);
             }
-            result.Add(players[0]);
-            _dealer = 3;
-            _smallBlind = 4;
-            _bigBlind = 5;
-            return result;
+            result.Add(playerContainer[0]);
+            result[3 % playerContainer.Count].Role.dealer = true;
+            result[4 % playerContainer.Count].Role.smallBlind = true;
+            result[5 % playerContainer.Count].Role.bigBlind = true;
+            playerContainer = result;
+            OnDealerChipRound();
         }
 
         private void TakeMandatoryBets()
         {
-            playerContainer[_smallBlind].TakeMandatoryBet(_blindValue);
-            playerContainer[_bigBlind].TakeMandatoryBet(_blindValue);
-            OnPlayerActionEvent(playerContainer[_smallBlind]);
-            OnPlayerActionEvent(playerContainer[_bigBlind]);
+            playerContainer[GetSmallBlind()].TakeMandatoryBet(_blindValue);
+            playerContainer[GetBigBlind()].TakeMandatoryBet(_blindValue);
+            OnPlayerActionEvent(playerContainer[GetSmallBlind()]);
+            OnPlayerActionEvent(playerContainer[GetBigBlind()]);
         }
 
         private void EndOfTheRoundUpdates()
@@ -223,45 +263,9 @@ namespace PokerGame.Model
                 player.RoundEndFoldCards();
             }
             MiddleFieldSection.ClearTheSection();
-            OnAvaragePlayersUpdateEvent();
+            OnRefreshPlayers();
             OnUpdateMiddleSectionEvent();
         }
-
-        public async void AsyncStartRound()
-        {
-            RemaineTime = 10000; //needs to handle
-            _actualLicitBet = 200;
-            int delayTime = 150;
-
-            TakeMandatoryBets();
-            for (int i = 0; i<playerContainer.Count; i++)
-            {
-                Random rand = new Random(); // look for if it is worth to create every time
-                await Task.Delay(delayTime);
-                playerContainer[i].hand.leftHand = MiddleField.CardGenerator(rand);
-                if (playerContainer[i] == p)
-                {
-                    playerContainer[i].hand.leftHand.isUpSideDown = false;
-                    OnCheckCombinationEvent();
-                }
-                OnCardAllocation(playerContainer[i]);
-            }
-
-            for (int i = 0; i < playerContainer.Count; i++)
-            {
-                Random rand = new Random(); // look for if it is worth to create every time
-                await Task.Delay(delayTime);
-                playerContainer[i].hand.rightHand = MiddleField.CardGenerator(rand);
-                if (playerContainer[i] == p)
-                {
-                    playerContainer[i].hand.rightHand.isUpSideDown = false;
-                    OnCheckCombinationEvent();
-                }
-                OnCardAllocation(playerContainer[i]);
-            }
-            AsyncRound(1);
-        }
-
 
 
         public async void AsyncTestUnFoldMiddleCards()
@@ -309,6 +313,68 @@ namespace PokerGame.Model
             }
         }
 
+        private void CheckPlayersInGame()
+        {
+            foreach(var p in playerContainer) p.CheckIfInGame();
+
+            for(int i = 0; i<playerContainer.Count; i++)
+            {
+                if (!playerContainer[i].InGame)
+                {
+                    var outOfGame = playerContainer[i];
+                    playerContainer.RemoveAt(i);
+                    OnOutOfGamePlayerEvent(outOfGame);
+                    playersOutOfTheGame.Add(outOfGame);
+                    i--;
+                }
+            }
+        }
+
+        public async void AsyncStartRound()
+        {
+            await Task.Delay(500);
+            RemaineTime = 10000; //needs to handle
+            _actualLicitBet = 200;
+            int delayTime = 150;
+            foreach(var p in playerContainer)
+            {
+                if (p.Signed)
+                {
+                    p.Signed = false;
+                    OnSignPlayerEvent(p);
+                }
+            }
+
+            TakeMandatoryBets();
+            for (int i = 0; i < playerContainer.Count; i++)
+            {
+                Random rand = new Random(); // look for if it is worth to create every time
+                await Task.Delay(delayTime);
+                playerContainer[i].hand.leftHand = MiddleField.CardGenerator(rand);
+                if (playerContainer[i] == p)
+                {
+                    playerContainer[i].hand.leftHand.isUpSideDown = false;
+                    OnCheckCombinationEvent();
+                }
+                OnCardAllocation(playerContainer[i]);
+            }
+
+            for (int i = 0; i < playerContainer.Count; i++)
+            {
+                Random rand = new Random(); // look for if it is worth to create every time
+                await Task.Delay(delayTime);
+                playerContainer[i].hand.rightHand = MiddleField.CardGenerator(rand);
+                if (playerContainer[i] == p)
+                {
+                    playerContainer[i].hand.rightHand.isUpSideDown = false;
+                    OnCheckCombinationEvent();
+                }
+                OnCardAllocation(playerContainer[i]);
+            }
+            AsyncRound(1);
+        }
+
+
         public async void AsyncRound(int numberOfRound) //Refactor this function
         {
             if (numberOfRound == 5)
@@ -325,7 +391,8 @@ namespace PokerGame.Model
                 EndOfTheRoundUpdates();
                 await Task.Delay(1000);
                 OnUpdateMiddleSectionEvent();
-                OnAvaragePlayersUpdateEvent();
+                OnRefreshPlayers();
+                AsyncStartRound();
                 return;
             }
             for (int i = 0; i<playerContainer.Count; i++)
@@ -376,12 +443,11 @@ namespace PokerGame.Model
                 OnCheckCombinationEvent(); //Event that needs to look after it
             }
 
-            playerContainer = ChangePlayersOrder(playerContainer);
-            NextRoles();
+            ChangePlayersOrder();
+
             await Task.Delay(400);
             if (numberOfRound != 4) TakeMandatoryBets();
             AsyncRound(++numberOfRound);
-
         }
 
         public void GameOn()
