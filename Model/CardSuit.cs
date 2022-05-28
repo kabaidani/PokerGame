@@ -2,10 +2,10 @@
 {
     public enum CardSuit
     {
-        NOCARD,
-        DIAMOND,
-        CLUB,
-        HEART,
-        SPADE
+        NOCARD = 0,
+        DIAMOND = 1,
+        CLUB = 2,
+        HEART = 3,
+        SPADE = 4
     }
 }

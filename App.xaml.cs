@@ -26,6 +26,10 @@ namespace PokerGame
         private MainWindow _mainWindow;
         private PokerModel _model;
         private PokerViewModel _viewModel;
+        private CharcterSelecter _charcterSelecterWindow;
+        
+        private CharacterSelecterModel _characterSelecterModel;
+        private CharacterSelecterViewModel _characterSelecterViewModel;
 
         public App()
         {
@@ -35,12 +39,31 @@ namespace PokerGame
 
         private void App_Startup(object sender, StartupEventArgs e)
         {
-            _model = new PokerModel(5);
-            _viewModel = new PokerViewModel(_model);
+            _characterSelecterModel = new CharacterSelecterModel();
+            _characterSelecterViewModel = new CharacterSelecterViewModel(_characterSelecterModel);
+            _charcterSelecterWindow = new CharcterSelecter();
+
+            _charcterSelecterWindow.DataContext = _characterSelecterViewModel;
+            _characterSelecterViewModel.StartGameEvent += OnStartPokerGame;
+            _charcterSelecterWindow.Show();
+        }
+
+        private void OnStartPokerGame(object sender, EventArgs e)
+        {
+
+            int startingMoney = 0;
+            try
+            {
+                startingMoney = Int32.Parse(_characterSelecterViewModel.StartingMoney);
+                _model = new PokerModel(5, startingMoney);
+            }
+            catch (FormatException)
+            {
+                _model = new PokerModel(5);
+            }
+
+            _viewModel = new PokerViewModel(_model, _characterSelecterViewModel.SelectedCharacter);
             _mainWindow = new MainWindow();
-
-
-            _mainWindow.DataContext = _viewModel;
 
             _mainWindow.MiddleTopCharacterGrid.DataContext = _viewModel.MiddleTopCharacter;
             _mainWindow.LeftTopCharacterGrid.DataContext = _viewModel.LeftTopCharacter;
@@ -50,12 +73,12 @@ namespace PokerGame
             _mainWindow.LeftBottomCharacterGrid.DataContext = _viewModel.LeftBottomCharacter;
             _mainWindow.MiddleSectionGrid.DataContext = _viewModel.MiddleSection;
             _mainWindow.StatusCards.DataContext = _viewModel.StatusCards;
+            _mainWindow.DataContext = _viewModel;
 
-            _viewModel.InitCharacterEventRaise();
 
-
+            _charcterSelecterWindow.Close();
             _mainWindow.Show();
-
+            _viewModel.InitCharacterEventRaise();
             _model.GameOn();
         }
     }

@@ -8,7 +8,6 @@ using System.Windows.Media;
 
 namespace PokerGame.ViewModel
 {
-
     public class PokerViewModel : ViewModelBase
     {
         private PokerModel _model;
@@ -98,7 +97,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                return _model.p.RaiseBet.ToString();
+                return _model.mainPlayer.RaiseBet.ToString();
             }
         }
 
@@ -106,14 +105,14 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                return _model.p.RaiseBet;
+                return _model.mainPlayer.RaiseBet;
             }
 
             set
             {
-                if(value != _model.p.RaiseBet)
+                if(value != _model.mainPlayer.RaiseBet)
                 {
-                    _model.p.RaiseBet = value;
+                    _model.mainPlayer.RaiseBet = value;
                     OnPropertyChanged("RaiseBetTextValue");
                     OnPropertyChanged("MinRaiseBetValue");
                     OnPropertyChanged("MaxRaiseBetValue");
@@ -134,7 +133,7 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                return _model.p.Money;
+                return _model.mainPlayer.Money;
             }
         }
 
@@ -177,10 +176,10 @@ namespace PokerGame.ViewModel
 
         private Dictionary<string, PlayerDatas> _characters;
 
-        public PokerViewModel(PokerModel model)
+        public PokerViewModel(PokerModel model, CharacterTypes mainPlayerCharacter)
         {
             _model = model;
-            _model.GeneratePlayers();
+            _model.GeneratePlayers(mainPlayerCharacter);
             _model.CardAllocation += OnCardAllocation;
 
             FoldButtonCommand = new DelegateCommand(p => _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer

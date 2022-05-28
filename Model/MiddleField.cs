@@ -5,8 +5,11 @@ namespace PokerGame.Model
 {
     public class MiddleField
     {
+        private Dictionary<Player, int> _playersBet;
+        private List<Player> _players;
         public List<Card> CommonityCards { private set; get; }
         public int CommonityBet { private set; get; }
+        private Deck _deck;
 
         public void ClearTheSection()
         {
@@ -14,17 +17,24 @@ namespace PokerGame.Model
             CommonityBet = 0; //Not sure if it is needed here
         }
 
-        public static Card CardGenerator(Random rand, bool isUpdsideDown = true)
-        {
-            int tmpCardSuit = rand.Next(1, 4);
-            int tmpCardRank = rand.Next(2, 14);
-            Card result = new Card(new CardType((CardSuit)tmpCardSuit, (CardRank)tmpCardRank), isUpdsideDown);
+        public Card CardGenerator(Random rand, bool isUpdsideDown = true)
+        { 
+            Card result = _deck.getCard();
+            result.isUpSideDown = isUpdsideDown;
             return result;
         }
 
-        public MiddleField()
+        public MiddleField(Deck deck, List<Player> players)
         {
             CommonityCards = new List<Card>();
+            _deck = deck;
+            _playersBet = new Dictionary<Player, int>();
+            _players = new List<Player>();
+            foreach (var player in players)
+            {
+                _playersBet.Add(player, 0);
+                _players.Add(player);
+            } 
         }
 
         public void UnfoldNextCard()
@@ -39,10 +49,68 @@ namespace PokerGame.Model
             int ammount = 0;
             foreach(var player in players)
             {
-                ammount += player.CollectBet();
+                int playerBet = player.CollectBet();
+                _playersBet[player] += playerBet;
+                ammount += playerBet;
             }
-
             CommonityBet += ammount;
         }
+
+        private int HeighestBetCalculator()
+        {
+            int heighestBet = 0;
+            foreach (var playersBet in _playersBet)
+            {
+                if (heighestBet < playersBet.Value)
+                {
+                    heighestBet = playersBet.Value;
+                }
+            }
+            return heighestBet;
+        }
+
+        public bool PrizeDistribution(List<Player> winners)
+        {
+            int commonityBetConst = CommonityBet;
+            int heighestBet = HeighestBetCalculator(); //The heighest bet is the normal bet
+            int partsNumber = winners.Count;
+            List<Player> fullBetPlayers = new List<Player>();
+            List<Player> partBetPlayers = new List<Player>();
+            foreach (var player in winners)
+            {
+                if(_playersBet[player] == heighestBet)
+                {
+                    fullBetPlayers.Add(player);
+                }else
+                {
+                    partBetPlayers.Add(player);
+                }
+            }
+            foreach(var player in partBetPlayers)
+            {
+                double multiplier = 1.0 / partsNumber;
+                double multiplier2 = Convert.ToDouble(_playersBet[player]) / heighestBet;
+                double prize = commonityBetConst * multiplier * multiplier2;
+                player.gainPrize(Convert.ToInt32(Math.Floor(prize)));
+                CommonityBet -= Convert.ToInt32(Math.Floor(prize));
+            }
+            foreach(var player in fullBetPlayers)
+            {
+                int prize = CommonityBet / fullBetPlayers.Count;
+                player.gainPrize(prize);
+            }
+            if (fullBetPlayers.Count > 0)
+            {
+                CommonityBet = 0;
+                foreach(var player in _players)
+                {
+                    _playersBet[player] = 0;
+                }
+
+                return false;
+            } return true;
+        }
+
+
     }
 }

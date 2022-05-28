@@ -10,6 +10,15 @@ using System.Linq;
 
 namespace PokerGame.Model
 {
+    public class CharacterSelecterModel
+    {
+        public int GridSize { get; private set; }
+        public CharacterSelecterModel()
+        {
+            GridSize = 4;
+        }
+    }
+
     public class PokerModel
     {
         public event EventHandler<PokerPlayerEventArgs> CardAllocation; //Good
@@ -32,7 +41,7 @@ namespace PokerGame.Model
         public int PlayersNum { private get; set; }
         public List<Player> playerContainer;
         public List<Player> playersOutOfTheGame;
-        public MainPlayer p;
+        public MainPlayer mainPlayer;
         public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
         public StatusCards StatusCards { get; private set; }
 
@@ -52,7 +61,18 @@ namespace PokerGame.Model
 
         public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
-        
+        private Deck _deck;
+
+        public PokerModel(int playersNumber, int startingMoney = 2000)
+        {
+            if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
+            PlayersNum = playersNumber;
+            StartingMoney = startingMoney;
+            _deck = new Deck();
+            StatusCards = new StatusCards();
+            playersOutOfTheGame = new List<Player>();
+        }
+
 
         private void OnRefreshGivenPlayers(List<Player> refreshedPlayers)
         {
@@ -92,8 +112,8 @@ namespace PokerGame.Model
             if(CheckCombinationEvent != null)
             {
                 List<Card> cards = new List<Card>();
-                cards.Add(p.hand.leftHand);
-                cards.Add(p.hand.rightHand);
+                cards.Add(mainPlayer.hand.leftHand);
+                cards.Add(mainPlayer.hand.rightHand);
                 cards.AddRange(MiddleFieldSection.CommonityCards);
                 List<Card> res = new List<Card>();
                 StatusCards.checkPokerCombination(cards, ref res);
@@ -158,17 +178,6 @@ namespace PokerGame.Model
             }
         }
 
-
-        public PokerModel(int playersNumber, int startingMoney = 800)
-        {
-            if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
-            PlayersNum = playersNumber;
-            StartingMoney = startingMoney;
-            MiddleFieldSection = new MiddleField();
-            StatusCards = new StatusCards();
-            playersOutOfTheGame = new List<Player>();
-        }
-
         //private void NextRoles()
         //{
         //    playerContainer[_dealer].Role.dealer = true;
@@ -179,12 +188,12 @@ namespace PokerGame.Model
         //}
 
 
-        public void GeneratePlayers()
+        public void GeneratePlayers(CharacterTypes mainPlayerCharacterType)
         {
             playerContainer = new List<Player>();
             Random rand = new Random();
 
-            p = new MainPlayer("Daniel", CharacterTypes.BOB, StartingMoney);
+            mainPlayer = new MainPlayer("Daniel", mainPlayerCharacterType, StartingMoney);
 
             for(int i = 0; i < 5; i++)
             {
@@ -193,12 +202,14 @@ namespace PokerGame.Model
                 playerContainer.Add(new BotPlayer(character, StartingMoney));
                 if(i == 1)
                 {
-                    playerContainer.Add(p);
+                    playerContainer.Add(mainPlayer);
                 }
             }
             playerContainer[3].Role.dealer = true;
             playerContainer[4].Role.smallBlind = true;
             playerContainer[5].Role.bigBlind = true;
+
+            MiddleFieldSection = new MiddleField(_deck, playerContainer);
         }
 
         private int GetDealer()
@@ -229,13 +240,13 @@ namespace PokerGame.Model
         }
 
 
-        private void ChangePlayersOrder()
+        private void ChangePlayersOrder(bool lastRound)
         {
             List<Player> result = new List<Player>();
             playerContainer[GetDealer()].Role.dealer = false;
             playerContainer[GetSmallBlind()].Role.smallBlind = false;
             playerContainer[GetBigBlind()].Role.bigBlind = false;
-            CheckPlayersInGame();
+            if(lastRound) CheckPlayersInGame();
             for (int i = 0; i< playerContainer.Count-1; i++)
             {
                 result.Add(playerContainer[i + 1]);
@@ -292,24 +303,30 @@ namespace PokerGame.Model
         public void MainPlayerAction(Action action)
         {
             _end = false;
-            p.PlayerAction(ref _actualLicitBet, action);
-            OnPlayerActionEvent(p);
+            mainPlayer.PlayerAction(ref _actualLicitBet, action);
+            OnPlayerActionEvent(mainPlayer);
         }
 
 
 
         private void CheckWinner()
         {
-            List<Player> winners = new List<Player>();
-            foreach (var player in playerContainer) winners.Add(player);
-            winners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
-            winners.Reverse();
-            winners = winners.Where(p => winners[0].CompareTo(p, MiddleFieldSection.CommonityCards) == 0).Select(p => p).ToList();
-            int winningPrice = MiddleFieldSection.CommonityBet / winners.Count;
-            foreach(var player in winners)
+            List<Player> sortedwinners = new List<Player>();
+            foreach (var player in playerContainer) sortedwinners.Add(player);
+            sortedwinners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
+            sortedwinners.Reverse();
+            var realwinners = sortedwinners.Where(p => sortedwinners[0].CompareTo(p, MiddleFieldSection.CommonityCards) == 0).Select(p => p).ToList();
+            //int winningPrice = MiddleFieldSection.CommonityBet / winners.Count;
+            while ( MiddleFieldSection.PrizeDistribution(realwinners))
             {
-                player.gainPrize(winningPrice);
-                player.Signed = true;
+                foreach(var player in realwinners)
+                {
+                    sortedwinners.Remove(player);
+                }
+                sortedwinners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
+                sortedwinners.Reverse();
+                realwinners = sortedwinners.Where(p => sortedwinners[0].CompareTo(p, MiddleFieldSection.CommonityCards) == 0).Select(p => p).ToList();
+
             }
         }
 
@@ -348,10 +365,9 @@ namespace PokerGame.Model
             TakeMandatoryBets();
             for (int i = 0; i < playerContainer.Count; i++)
             {
-                Random rand = new Random(); // look for if it is worth to create every time
                 await Task.Delay(delayTime);
-                playerContainer[i].hand.leftHand = MiddleField.CardGenerator(rand);
-                if (playerContainer[i] == p)
+                playerContainer[i].hand.leftHand = _deck.getCard();
+                if (playerContainer[i] == mainPlayer)
                 {
                     playerContainer[i].hand.leftHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
@@ -361,10 +377,9 @@ namespace PokerGame.Model
 
             for (int i = 0; i < playerContainer.Count; i++)
             {
-                Random rand = new Random(); // look for if it is worth to create every time
                 await Task.Delay(delayTime);
-                playerContainer[i].hand.rightHand = MiddleField.CardGenerator(rand);
-                if (playerContainer[i] == p)
+                playerContainer[i].hand.rightHand = _deck.getCard();
+                if (playerContainer[i] == mainPlayer)
                 {
                     playerContainer[i].hand.rightHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
@@ -388,10 +403,12 @@ namespace PokerGame.Model
                 //if (playerContainer.Count > 1) AsyncStartRound();
 
                 await Task.Delay(1000);
+                ChangePlayersOrder(true);
                 EndOfTheRoundUpdates();
                 await Task.Delay(1000);
                 OnUpdateMiddleSectionEvent();
                 OnRefreshPlayers();
+                _deck.Refresh();
                 AsyncStartRound();
                 return;
             }
@@ -443,7 +460,7 @@ namespace PokerGame.Model
                 OnCheckCombinationEvent(); //Event that needs to look after it
             }
 
-            ChangePlayersOrder();
+            ChangePlayersOrder(false);
 
             await Task.Delay(400);
             if (numberOfRound != 4) TakeMandatoryBets();

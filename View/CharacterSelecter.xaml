@@ -1,0 +1,78 @@
+﻿<Window x:Class="PokerGame.view.CharcterSelecter"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PokerGame.view"
+        mc:Ignorable="d"
+        Background="#3d3f3c"
+        Title="CharcterSelecter" Height="750" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="500"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Select your character"  VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30" FontWeight="Bold" Foreground="White"/>
+
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Fields}" Width="610" Margin="0,50,0,0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="{Binding Size}" Columns="{Binding Size}" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Command="{Binding SelectCommand}" CommandParameter="{Binding Number}" Focusable="False" Width="150">
+                        <Button.Background>
+                            <ImageBrush ImageSource="{Binding CharacterUrl}" />
+                        </Button.Background>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="Grid.Row" Value="{Binding X}" />
+                    <Setter Property="Grid.Column" Value="{Binding Y}"/>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+        </ItemsControl>
+
+        
+        <Grid Grid.Row="2" VerticalAlignment="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Text="Set the value of the starting money in range of €(1000-5000) and press enter: " VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,20,0"/>
+                <TextBlock Text="€" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,0,5,0"/>
+                <TextBox Text="{Binding StartingMoney}" Background="Transparent" Width="100" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" PreviewTextInput="TextBlock_PreviewTextInput" KeyDown="TextBox_KeyDown"/>
+            </StackPanel>
+            <Button Grid.Row="1" Content="Start the Game" Width="200" Height="70" FontWeight="Bold" Command="{Binding StartGameCommand}" VerticalAlignment="Top" Margin="0,20,0,0">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="Green"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontSize" Value="20"/>
+                        <Style.Triggers>  
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="FontSize" Value="25"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="30" Background="Green">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center">
+                            </ContentPresenter>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>
