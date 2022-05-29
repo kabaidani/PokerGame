@@ -15,6 +15,7 @@ namespace PokerGame.ViewModel
         public DelegateCommand FoldButtonCommand { get; set; }
         public DelegateCommand CallOrCheckButtonCommand { get; set; }
         public DelegateCommand RaiseButtonCommand { get; set; }
+        public DelegateCommand ReleaseModelLockingKey { get; set; }
 
         public event EventHandler<PlayersEventArg> InitCharacters;
 
@@ -185,6 +186,7 @@ namespace PokerGame.ViewModel
             FoldButtonCommand = new DelegateCommand(p => _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE));
+            ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
 
 
             _model.UpdateMiddleSectionEvent += OnUpdateMiddleSectionEvent;
@@ -197,6 +199,9 @@ namespace PokerGame.ViewModel
             _model.CheckCombinationEvent += OnCombinationEvent;
             _model.RefreshPlayers += OnRefreshPlayers;
             _model.RefreshGivenPlayers += OnRefreshGivenPlayers;
+            _model.RefreshCommonityBet += OnRefreshCommonityBet;
+            _model.LockingKeyStateChangeEvent += OnLockingKeyStateChangeEvent;
+            _model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -284,6 +289,14 @@ namespace PokerGame.ViewModel
             _characters[e.Player.StaticName].PropertyChange();
         }
 
+        private void OnUpdateGainedPrizeEvent(object sender, PlayersEventArg e)
+        {
+            foreach(var player in e.Players)
+            {
+                _characters[player.StaticName].ShowGainedPrize();
+            }
+        }
+
 
         private void CallOrCheckCommand(object o)
         {
@@ -302,10 +315,41 @@ namespace PokerGame.ViewModel
             MiddleSection.PropertyChange();
         }
 
+        public void OnRefreshCommonityBet(object sender, EventArgs e)
+        {
+            MiddleSection.CommonityBetpropertyChange();
+        }
+
+
+        public System.Windows.Visibility ActionButtonsVisible
+        {
+            get
+            {
+                if (_model.CheckLockingKeyState()) return System.Windows.Visibility.Collapsed;
+                return System.Windows.Visibility.Visible;
+            }
+        }
+
+        public System.Windows.Visibility LockingKeyReleaser
+        {
+            get
+            {
+                if (_model.CheckLockingKeyState()) return System.Windows.Visibility.Visible;
+                return System.Windows.Visibility.Collapsed;
+            }
+        }
+
+        public void OnLockingKeyStateChangeEvent(object sender, EventArgs e)
+        {
+            OnPropertyChanged("ActionButtonsVisible");
+            OnPropertyChanged("LockingKeyReleaser");
+        }
+
         public void InitCharacterEventRaise()
         {
             OnInitCharacters(_model.playerContainer);
         }
+
 
     }
 }

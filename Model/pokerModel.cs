@@ -34,6 +34,9 @@ namespace PokerGame.Model
         public event EventHandler<CommonityCardsEventArgs> CheckCombinationEvent; //need to change the name of the template parameter
         public event EventHandler RefreshPlayers;
         public event EventHandler<PlayersEventArg> RefreshGivenPlayers;
+        public event EventHandler RefreshCommonityBet;
+        public event EventHandler LockingKeyStateChangeEvent;
+        public event EventHandler<PlayersEventArg> UpdateGainedPrizeEvent;
 
 
         public bool MainplayerTurn { get; private set; }
@@ -47,10 +50,6 @@ namespace PokerGame.Model
 
         private enum Role { DEALER, SMALLBLIND, BIGBLIND}
 
-        //private int _dealer;
-        //private int _smallBlind;
-        //private int _bigBlind;
-
         private int _blindValue = 100;
         public int BlindValue { get { return _blindValue; } }
 
@@ -62,6 +61,7 @@ namespace PokerGame.Model
         public int RemaineTime { private set; get; }
         public int getActualLicitBet() { return _actualLicitBet; }
         private Deck _deck;
+        private bool _lockingKey;
 
         public PokerModel(int playersNumber, int startingMoney = 2000)
         {
@@ -71,8 +71,33 @@ namespace PokerGame.Model
             _deck = new Deck();
             StatusCards = new StatusCards();
             playersOutOfTheGame = new List<Player>();
+            _lockingKey = false;
+            OnLockingKeyStateChangeEvent();
         }
 
+        private void OnRefreshCommonityBet()
+        {
+            if(RefreshCommonityBet != null)
+            {
+                RefreshCommonityBet(this, EventArgs.Empty);
+            }
+        }
+
+        private void OnLockingKeyStateChangeEvent()
+        {
+            if(LockingKeyStateChangeEvent != null)
+            {
+                LockingKeyStateChangeEvent(this, EventArgs.Empty);
+            }
+        }
+
+        private void OnUpdateGainedPrizeEvent(List<Player> players)
+        {
+            if(UpdateGainedPrizeEvent != null)
+            {
+                UpdateGainedPrizeEvent(this, new PlayersEventArg(players));
+            }
+        }
 
         private void OnRefreshGivenPlayers(List<Player> refreshedPlayers)
         {
@@ -177,15 +202,6 @@ namespace PokerGame.Model
                 CardAllocation(this, new PokerPlayerEventArgs(player));
             }
         }
-
-        //private void NextRoles()
-        //{
-        //    playerContainer[_dealer].Role.dealer = true;
-        //    playerContainer[_bigBlind].Role.bigBlind = true;
-        //    playerContainer[_smallBlind].Role.smallBlind = true;
-
-        //    OnDealerChipRound();
-        //}
 
 
         public void GeneratePlayers(CharacterTypes mainPlayerCharacterType)
@@ -299,6 +315,22 @@ namespace PokerGame.Model
             OnCheckCombinationEvent();
         }
 
+        public void ReleaseLockingKey()
+        {
+            _lockingKey = false;
+            OnLockingKeyStateChangeEvent();
+        }
+
+        public void LockLockingKey()
+        {
+            _lockingKey = true;
+            OnLockingKeyStateChangeEvent();
+        }
+
+        public bool CheckLockingKeyState()
+        {
+            return _lockingKey;
+        }
 
         public void MainPlayerAction(Action action)
         {
@@ -316,7 +348,6 @@ namespace PokerGame.Model
             sortedwinners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
             sortedwinners.Reverse();
             var realwinners = sortedwinners.Where(p => sortedwinners[0].CompareTo(p, MiddleFieldSection.CommonityCards) == 0).Select(p => p).ToList();
-            //int winningPrice = MiddleFieldSection.CommonityBet / winners.Count;
             while ( MiddleFieldSection.PrizeDistribution(realwinners))
             {
                 foreach(var player in realwinners)
@@ -394,19 +425,23 @@ namespace PokerGame.Model
         {
             if (numberOfRound == 5)
             {
-                await Task.Delay(500);
+                await Task.Delay(2000);
                 MiddleFieldSection.CollectBets(playerContainer);
                 foreach (var player in playerContainer) player.UnfoldHand();
                 CheckWinner();
                 MiddleFieldSection.CollectBets(playerContainer);
                 OnRoundOverForPlayersEvent(playerContainer);
+
+                OnUpdateGainedPrizeEvent(playerContainer);
+                LockLockingKey();
+                while (_lockingKey) await Task.Delay(200);
                 //if (playerContainer.Count > 1) AsyncStartRound();
 
-                await Task.Delay(1000);
                 ChangePlayersOrder(true);
                 EndOfTheRoundUpdates();
-                await Task.Delay(1000);
+                await Task.Delay(2500);
                 OnUpdateMiddleSectionEvent();
+                foreach (var player in playerContainer) player.ClearLastAction();
                 OnRefreshPlayers();
                 _deck.Refresh();
                 AsyncStartRound();
@@ -421,7 +456,7 @@ namespace PokerGame.Model
                 _end = true;
                 for (int j = 0; j < 50 && _end; j++)
                 {
-                    await Task.Delay(2);
+                    await Task.Delay(20);
                     RemaineTime -= 10;
                     //OnRefreshRemainTime();
                 }
@@ -439,9 +474,11 @@ namespace PokerGame.Model
 
             }
 
-            await Task.Delay(500);
+            await Task.Delay(1500);
             MiddleFieldSection.CollectBets(playerContainer);
-            await Task.Delay(500);
+            OnRefreshCommonityBet();
+            OnRefreshPlayers();
+            await Task.Delay(1500);
 
             if (numberOfRound == 1)
             {

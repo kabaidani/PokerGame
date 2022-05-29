@@ -10,6 +10,13 @@
         WindowStartupLocation="CenterScreen"
         Background="#3d3f3c">
 
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Window.Resources>
+    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="650"/>
@@ -67,10 +74,10 @@
                                 </Label>
                             </Grid>
 
-                            <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                <TextBlock Name="LeftTopCharacterNameTextBox" Text="{Binding CharacterNameText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="LeftTopCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="LeftTopCharacterLastActionTextBox" Text="{Binding LastActionTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                            <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Left">
+                                <TextBlock Name="LeftTopCharacterNameTextBox" Text="{Binding CharacterNameText}" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="15" Foreground="White"/>
+                                <TextBlock Name="LeftTopCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="15" Foreground="White"/>
+                                <TextBlock Name="LeftTopCharacterLastActionTextBox" Text="{Binding LastActionTextBox}" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="15" Foreground="White"/>
                             </StackPanel>
                         </Grid>
 
@@ -84,7 +91,7 @@
                             <Label Grid.Row="0" VerticalAlignment="Bottom">
                                 <Image Name="LeftTopCharacterBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                             </Label>
-                            <TextBlock Name="LeftTopCharacterBetTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                            <TextBlock Name="LeftTopCharacterBetTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
                             <Label Grid.Row="2" VerticalAlignment="Bottom">
                                 <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                             </Label>
@@ -130,9 +137,9 @@
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Left">
-                                <TextBlock Name="MiddleTopCharacterNameTextBox" Text="{Binding CharacterNameText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="MiddleTopCharacterMoneyTextBox" Text="{Binding MoneyTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="MiddleTopCharacterLastActionTextBox" Text="{Binding LastActionTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="MiddleTopCharacterNameTextBox" Text="{Binding CharacterNameText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
+                                <TextBlock Name="MiddleTopCharacterMoneyTextBox" Text="{Binding MoneyTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
+                                <TextBlock Name="MiddleTopCharacterLastActionTextBox" Text="{Binding LastActionTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
                             </StackPanel>
                         </Grid>
 
@@ -146,7 +153,7 @@
                             <Label Grid.Row="0" VerticalAlignment="Bottom">
                                 <Image Name="MiddleTopCharacterBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                             </Label>
-                            <TextBlock Name="MiddleTopCharacterBetTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                            <TextBlock Name="MiddleTopCharacterBetTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
                             <Label Grid.Row="2" VerticalAlignment="Bottom">
                                 <Image  Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                             </Label>
@@ -192,9 +199,9 @@
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                <TextBlock Name="RightTopCharacterNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="RightTopCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                <TextBlock Name="RightTopCharacterLastActionTextBox" Text="{Binding LastActionTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                <TextBlock Name="RightTopCharacterNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
+                                <TextBlock Name="RightTopCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
+                                <TextBlock Name="RightTopCharacterLastActionTextBox" Text="{Binding LastActionTextBox}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
                             </StackPanel>
                         </Grid>
 
@@ -208,7 +215,7 @@
                             <Label Grid.Row="0" VerticalAlignment="Bottom">
                                 <Image Name="RightTopCharacterBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                             </Label>
-                            <TextBlock Name="RightTopCharacterBetTextBox" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                            <TextBlock Name="RightTopCharacterBetTextBox" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
                             <Label Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right">
                                 <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                             </Label>
@@ -243,9 +250,9 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Top">
-                            <TextBlock Name="LeftBottomCharacterNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock Name="LeftBottomCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock Name="LeftBottomCharacterLastActionTextBox" Text="{Binding LastActionTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="LeftBottomCharacterNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
+                            <TextBlock Name="LeftBottomCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
+                            <TextBlock Name="LeftBottomCharacterLastActionTextBox" Text="{Binding LastActionTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
                         </StackPanel>
 
                         <Label Name="LeftBottomCharacterProfilePictureLabel" Grid.Row="0" VerticalAlignment="Bottom" Margin="10,0,10,0">
@@ -284,7 +291,7 @@
                                 <Image Name="LeftBottomCharacterBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                             </Label>
 
-                            <TextBlock Name="LeftBottomCharacterBetTextBox" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" Grid.Row="1"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
+                            <TextBlock Name="LeftBottomCharacterBetTextBox" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" Grid.Row="1"  HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20"/>
 
                             <Label Grid.Row="2" Height="40">
                                 <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
@@ -310,9 +317,9 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Top">
-                            <TextBlock Name="RightBottomCharacterNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock Name="RightBottomCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-                            <TextBlock Name="RightBottomCharacterLastActionTextBox" Text="{Binding LastActionTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+                            <TextBlock Name="RightBottomCharacterNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
+                            <TextBlock Name="RightBottomCharacterMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
+                            <TextBlock Name="RightBottomCharacterLastActionTextBox" Text="{Binding LastActionTextBox}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
                         </StackPanel>
 
                         <Label Name="RightBottomCharacterProfilePictureLabel" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0,0,20,0">
@@ -350,7 +357,7 @@
                             <Label Grid.Row="0" VerticalAlignment="Top">
                                 <Image Name="RightBottomCharacterBetPicture" Source="{Binding BetPictureUrl}" Visibility="{Binding BetPictureAndValueVisibility}"/>
                             </Label>
-                            <TextBlock Name="RightBottomCharacterBetTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30"/>
+                            <TextBlock Name="RightBottomCharacterBetTextBox" Grid.Row="1" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20"/>
                             <Label Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Right">
                                 <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                             </Label>
@@ -441,9 +448,9 @@
                                 </Grid>
 
                                 <StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center">
-                                    <TextBlock Name="MainPlayerNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                    <TextBlock Name="MainPlayerMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
-                                    <TextBlock Name="MainPlayerLastActionTextBox" Text="{Binding LastActionTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="20"/>
+                                    <TextBlock Name="MainPlayerNameTextBox" Text="{Binding CharacterNameText}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
+                                    <TextBlock Name="MainPlayerMoneyTextBox" Text="{Binding MoneyTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
+                                    <TextBlock Name="MainPlayerLastActionTextBox" Text="{Binding LastActionTextBox}"  HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15"/>
                                 </StackPanel>
                             </Grid>
 
@@ -462,7 +469,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Name="MainPlayerBetTextBox" Grid.Column="0" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                                    <TextBlock Name="MainPlayerBetTextBox" Grid.Column="0" Text="{Binding BetValue}" Visibility="{Binding BetPictureAndValueVisibility}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
                                     <Label Grid.Column="1" VerticalAlignment="Bottom" Height="40" Width="40" HorizontalAlignment="Right" Margin="10,0,0,0">
                                         <Image Source="{Binding DealerChipPicture}" Visibility="{Binding DealerChipPictureVisibility}"/>
                                     </Label>
@@ -482,13 +489,40 @@
             </Grid.ColumnDefinitions>
 
 
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="0" Name="StatusBar">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
+                <Grid Grid.Row="0" Visibility="{Binding LockingKeyReleaser}">
+                    <Button Content="Press the button to continue" Width="500" Height="40" FontWeight="Bold" Command="{Binding ReleaseModelLockingKey}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#cc6f34"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontSize" Value="20"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="FontSize" Value="25"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border CornerRadius="10" Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center">
+
+                                    </ContentPresenter>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <Grid Grid.Row="0" Visibility="{Binding ActionButtonsVisible}">
                     <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
 
                         <Button Content="Fold" Width="175"  FontWeight="Bold" Command="{Binding FoldButtonCommand}" IsEnabled="{Binding IsButtonActive}">

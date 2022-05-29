@@ -8,6 +8,7 @@ namespace PokerGame.ViewModel
     {
         private Player _player;
         private bool _roundOverState;
+        private bool _showGainedPrize;
         
         public PlayerDatas(Player player)
         {
@@ -151,6 +152,11 @@ namespace PokerGame.ViewModel
             get
             {
                 if (!_player.InGame) return "";
+                if (_showGainedPrize)
+                {
+                    _showGainedPrize = false;
+                    return "+ €" + _player.GetGainedPrize().ToString();
+                }
                 return "€ " + _player.Money.ToString();
             }
         }
@@ -159,7 +165,11 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_roundOverState) return _player.PokerHandRanks.ToString();
+                if (_roundOverState)
+                {
+                    _roundOverState = false;
+                    return _player.PokerHandRanks.ToString();
+                }
                 if (!_player.InGame || _player.LastAction == Action.NOACTION) return "";
                 return _player.LastAction.ToString();
             }
@@ -217,6 +227,12 @@ namespace PokerGame.ViewModel
             _roundOverState = true;
             PropertyChange("ProfilePictureURL");
             OnPropertyChanged("");
+        }
+
+        public void ShowGainedPrize()
+        {
+            _showGainedPrize = true;
+            OnPropertyChanged("MoneyTextBox");
         }
     }
 }

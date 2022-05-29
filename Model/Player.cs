@@ -17,6 +17,7 @@ namespace PokerGame.Model
         public int RaiseBet { set; get; }
         public bool Signed { set; get; }
         public Role Role;
+        private int _gainedPrize;
         public PokerHandRanks PokerHandRanks { private set; get; } // need to be carefull with the useage of this
 
         public Player(string staticName, CharacterTypes character, int money)
@@ -31,6 +32,19 @@ namespace PokerGame.Model
             Money = money;
             LastAction = Action.NOACTION;
             InGame = true;
+            _gainedPrize = 0;
+        }
+
+        public int GetGainedPrize()
+        {
+            var returnVal = _gainedPrize;
+            _gainedPrize = 0;
+            return returnVal;
+        }
+
+        public void ClearLastAction()
+        {
+            LastAction = Action.NOACTION;
         }
 
         public int CollectBet()
@@ -50,6 +64,7 @@ namespace PokerGame.Model
 
         public void gainPrize(int ammount)
         {
+            _gainedPrize = ammount;
             Money += ammount;
         }
 
@@ -373,8 +388,15 @@ namespace PokerGame.Model
             }
             else if (chosenAction == Action.CALL)
             {
-                Money -= actualLicitBet;
-                BetChips += actualLicitBet;
+                if (Money >= actualLicitBet)
+                {
+                    Money -= actualLicitBet;
+                    BetChips += actualLicitBet;
+                }else
+                {
+                    BetChips += Money;
+                    Money = 0;
+                }
                 //Event for call
             }
             else if (chosenAction == Action.CHECK)
@@ -383,7 +405,8 @@ namespace PokerGame.Model
             }
             else if (chosenAction == Action.RAISE)
             {
-                // need to thro an error if RaiseBet < 2*actualLicitBet
+                if (RaiseBet < 2 * actualLicitBet) throw new PokerGameException("Not legal rasebet value");
+                if (Money < RaiseBet) throw new PokerGameException("The Raisebet is higher than the actual credit");
                 Money -= RaiseBet;
                 actualLicitBet = RaiseBet;
                 BetChips += actualLicitBet;
@@ -419,20 +442,31 @@ namespace PokerGame.Model
                 //Event for fold
             } else if (chosenAction == Action.CALL)
             {
-                Money -= actualLicitBet;
-                BetChips += actualLicitBet;
+                if (Money >= actualLicitBet)
+                {
+                    Money -= actualLicitBet;
+                    BetChips += actualLicitBet;
+                }
+                else
+                {
+                    BetChips += Money;
+                    Money = 0;
+                }
                 //Event for call
-            } else if (chosenAction == Action.CHECK)
+            }
+            else if (chosenAction == Action.CHECK)
             {
                 //Event for check
             } else if (chosenAction == Action.RAISE)
             {
-                // need to thro an error if RaiseBet < 2*actualLicitBet
+                if (RaiseBet < 2 * actualLicitBet) throw new PokerGameException("Not legal rasebet value");
+                if (Money < RaiseBet) throw new PokerGameException("The Raisebet is higher than the actual credit");
                 Money -= RaiseBet;
                 actualLicitBet = RaiseBet;
                 BetChips += actualLicitBet;
                 //Event for raise
-            } else if (chosenAction == Action.NOACTION) { }
+            }
+            else if (chosenAction == Action.NOACTION) { }
         }
 
     }

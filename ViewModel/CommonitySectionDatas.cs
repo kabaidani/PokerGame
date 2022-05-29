@@ -221,5 +221,12 @@ namespace PokerGame.ViewModel
             OnPropertyChanged("CommonityBetPictureAndValueVisibility");
         }
 
+        public void CommonityBetpropertyChange()
+        {
+            OnPropertyChanged("CommonityBetPictureUrl");
+            OnPropertyChanged("CommonityBetValue");
+            OnPropertyChanged("CommonityBetPictureAndValueVisibility");
+        }
+
     }
 }
