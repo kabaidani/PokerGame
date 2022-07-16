@@ -9,6 +9,10 @@ namespace PokerGame.Model
     {
         private static Tuple<bool, Card> CardsContain(List<Card> cards, Card card, int checkLevel)
         {
+            if ((int)card.cardType.cardRank == 1)
+            {
+                card.cardType.cardRank = CardRank.ACE;
+            }
             foreach (var c in cards)
             {
                 if (CardsEqual(c, card, checkLevel))
@@ -310,6 +314,293 @@ namespace PokerGame.Model
                 return PokerHandRanks.HIGHCARD;
             }
         }
+
+
+        public static int CheckProbabilityOfTwoPair(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if(StatusCards.CheckTwoPair(cards, ref tmp))
+            {
+                return 0;
+            }
+            if (StatusCards.CheckPair(cards, ref tmp))
+            {
+                return (cards.Count - 2) * 3; //need one more from the left cards
+            } 
+            return -1; //If we don't have a pair can't get 2 pairs with one shot
+        }
+
+        public static int CheckProbabilityOfPair(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckPair(cards, ref tmp))
+            {
+                return 0;
+            }
+            return cards.Count * 3;
+        }
+
+        public static void NumberOfPairs(List<Card> cards, ref int result)
+        {
+            List<Card> tmp = new List<Card>();
+            if (!StatusCards.CheckPair(cards, ref tmp))
+            {
+                return;
+            }
+            else
+            {
+                result++;
+                var updatedCards = new List<Card>();
+                foreach(var card in cards)
+                {
+                    if (!CardsEqual(card, tmp[0], 0) && !CardsEqual(card, tmp[1], 0))
+                    {
+                        updatedCards.Add(card);
+                    }
+                }
+                NumberOfPairs(updatedCards, ref result);
+            }
+        }
+
+        public static int CheckProbabilityOfThreeOfKind(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckThreeOfAKind(cards, ref tmp))
+            {
+                return 0;
+            }
+            int pairNumber = 0;
+            NumberOfPairs(cards, ref pairNumber);
+
+            if (pairNumber != 0)
+            {
+                return pairNumber * 2;
+            }
+            return -1;
+        }
+
+        public static bool CheckXNumberOfCardStraight(List<Card> cards, ref List<Card> result, int x)
+        {
+            cards = cards.OrderBy(p => p.cardType.cardRank).ToList();
+            for (int i = cards.Count - 1; i >= 0; i--)
+            {
+                var refCard = cards[i];
+                bool res = true;
+                result.Clear();
+                result.Add(refCard);
+                for (int j = 1; j < x && res; j++) // it should be a while loop
+                {
+                    var containedRes = CardsContain(cards, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank - j), false), 2);
+                    res = containedRes.Item1;
+                    if (containedRes.Item1)
+                    {
+                        result.Add(containedRes.Item2);
+                    }
+                }
+                if (res)
+                {
+                    result.Reverse();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static int CheckProbabilityOfStraight(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckStraight(cards, ref tmp))
+            {
+                return 0;
+            }
+
+            List<Card> result = new List<Card>();
+
+            if (CheckXNumberOfCardStraight(cards, ref result, 4))
+            {
+                return 8;
+            }
+
+            cards = cards.OrderBy(p => p.cardType.cardRank).ToList();
+            for (int i = cards.Count - 1; i >= 0; i--)
+            {
+                var refCard = cards[i];
+                bool res = true;
+                int holeNumber = 0;
+                result.Clear();
+                result.Add(refCard);
+                for (int j = 1; j < 5 && (res || holeNumber == 1); j++) // it should be a while loop
+                {
+                    var containedRes = CardsContain(cards, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank - j), false), 2);
+                    res = containedRes.Item1;
+                    if (containedRes.Item1)
+                    {
+                        result.Add(containedRes.Item2);
+                    }else
+                    {
+                        holeNumber++;
+                    }
+                }
+                if (res)
+                {
+                    return 4;
+                }
+            }
+            return -1;
+
+
+        }
+
+        public static int CheckProbabilityOfFlush(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckFlush(cards, ref tmp))
+            {
+                return 0;
+            }
+
+            int[] cardsuits = new int[5];
+            foreach (Card card in cards)
+            {
+                cardsuits[Convert.ToInt32(card.cardType.cardSuit)]++;
+            }
+            foreach(Int32 v in cardsuits)
+            {
+                if (v == 4) return 9;
+            }
+            return -1;
+
+        }
+
+        public static int CheckProbabilityOfFullHouse(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckFullHouse(cards, ref tmp))
+            {
+                return 0;
+            }
+            if (StatusCards.CheckFourOfAKind(cards, ref tmp))
+            {
+                return (cards.Count - 4) * 3;
+            }
+            if (StatusCards.CheckThreeOfAKind(cards, ref tmp))
+            {
+                return (cards.Count - 3) * 3;
+            }
+            if (StatusCards.CheckTwoPair(cards, ref tmp))
+            {
+                return 4;
+            }
+            return -1;
+        }
+
+        public static int CheckProbabilityOfFourOfKind(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckFourOfAKind(cards, ref tmp))
+            {
+                return 0;
+            }
+            if (StatusCards.CheckThreeOfAKind(cards, ref tmp))
+            {
+                return 1;
+            }
+            return -1;
+        }
+
+        public static int CheckProbabilityOfStraightFlush(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckStraightFlush(cards, ref tmp))
+            {
+                return 0;
+            }
+
+            int[] cardsuits = new int[5];
+            foreach (Card card in cards)
+            {
+                cardsuits[Convert.ToInt32(card.cardType.cardSuit)]++;
+            }
+            CardSuit maxCardSuit = CardSuit.NOCARD;
+            int counter = 0;
+            for(int i = 1; i<5; i++)
+            {
+                if(cardsuits[i] > counter)
+                {
+                    counter = cardsuits[i];
+                    maxCardSuit = (CardSuit)i;
+                }
+            }
+
+            if(maxCardSuit == CardSuit.NOCARD)
+            {
+                throw new PokerGameException("couldn't find any card suits, error");
+            }
+
+            int[] cardPlaces = new int[16];
+            foreach (var card in cards)
+            {
+                if(card.cardType.cardSuit == maxCardSuit)
+                {
+                    int temp = Convert.ToInt32(card.cardType.cardRank);
+                    cardPlaces[Convert.ToInt32(card.cardType.cardRank)] = 1;
+                    if (Convert.ToInt32(card.cardType.cardRank) == 14) cardPlaces[1] = 1;
+                }
+
+            }
+            List<int> counters = new List<int>();
+            counter = 0;
+            for (int i = 2; i < 16; i++) //Ace can be first or last
+            {
+                if (cardPlaces[i] == 1)
+                {
+                    counter++;
+                }
+                else if (counter > 0)
+                {
+                    counters.Add(counter);
+                    counter = 0;
+                }
+            }
+            int missingCards = 0;
+            for (int i = 1; i < counters.Count; i++)
+            {
+                if (counters[i - 1] + counters[i] >= 4) missingCards++;
+            }
+            if (missingCards > 0) return missingCards;
+            return -1;
+
+        }
+
+
+        public static int CheckProbablityOfRoyalFlush(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckRoyalFlush(cards, ref tmp))
+            {
+                return 0;
+            }
+
+            int[] cardsuits = new int[5];
+            CardSuit cardSuit = CardSuit.NOCARD;
+            foreach (Card card in cards)
+            {
+                cardsuits[Convert.ToInt32(card.cardType.cardSuit)]++;
+                if (cardsuits[Convert.ToInt32(card.cardType.cardSuit)] == 4)
+                {
+                    cardSuit = card.cardType.cardSuit;
+                }
+            }
+            int missing = 5;
+            if (CardsContain(cards, new Card(new CardType(cardSuit, CardRank.ACE), false), 0).Item1) missing--;
+            if (CardsContain(cards, new Card(new CardType(cardSuit, CardRank.KING), false), 0).Item1) missing--;
+            if (CardsContain(cards, new Card(new CardType(cardSuit, CardRank.QUEEN), false), 0).Item1) missing--;
+            if (CardsContain(cards, new Card(new CardType(cardSuit, CardRank.JACK), false), 0).Item1) missing--;
+            if (CardsContain(cards, new Card(new CardType(cardSuit, CardRank.TEN), false), 0).Item1) missing--;
+            if (missing == 1) return 1;
+            return -1;
+        }
+
 
         public static CardRank FullHouseRankThreeOfKind(List<Card> list)
         {
