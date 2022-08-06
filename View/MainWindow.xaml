@@ -525,7 +525,7 @@
                 <Grid Grid.Row="0" Visibility="{Binding ActionButtonsVisible}">
                     <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
 
-                        <Button Content="Fold" Width="175"  FontWeight="Bold" Command="{Binding FoldButtonCommand}" IsEnabled="{Binding IsButtonActive}">
+                        <Button Content="{Binding FoldButtonContent}" Width="175"  FontWeight="Bold" Command="{Binding FoldButtonCommand}" IsEnabled="{Binding IsButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Red"/>
@@ -552,7 +552,7 @@
 
 
 
-                        <Button Content="{Binding CallButtonContextUpdate}" Width="175" FontWeight="Bold" Command="{Binding CallOrCheckButtonCommand}" CommandParameter="{Binding CheckOrCallButtonContext}" IsEnabled="{Binding IsButtonActive}">
+                        <Button Content="{Binding CallButtonContextUpdate}" Width="175" FontWeight="Bold" Command="{Binding CallOrCheckButtonCommand}" CommandParameter="{Binding CallButtonContextUpdate}" IsEnabled="{Binding IsButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="#FF9933"/>
@@ -576,7 +576,7 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Button Content="Raise" Width="175" FontWeight="Bold" Command="{Binding RaiseButtonCommand}" IsEnabled="{Binding IsButtonActive}">
+                        <Button Content="{Binding RaiseButtonContent}" Width="175" FontWeight="Bold" Command="{Binding RaiseButtonCommand}" IsEnabled="{Binding IsButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Green"/>

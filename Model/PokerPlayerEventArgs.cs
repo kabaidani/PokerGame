@@ -4,11 +4,11 @@ namespace PokerGame.Model
 {
 
     public class PokerPlayerEventArgs : EventArgs
+    {
+        public PokerPlayerEventArgs(Player player)
         {
-            public PokerPlayerEventArgs(Player player)
-            {
-                Player = player;
-            }
-            public Player Player { private set; get; }
+            Player = player;
         }
+        public Player Player { private set; get; }
+    }
 }

@@ -325,19 +325,9 @@ namespace PokerGame.Model
             }
             if (StatusCards.CheckPair(cards, ref tmp))
             {
-                return (cards.Count - 2) * 3; //need one more from the left cards
+                return 1;
             } 
             return -1; //If we don't have a pair can't get 2 pairs with one shot
-        }
-
-        public static int CheckProbabilityOfPair(List<Card> cards)
-        {
-            List<Card> tmp = new List<Card>();
-            if (StatusCards.CheckPair(cards, ref tmp))
-            {
-                return 0;
-            }
-            return cards.Count * 3;
         }
 
         public static void NumberOfPairs(List<Card> cards, ref int result)
@@ -374,7 +364,7 @@ namespace PokerGame.Model
 
             if (pairNumber != 0)
             {
-                return pairNumber * 2;
+                return 1;
             }
             return -1;
         }
@@ -418,7 +408,7 @@ namespace PokerGame.Model
 
             if (CheckXNumberOfCardStraight(cards, ref result, 4))
             {
-                return 8;
+                return 1;
             }
 
             cards = cards.OrderBy(p => p.cardType.cardRank).ToList();
@@ -443,7 +433,7 @@ namespace PokerGame.Model
                 }
                 if (res)
                 {
-                    return 4;
+                    return 1;
                 }
             }
             return -1;
@@ -466,12 +456,26 @@ namespace PokerGame.Model
             }
             foreach(Int32 v in cardsuits)
             {
-                if (v == 4) return 9;
+                if (v == 4) return 1;
             }
             return -1;
 
         }
 
+        public static PokerHandRanks CheckTheClosestAndHighestHandRank(List<Card> cards)
+        {
+            if (CheckProbablityOfRoyalFlush(cards) == 1) return PokerHandRanks.ROYALFLUSH;
+            if (CheckProbabilityOfStraightFlush(cards) == 1) return PokerHandRanks.STRAIGHTFLUSH;
+            if (CheckProbabilityOfFourOfKind(cards) == 1) return PokerHandRanks.FOUROFAKIND;
+            if (CheckProbabilityOfFullHouse(cards) == 1) return PokerHandRanks.FULLHOUSE;
+            if (CheckProbabilityOfFlush(cards) == 1) return PokerHandRanks.FLUSH;
+            if (CheckProbabilityOfStraight(cards) == 1) return PokerHandRanks.STRAIGHT;
+            if (CheckProbabilityOfThreeOfKind(cards) == 1) return PokerHandRanks.THREEOFAKIND;
+            if (CheckProbabilityOfTwoPair(cards) == 1) return PokerHandRanks.TWOPAIR;
+            return PokerHandRanks.PAIR;
+        }
+
+        //TODO Maybe it would be a better if we name these kind of functions to CheckDistanceOfFullHouse
         public static int CheckProbabilityOfFullHouse(List<Card> cards)
         {
             List<Card> tmp = new List<Card>();
@@ -481,15 +485,15 @@ namespace PokerGame.Model
             }
             if (StatusCards.CheckFourOfAKind(cards, ref tmp))
             {
-                return (cards.Count - 4) * 3;
+                return 1;
             }
             if (StatusCards.CheckThreeOfAKind(cards, ref tmp))
             {
-                return (cards.Count - 3) * 3;
+                return 1;
             }
             if (StatusCards.CheckTwoPair(cards, ref tmp))
             {
-                return 4;
+                return 1;
             }
             return -1;
         }
@@ -567,7 +571,7 @@ namespace PokerGame.Model
             {
                 if (counters[i - 1] + counters[i] >= 4) missingCards++;
             }
-            if (missingCards > 0) return missingCards;
+            if (missingCards > 0) return 1;
             return -1;
 
         }

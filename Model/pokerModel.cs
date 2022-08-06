@@ -27,6 +27,7 @@ namespace PokerGame.Model
         public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent; // Good
         public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent; //Good
         public event EventHandler<PokerPlayerEventArgs> OutOfGamePlayerEvent;
+        public event EventHandler<PossibleActionsEventArgs> SetActionOptionsEvent;
         //public event EventHandler<PlayersEventArg> AveragePlayersUpdateEvent; //Deprecated
         public event EventHandler RefreshRemainTime;
         public event EventHandler DealerChipPass;
@@ -52,7 +53,8 @@ namespace PokerGame.Model
 
         private int _blindValue = 100;
         public int BlindValue { get { return _blindValue; } }
-
+        private int _lastRaiseValue;
+        
         private int _actualLicitBet;
         private bool _end; // should give an intuitive name for this
 
@@ -62,9 +64,11 @@ namespace PokerGame.Model
         public int getActualLicitBet() { return _actualLicitBet; }
         private Deck _deck;
         private bool _lockingKey;
+        private Random rand;
 
         public PokerModel(int playersNumber, int startingMoney = 2000)
         {
+            rand = new Random();
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
             PlayersNum = playersNumber;
             StartingMoney = startingMoney;
@@ -207,7 +211,6 @@ namespace PokerGame.Model
         public void GeneratePlayers(CharacterTypes mainPlayerCharacterType)
         {
             playerContainer = new List<Player>();
-            Random rand = new Random();
 
             mainPlayer = new MainPlayer("Daniel", mainPlayerCharacterType, StartingMoney);
 
@@ -277,6 +280,7 @@ namespace PokerGame.Model
 
         private void TakeMandatoryBets()
         {
+            _actualLicitBet = _blindValue;
             playerContainer[GetSmallBlind()].TakeMandatoryBet(_blindValue);
             playerContainer[GetBigBlind()].TakeMandatoryBet(_blindValue);
             OnPlayerActionEvent(playerContainer[GetSmallBlind()]);
@@ -332,11 +336,11 @@ namespace PokerGame.Model
             return _lockingKey;
         }
 
-        public void MainPlayerAction(Action action)
+        public void MainPlayerAction(Action action, int raiseOrBetValue = 0)
         {
             _end = false;
-            mainPlayer.PlayerAction(ref _actualLicitBet, action);
-            OnPlayerActionEvent(mainPlayer);
+
+            mainPlayer.PlayerAction(ref _actualLicitBet, ref _lastRaiseValue, raiseOrBetValue, _blindValue,  action);
         }
 
 
@@ -382,7 +386,6 @@ namespace PokerGame.Model
         {
             await Task.Delay(500);
             RemaineTime = 10000; //needs to handle
-            _actualLicitBet = 200;
             int delayTime = 150;
             foreach(var p in playerContainer)
             {
@@ -398,9 +401,9 @@ namespace PokerGame.Model
             {
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.leftHand = _deck.getCard();
+                    playerContainer[i].hand.leftHand.isUpSideDown = false; //Just temp
                 if (playerContainer[i] == mainPlayer)
                 {
-                    playerContainer[i].hand.leftHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
                 }
                 OnCardAllocation(playerContainer[i]);
@@ -410,9 +413,9 @@ namespace PokerGame.Model
             {
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.rightHand = _deck.getCard();
+                    playerContainer[i].hand.rightHand.isUpSideDown = false; //Just temp
                 if (playerContainer[i] == mainPlayer)
                 {
-                    playerContainer[i].hand.rightHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
                 }
                 OnCardAllocation(playerContainer[i]);
@@ -454,14 +457,29 @@ namespace PokerGame.Model
                 OnSignPlayerEvent(playerContainer[i]);
 
                 _end = true;
-                for (int j = 0; j < 50 && _end; j++)
+                //Temp part
+                int thinkingTimeMultiplier = 0;
+                if (playerContainer[i].StaticName != "MainPlayer")
+                {
+                    BotPlayer actPlayer = playerContainer[i] as BotPlayer;
+                    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                    thinkingTimeMultiplier = rand.Next(100, 150);
+                } else
+                {
+                    MainPlayer actPlayer = playerContainer[i] as MainPlayer;
+                    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
+                }
+
+                //End of the temp part
+                for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
                 {
                     await Task.Delay(20);
-                    RemaineTime -= 10;
-                    //OnRefreshRemainTime();
+                    RemaineTime -= 20;
+                    OnRefreshRemainTime();
                 }
                 //await Task.Delay(10000);
-                playerContainer[i].PlayerAction(ref _actualLicitBet);
+
                 OnPlayerActionEvent(playerContainer[i]);
 
                 if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(false);
@@ -471,7 +489,6 @@ namespace PokerGame.Model
                 
                 RemaineTime = 10000;
                 OnRefreshRemainTime();
-
             }
 
             await Task.Delay(1500);

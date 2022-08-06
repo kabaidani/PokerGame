@@ -29,7 +29,6 @@ namespace PokerGame.ViewModel
         public StatusCardsDatas StatusCards;
 
 
-
         private string _timeRowColor = "Green";
         public string TimeRowColor
         {
@@ -70,6 +69,33 @@ namespace PokerGame.ViewModel
             }
         }
 
+        private string _foldButtonContent = "FOLD";
+        public string FoldButtonContent
+        {
+            get { return _foldButtonContent;}
+            set
+            {
+                if ( value != _foldButtonContent )
+                {
+                    _foldButtonContent = value;
+                    OnPropertyChanged("FoldButtonContent"); //Not sure that we need that
+                }
+            }
+        }
+
+        private string _raiseButtonContent = "RAISE";
+        public string RaiseButtonContent
+        {
+            get { return _raiseButtonContent; }
+            set
+            {
+                if (value != _raiseButtonContent)
+                {
+                    _raiseButtonContent = value;
+                    OnPropertyChanged("RaiseButtonContent"); //Not sure that we need that
+                }
+            }
+        }
 
         public string CallButtonContextUpdate
         {
@@ -185,7 +211,7 @@ namespace PokerGame.ViewModel
 
             FoldButtonCommand = new DelegateCommand(p => _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
-            RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE));
+            RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE, _model.mainPlayer.RaiseBet)); //TODO rename the function so that Bet and Raise appear in it
             ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
 
 
@@ -202,6 +228,7 @@ namespace PokerGame.ViewModel
             _model.RefreshCommonityBet += OnRefreshCommonityBet;
             _model.LockingKeyStateChangeEvent += OnLockingKeyStateChangeEvent;
             _model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
+            _model.mainPlayer.SetActionOptionsEvent += OnSetActionOptionsEvent;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -276,13 +303,27 @@ namespace PokerGame.ViewModel
             }
         }
 
-        //private void OnAveragePlayersUpdateEvent(object sender, PlayersEventArg e)
-        //{
-        //    foreach (var player in e.Players)
-        //    {
-        //        _characters[player.StaticName].PropertyChange();
-        //    }
-        //}
+        private void OnSetActionOptionsEvent(object sender, PossibleActionsEventArgs e)
+        {
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.FOLD)) FoldButtonContent = "FOLD";
+
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.RAISE)) RaiseButtonContent = "RAISE";
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.BET)) RaiseButtonContent = "BET";
+
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.CHECK))
+            {
+                if (_model.getActualLicitBet() != 0) throw new PokerGameException("The CHECK action not allowed here");
+                OnPropertyChanged("CallButtonContextUpdate");
+            }
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.CALL))
+            {
+
+                if (_model.getActualLicitBet() == 0) throw new PokerGameException("The BET action not allowed here");
+                OnPropertyChanged("CallButtonContextUpdate");
+            }
+            OnPropertyChanged("MinRaiseBetValue");
+
+        }
 
         private void OnPlayerActionEvent(object sender, PokerPlayerEventArgs e)
         {
@@ -303,10 +344,10 @@ namespace PokerGame.ViewModel
             string buttonContext = Convert.ToString(o);
             if(buttonContext == "Check")
             {
-                _model.MainPlayerAction(Model.Action.CHECK);
+                _model.MainPlayerAction(Model.Action.CHECK); //Correct in the model
             }else
             {
-                _model.MainPlayerAction(Model.Action.CALL);
+                _model.MainPlayerAction(Model.Action.CALL); //Correct in the model
             }
         }
 
