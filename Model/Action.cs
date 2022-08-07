@@ -7,6 +7,8 @@
         FOLD,
         RAISE,
         CALL,
-        CHECK
+        CHECK,
+        BIGBLIND,
+        SMALLBLIND
     }
 }

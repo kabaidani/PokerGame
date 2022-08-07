@@ -423,73 +423,153 @@ namespace PokerGame.Model
             AsyncRound(1);
         }
 
+        private async Task WaitingTimeForPlayers(int thinkingTimeMultiplier)
+        {
+            for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
+            {
+                await Task.Delay(20);
+                RemaineTime -= 20;
+                OnRefreshRemainTime();
+            }
+        }
+
+        private async Task RoundNumberFive()
+        {
+            await Task.Delay(2000);
+            MiddleFieldSection.CollectBets(playerContainer);
+            foreach (var player in playerContainer) player.UnfoldHand();
+            CheckWinner();
+            MiddleFieldSection.CollectBets(playerContainer);
+            OnRoundOverForPlayersEvent(playerContainer);
+
+            OnUpdateGainedPrizeEvent(playerContainer);
+            LockLockingKey();
+            while (_lockingKey) await Task.Delay(200);
+
+            ChangePlayersOrder(true);
+            EndOfTheRoundUpdates();
+            await Task.Delay(2500);
+            OnUpdateMiddleSectionEvent();
+            foreach (var player in playerContainer) player.ClearLastAction();
+            OnRefreshPlayers();
+            _deck.Refresh();
+            AsyncStartRound();
+            return;
+        }
+
+        private async Task PlayersTurn()
+        {
+            foreach(Player p in playerContainer)
+            {
+                if (p.StaticName == "MainPlayer") OnMainPlayerTurn(true);
+                p.Signed = true;
+                OnSignPlayerEvent(p);
+
+                _end = true;
+                int thinkingTimeMultiplier = 0;
+                if (p.StaticName != "MainPlayer")
+                {
+                    BotPlayer actPlayer = p as BotPlayer;
+                    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                    thinkingTimeMultiplier = rand.Next(100, 150);
+                }
+                else
+                {
+                    MainPlayer actPlayer = p as MainPlayer;
+                    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
+                }
+
+                await WaitingTimeForPlayers(thinkingTimeMultiplier);
+
+                OnPlayerActionEvent(p);
+                if (p.StaticName == "MainPlayer") OnMainPlayerTurn(false);
+                p.Signed = false;
+                await Task.Delay(150);
+                OnSignPlayerEvent(p);
+
+                RemaineTime = 10000;
+                OnRefreshRemainTime();
+            }
+        }
+
+        private async Task PlayersTurnManagerFunc()
+        {
+            bool somebodyRaised = false;
+            await PlayersTurn();
+            foreach(Player p in playerContainer)
+            {
+                if (p.LastAction == Action.RAISE) somebodyRaised = true;
+            }
+            if (somebodyRaised) await PlayersTurnManagerFunc();
+        }
 
         public async void AsyncRound(int numberOfRound) //Refactor this function
         {
             if (numberOfRound == 5)
             {
-                await Task.Delay(2000);
-                MiddleFieldSection.CollectBets(playerContainer);
-                foreach (var player in playerContainer) player.UnfoldHand();
-                CheckWinner();
-                MiddleFieldSection.CollectBets(playerContainer);
-                OnRoundOverForPlayersEvent(playerContainer);
+                //await Task.Delay(2000);
+                //MiddleFieldSection.CollectBets(playerContainer);
+                //foreach (var player in playerContainer) player.UnfoldHand();
+                //CheckWinner();
+                //MiddleFieldSection.CollectBets(playerContainer);
+                //OnRoundOverForPlayersEvent(playerContainer);
 
-                OnUpdateGainedPrizeEvent(playerContainer);
-                LockLockingKey();
-                while (_lockingKey) await Task.Delay(200);
-                //if (playerContainer.Count > 1) AsyncStartRound();
+                //OnUpdateGainedPrizeEvent(playerContainer);
+                //LockLockingKey();
+                //while (_lockingKey) await Task.Delay(200);
+                ////if (playerContainer.Count > 1) AsyncStartRound();
 
-                ChangePlayersOrder(true);
-                EndOfTheRoundUpdates();
-                await Task.Delay(2500);
-                OnUpdateMiddleSectionEvent();
-                foreach (var player in playerContainer) player.ClearLastAction();
-                OnRefreshPlayers();
-                _deck.Refresh();
-                AsyncStartRound();
+                //ChangePlayersOrder(true);
+                //EndOfTheRoundUpdates();
+                //await Task.Delay(2500);
+                //OnUpdateMiddleSectionEvent();
+                //foreach (var player in playerContainer) player.ClearLastAction();
+                //OnRefreshPlayers();
+                //_deck.Refresh();
+                //AsyncStartRound();
+                await RoundNumberFive();
                 return;
             }
-            for (int i = 0; i<playerContainer.Count; i++)
-            {
-                if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(true);
-                playerContainer[i].Signed = true;
-                OnSignPlayerEvent(playerContainer[i]);
+            //foreach (Player p in playerContainer)
+            //{
+            await PlayersTurnManagerFunc();
+                //if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(true);
+                //playerContainer[i].Signed = true;
+                //OnSignPlayerEvent(playerContainer[i]);
 
-                _end = true;
-                //Temp part
-                int thinkingTimeMultiplier = 0;
-                if (playerContainer[i].StaticName != "MainPlayer")
-                {
-                    BotPlayer actPlayer = playerContainer[i] as BotPlayer;
-                    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
-                    thinkingTimeMultiplier = rand.Next(100, 150);
-                } else
-                {
-                    MainPlayer actPlayer = playerContainer[i] as MainPlayer;
-                    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
-                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
-                }
+                //_end = true;
+                //int thinkingTimeMultiplier = 0;
+                //if (playerContainer[i].StaticName != "MainPlayer")
+                //{
+                //    BotPlayer actPlayer = playerContainer[i] as BotPlayer;
+                //    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                //    thinkingTimeMultiplier = rand.Next(100, 150);
+                //} else
+                //{
+                //    MainPlayer actPlayer = playerContainer[i] as MainPlayer;
+                //    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                //    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
+                //}
 
-                //End of the temp part
-                for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
-                {
-                    await Task.Delay(20);
-                    RemaineTime -= 20;
-                    OnRefreshRemainTime();
-                }
-                //await Task.Delay(10000);
+                //await WaitingTimeForPlayers(thinkingTimeMultiplier);
+                ////for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
+                ////{
+                ////    await Task.Delay(20);
+                ////    RemaineTime -= 20;
+                ////    OnRefreshRemainTime();
+                ////}
 
-                OnPlayerActionEvent(playerContainer[i]);
+                //OnPlayerActionEvent(playerContainer[i]);
 
-                if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(false);
-                playerContainer[i].Signed = false;
-                await Task.Delay(150);
-                OnSignPlayerEvent(playerContainer[i]);
-                
-                RemaineTime = 10000;
-                OnRefreshRemainTime();
-            }
+                //if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(false);
+                //playerContainer[i].Signed = false;
+                //await Task.Delay(150);
+                //OnSignPlayerEvent(playerContainer[i]);
+
+                //RemaineTime = 10000;
+                //OnRefreshRemainTime();
+            //}
 
             await Task.Delay(1500);
             MiddleFieldSection.CollectBets(playerContainer);
@@ -514,10 +594,9 @@ namespace PokerGame.Model
                 OnCheckCombinationEvent(); //Event that needs to look after it
             }
 
-            ChangePlayersOrder(false);
 
+            foreach (var player in playerContainer) player.ClearLastAction();
             await Task.Delay(400);
-            if (numberOfRound != 4) TakeMandatoryBets();
             AsyncRound(++numberOfRound);
         }
 

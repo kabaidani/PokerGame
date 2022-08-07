@@ -14,7 +14,7 @@ namespace PokerGame.ViewModel
 
         public DelegateCommand FoldButtonCommand { get; set; }
         public DelegateCommand CallOrCheckButtonCommand { get; set; }
-        public DelegateCommand RaiseButtonCommand { get; set; }
+        public DelegateCommand RaiseOrBetButtonCommand { get; set; }
         public DelegateCommand ReleaseModelLockingKey { get; set; }
 
         public event EventHandler<PlayersEventArg> InitCharacters;
@@ -84,7 +84,7 @@ namespace PokerGame.ViewModel
         }
 
         private string _raiseButtonContent = "RAISE";
-        public string RaiseButtonContent
+        public string RaiseOrBetButtonContent
         {
             get { return _raiseButtonContent; }
             set
@@ -92,22 +92,37 @@ namespace PokerGame.ViewModel
                 if (value != _raiseButtonContent)
                 {
                     _raiseButtonContent = value;
-                    OnPropertyChanged("RaiseButtonContent"); //Not sure that we need that
+                    OnPropertyChanged("RaiseOrBetButtonContent"); //Not sure that we need that
                 }
             }
         }
 
+        private string _callOrCheckButtonContext = "CALL";
         public string CallButtonContextUpdate
         {
             get
             {
-                if (_model.getActualLicitBet() != 0)
+                if (_callOrCheckButtonContext == "CALL")
                 {
+                    if(_model.mainPlayer.LastAction == Model.Action.SMALLBLIND)
+                    {
+                        int smallBlind = _model.BlindValue / 2;
+                        return "Call (" + smallBlind.ToString() + ")";
+                    }
                     return "Call (" + _model.getActualLicitBet().ToString() + ")";
+
                 }
                 else
                 {
                     return "Check";
+                }
+            }
+            set
+            {
+                if (value != _callOrCheckButtonContext)
+                {
+                    _callOrCheckButtonContext = value;
+                    OnPropertyChanged("CallButtonContextUpdate");
                 }
             }
         }
@@ -124,35 +139,60 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                return _model.mainPlayer.RaiseBet.ToString();
+                if(RaiseBetValue < MinRaiseBetValue)
+                {
+                    if(_raiseButtonContent == "RAISE")
+                    {
+                        RaiseBetValue = MinRaiseBetValue;
+                    } else //Case of BET
+                    {
+                        RaiseBetValue = _model.BlindValue; //TODO Make a function in the model for this purpose
+                    }
+                } else if (_raiseButtonContent == "BET")
+                {
+                    RaiseBetValue = _model.BlindValue; //TODO Make a function in the model for this purpose
+                }
+                return RaiseBetValue.ToString();
             }
         }
 
+        private int _raiseOrBetValue;
         public int RaiseBetValue
         {
             get
             {
-                return _model.mainPlayer.RaiseBet;
+                return _raiseOrBetValue;
             }
 
             set
             {
-                if(value != _model.mainPlayer.RaiseBet)
+                if (value != _raiseOrBetValue)
                 {
-                    _model.mainPlayer.RaiseBet = value;
+                    _raiseOrBetValue = value;
+                    OnPropertyChanged("RaiseBetValue");
                     OnPropertyChanged("RaiseBetTextValue");
                     OnPropertyChanged("MinRaiseBetValue");
                     OnPropertyChanged("MaxRaiseBetValue");
-                    OnPropertyChanged("CheckOrCallButtonContext");
+                    OnPropertyChanged("CallButtonContextUpdate");
                 }
             }
         }
 
+        private int _minRaiseOrBetValue;
         public int MinRaiseBetValue
         {
             get
             {
-                return _model.getActualLicitBet();
+                return _minRaiseOrBetValue;
+            }
+            set
+            {
+                if(value != _minRaiseOrBetValue)
+                {
+                    _minRaiseOrBetValue = value;
+                    OnPropertyChanged("RaiseBetTextValue");
+                    OnPropertyChanged("MinRaiseBetValue");
+                }
             }
         }
 
@@ -187,7 +227,7 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private void OnRefreshPlayers(object sender, EventArgs e)
+        private void OnRefreshPlayers(object sender, EventArgs e) //Is it used???
         {
             foreach (var character in _characters)
             {
@@ -211,7 +251,7 @@ namespace PokerGame.ViewModel
 
             FoldButtonCommand = new DelegateCommand(p => _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
-            RaiseButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.RAISE, _model.mainPlayer.RaiseBet)); //TODO rename the function so that Bet and Raise appear in it
+            RaiseOrBetButtonCommand = new DelegateCommand(p => RaiseOrBetCommand(p));
             ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
 
 
@@ -307,21 +347,15 @@ namespace PokerGame.ViewModel
         {
             if (e.PossibleActions.Contains(PokerGame.Model.Action.FOLD)) FoldButtonContent = "FOLD";
 
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.RAISE)) RaiseButtonContent = "RAISE";
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.BET)) RaiseButtonContent = "BET";
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.RAISE)) RaiseOrBetButtonContent = "RAISE";
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.BET)) RaiseOrBetButtonContent = "BET";
+            OnPropertyChanged("MaxRaiseBetValue");
 
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.CHECK))
-            {
-                if (_model.getActualLicitBet() != 0) throw new PokerGameException("The CHECK action not allowed here");
-                OnPropertyChanged("CallButtonContextUpdate");
-            }
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.CALL))
-            {
 
-                if (_model.getActualLicitBet() == 0) throw new PokerGameException("The BET action not allowed here");
-                OnPropertyChanged("CallButtonContextUpdate");
-            }
-            OnPropertyChanged("MinRaiseBetValue");
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.CHECK)) CallButtonContextUpdate = "CHECK";
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.CALL)) CallButtonContextUpdate = "CALL";
+
+            MinRaiseBetValue = _model.mainPlayer.MinRaiseBet;
 
         }
 
@@ -348,6 +382,19 @@ namespace PokerGame.ViewModel
             }else
             {
                 _model.MainPlayerAction(Model.Action.CALL); //Correct in the model
+            }
+        }
+
+        private void RaiseOrBetCommand(object o)
+        {
+            string buttonContext = Convert.ToString(o);
+            if (buttonContext == "RAISE")
+            {
+                _model.MainPlayerAction(Model.Action.RAISE, RaiseBetValue); //Correct in the model
+            }
+            else
+            {
+                _model.MainPlayerAction(Model.Action.BET, RaiseBetValue); //Correct in the model
             }
         }
 

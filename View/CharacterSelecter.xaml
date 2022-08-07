@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PokerGame.view"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
         Background="#3d3f3c"
         Title="CharcterSelecter" Height="750" Width="800">
     <Grid>
