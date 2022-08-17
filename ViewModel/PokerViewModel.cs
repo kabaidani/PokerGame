@@ -29,6 +29,7 @@ namespace PokerGame.ViewModel
         public StatusCardsDatas StatusCards;
 
 
+
         private string _timeRowColor = "Green";
         public string TimeRowColor
         {
@@ -139,19 +140,21 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if(RaiseBetValue < MinRaiseBetValue)
+                if (RaiseBetValue < MinRaiseBetValue)
                 {
-                    if(_raiseButtonContent == "RAISE")
+                    if (_raiseButtonContent == "RAISE")
                     {
                         RaiseBetValue = MinRaiseBetValue;
-                    } else //Case of BET
+                    }
+                    else //Case of BET
                     {
                         RaiseBetValue = _model.BlindValue; //TODO Make a function in the model for this purpose
                     }
-                } else if (_raiseButtonContent == "BET")
-                {
-                    RaiseBetValue = _model.BlindValue; //TODO Make a function in the model for this purpose
                 }
+                //else
+                //{
+                //    RaiseBetValue = MinRaiseBetValue;
+                //}
                 return RaiseBetValue.ToString();
             }
         }
@@ -269,6 +272,7 @@ namespace PokerGame.ViewModel
             _model.LockingKeyStateChangeEvent += OnLockingKeyStateChangeEvent;
             _model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
             _model.mainPlayer.SetActionOptionsEvent += OnSetActionOptionsEvent;
+            _model.GameOverEvent += OnGameOverEvent;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -348,7 +352,11 @@ namespace PokerGame.ViewModel
             if (e.PossibleActions.Contains(PokerGame.Model.Action.FOLD)) FoldButtonContent = "FOLD";
 
             if (e.PossibleActions.Contains(PokerGame.Model.Action.RAISE)) RaiseOrBetButtonContent = "RAISE";
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.BET)) RaiseOrBetButtonContent = "BET";
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.BET))
+            {
+                RaiseBetValue = _model.BlindValue;
+                RaiseOrBetButtonContent = "BET";
+            }
             OnPropertyChanged("MaxRaiseBetValue");
 
 
@@ -357,6 +365,11 @@ namespace PokerGame.ViewModel
 
             MinRaiseBetValue = _model.mainPlayer.MinRaiseBet;
 
+        }
+
+        private void OnGameOverEvent(Object sender, EventArgs e)
+        {
+            //MAybe it should be somewhere else in a sperated ViewModel
         }
 
         private void OnPlayerActionEvent(object sender, PokerPlayerEventArgs e)

@@ -5,9 +5,15 @@
     <Compile Update="View\CharacterSelecter.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\GameOverWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="View\CharacterSelecter.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\GameOverWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

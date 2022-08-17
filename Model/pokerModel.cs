@@ -28,7 +28,6 @@ namespace PokerGame.Model
         public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent; //Good
         public event EventHandler<PokerPlayerEventArgs> OutOfGamePlayerEvent;
         public event EventHandler<PossibleActionsEventArgs> SetActionOptionsEvent;
-        //public event EventHandler<PlayersEventArg> AveragePlayersUpdateEvent; //Deprecated
         public event EventHandler RefreshRemainTime;
         public event EventHandler DealerChipPass;
         public event EventHandler MainPlayerTurnEvent;
@@ -38,6 +37,9 @@ namespace PokerGame.Model
         public event EventHandler RefreshCommonityBet;
         public event EventHandler LockingKeyStateChangeEvent;
         public event EventHandler<PlayersEventArg> UpdateGainedPrizeEvent;
+        public event EventHandler GameOverEvent;
+        public event EventHandler NewGameEvent;
+        public event EventHandler CloseGameEvent;
 
 
         public bool MainplayerTurn { get; private set; }
@@ -57,6 +59,10 @@ namespace PokerGame.Model
         
         private int _actualLicitBet;
         private bool _end; // should give an intuitive name for this
+
+        private Player _raisedPlayer;
+        private Player _roundStarterPlayer;
+
 
         public Tuple<PokerHandRanks, List<Card>> _mainPlayerHandRank;
 
@@ -100,6 +106,30 @@ namespace PokerGame.Model
             if(UpdateGainedPrizeEvent != null)
             {
                 UpdateGainedPrizeEvent(this, new PlayersEventArg(players));
+            }
+        }
+
+        private void OnGameOverEvent()
+        {
+            if(GameOverEvent != null)
+            {
+                GameOverEvent(this, EventArgs.Empty);
+            }
+        }
+
+        public void OnCloseGameEvent()
+        {
+            if(CloseGameEvent != null)
+            {
+                CloseGameEvent(this, EventArgs.Empty);
+            }
+        }
+
+        public void OnNewGameEvent()
+        {
+            if(NewGameEvent != null)
+            {
+                NewGameEvent(this, EventArgs.Empty);
             }
         }
 
@@ -227,6 +257,7 @@ namespace PokerGame.Model
             playerContainer[3].Role.dealer = true;
             playerContainer[4].Role.smallBlind = true;
             playerContainer[5].Role.bigBlind = true;
+            //_roundStarterPlayer = playerContainer[5];
 
             MiddleFieldSection = new MiddleField(_deck, playerContainer);
         }
@@ -348,7 +379,16 @@ namespace PokerGame.Model
         private void CheckWinner()
         {
             List<Player> sortedwinners = new List<Player>();
-            foreach (var player in playerContainer) sortedwinners.Add(player);
+            foreach (var player in playerContainer)
+            {
+                if(player.LastAction != Action.FOLD)
+                {
+                    sortedwinners.Add(player);
+                }
+            }
+            sortedwinners.Clear();
+            sortedwinners.Add(mainPlayer);
+
             sortedwinners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
             sortedwinners.Reverse();
             var realwinners = sortedwinners.Where(p => sortedwinners[0].CompareTo(p, MiddleFieldSection.CommonityCards) == 0).Select(p => p).ToList();
@@ -367,20 +407,40 @@ namespace PokerGame.Model
 
         private void CheckPlayersInGame()
         {
-            foreach(var p in playerContainer) p.CheckIfInGame();
-
-            for(int i = 0; i<playerContainer.Count; i++)
-            {
-                if (!playerContainer[i].InGame)
+            List<Player> playerTempList = new List<Player>();
+            foreach(var p in playerContainer)
+            { 
+                if (p.CheckIfInGame()) playerTempList.Add(p);
+                else
                 {
-                    var outOfGame = playerContainer[i];
-                    playerContainer.RemoveAt(i);
-                    OnOutOfGamePlayerEvent(outOfGame);
-                    playersOutOfTheGame.Add(outOfGame);
-                    i--;
+                    OnOutOfGamePlayerEvent(p);
+                    playersOutOfTheGame.Add(p);
                 }
             }
+            playerContainer = playerTempList;
+            if (playerContainer.Count == 1 || !mainPlayer.InGame)
+            {
+                OnGameOverEvent();
+            }
+
         }
+
+        //private void CheckPlayersInGame()
+        //{
+        //    foreach(var p in playerContainer) p.CheckIfInGame();
+
+        //    for(int i = 0; i<playerContainer.Count; i++)
+        //    {
+        //        if (!playerContainer[i].InGame)
+        //        {
+        //            var outOfGame = playerContainer[i];
+        //            playerContainer.RemoveAt(i);
+        //            OnOutOfGamePlayerEvent(outOfGame);
+        //            playersOutOfTheGame.Add(outOfGame);
+        //            i--;
+        //        }
+        //    }
+        //}
 
         public async void AsyncStartRound()
         {
@@ -433,11 +493,24 @@ namespace PokerGame.Model
             }
         }
 
+        private bool CheckIfEveryOneFolded()
+        {
+            int counter = 0;
+            foreach(var p in playerContainer)
+            {
+                if (p.LastAction != Action.FOLD) counter++;
+            }
+            return counter == 1;
+        }
+
         private async Task RoundNumberFive()
         {
-            await Task.Delay(2000);
+            await Task.Delay(1000);
             MiddleFieldSection.CollectBets(playerContainer);
-            foreach (var player in playerContainer) player.UnfoldHand();
+            foreach (var player in playerContainer)
+            {
+                if(player.LastAction != Action.FOLD) player.UnfoldHand();
+            }
             CheckWinner();
             MiddleFieldSection.CollectBets(playerContainer);
             OnRoundOverForPlayersEvent(playerContainer);
@@ -450,17 +523,59 @@ namespace PokerGame.Model
             EndOfTheRoundUpdates();
             await Task.Delay(2500);
             OnUpdateMiddleSectionEvent();
-            foreach (var player in playerContainer) player.ClearLastAction();
+            foreach (var player in playerContainer)
+            {
+                player.ClearLastAction();
+                player.RoundEnd();
+            } 
             OnRefreshPlayers();
             _deck.Refresh();
             AsyncStartRound();
             return;
         }
 
-        private async Task PlayersTurn()
+        private void PutPlayersInQueueInOrder(ref Queue<Player> nextPlayerQueue, Player firstPlayer)
         {
-            foreach(Player p in playerContainer)
+            nextPlayerQueue.Clear();
+            int i = playerContainer.IndexOf(firstPlayer);
+            if (i < 0) throw new PokerGameException("The FirstPlayer can not be found among the other players");
+            int idx = 1;
+            while(idx < playerContainer.Count)
             {
+                int nextPlayerIdx = (i + idx) % playerContainer.Count;
+                nextPlayerQueue.Enqueue(playerContainer[nextPlayerIdx]);
+                idx++;
+            }
+        }
+
+        private async Task PlayersTurn(bool firstTurn)
+        {
+            if (firstTurn)
+            {
+                _roundStarterPlayer = playerContainer[GetBigBlind()];
+            }
+
+            Queue<Player> nextPlayersQueue = new Queue<Player>();
+            if(_roundStarterPlayer == null)
+            {
+                PutPlayersInQueueInOrder(ref nextPlayersQueue, playerContainer[GetDealer()]);
+                nextPlayersQueue.Enqueue(playerContainer[GetDealer()]);
+            } else
+            {
+                PutPlayersInQueueInOrder(ref nextPlayersQueue, _roundStarterPlayer);
+            }
+            if (firstTurn) nextPlayersQueue.Enqueue(_roundStarterPlayer);
+
+            while (nextPlayersQueue.Count != 0)
+            {
+
+                Player p = nextPlayersQueue.Dequeue();
+                if (!p.InRound)
+                {
+                    continue;
+                }
+
+
                 if (p.StaticName == "MainPlayer") OnMainPlayerTurn(true);
                 p.Signed = true;
                 OnSignPlayerEvent(p);
@@ -472,6 +587,7 @@ namespace PokerGame.Model
                     BotPlayer actPlayer = p as BotPlayer;
                     actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
                     thinkingTimeMultiplier = rand.Next(100, 150);
+                    thinkingTimeMultiplier = 50;
                 }
                 else
                 {
@@ -482,6 +598,12 @@ namespace PokerGame.Model
 
                 await WaitingTimeForPlayers(thinkingTimeMultiplier);
 
+                if (p.LastAction == Action.RAISE || p.LastAction == Action.BET)
+                {
+                    _roundStarterPlayer = p;
+                    PutPlayersInQueueInOrder(ref nextPlayersQueue, p);
+                } 
+
                 OnPlayerActionEvent(p);
                 if (p.StaticName == "MainPlayer") OnMainPlayerTurn(false);
                 p.Signed = false;
@@ -491,85 +613,20 @@ namespace PokerGame.Model
                 RemaineTime = 10000;
                 OnRefreshRemainTime();
             }
-        }
-
-        private async Task PlayersTurnManagerFunc()
-        {
-            bool somebodyRaised = false;
-            await PlayersTurn();
-            foreach(Player p in playerContainer)
-            {
-                if (p.LastAction == Action.RAISE) somebodyRaised = true;
-            }
-            if (somebodyRaised) await PlayersTurnManagerFunc();
+            _actualLicitBet = 0;
+            _roundStarterPlayer = null;
         }
 
         public async void AsyncRound(int numberOfRound) //Refactor this function
         {
             if (numberOfRound == 5)
             {
-                //await Task.Delay(2000);
-                //MiddleFieldSection.CollectBets(playerContainer);
-                //foreach (var player in playerContainer) player.UnfoldHand();
-                //CheckWinner();
-                //MiddleFieldSection.CollectBets(playerContainer);
-                //OnRoundOverForPlayersEvent(playerContainer);
-
-                //OnUpdateGainedPrizeEvent(playerContainer);
-                //LockLockingKey();
-                //while (_lockingKey) await Task.Delay(200);
-                ////if (playerContainer.Count > 1) AsyncStartRound();
-
-                //ChangePlayersOrder(true);
-                //EndOfTheRoundUpdates();
-                //await Task.Delay(2500);
-                //OnUpdateMiddleSectionEvent();
-                //foreach (var player in playerContainer) player.ClearLastAction();
-                //OnRefreshPlayers();
-                //_deck.Refresh();
-                //AsyncStartRound();
                 await RoundNumberFive();
                 return;
             }
-            //foreach (Player p in playerContainer)
-            //{
-            await PlayersTurnManagerFunc();
-                //if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(true);
-                //playerContainer[i].Signed = true;
-                //OnSignPlayerEvent(playerContainer[i]);
 
-                //_end = true;
-                //int thinkingTimeMultiplier = 0;
-                //if (playerContainer[i].StaticName != "MainPlayer")
-                //{
-                //    BotPlayer actPlayer = playerContainer[i] as BotPlayer;
-                //    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
-                //    thinkingTimeMultiplier = rand.Next(100, 150);
-                //} else
-                //{
-                //    MainPlayer actPlayer = playerContainer[i] as MainPlayer;
-                //    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
-                //    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
-                //}
+            await PlayersTurn(numberOfRound == 1);
 
-                //await WaitingTimeForPlayers(thinkingTimeMultiplier);
-                ////for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
-                ////{
-                ////    await Task.Delay(20);
-                ////    RemaineTime -= 20;
-                ////    OnRefreshRemainTime();
-                ////}
-
-                //OnPlayerActionEvent(playerContainer[i]);
-
-                //if (playerContainer[i].StaticName == "MainPlayer") OnMainPlayerTurn(false);
-                //playerContainer[i].Signed = false;
-                //await Task.Delay(150);
-                //OnSignPlayerEvent(playerContainer[i]);
-
-                //RemaineTime = 10000;
-                //OnRefreshRemainTime();
-            //}
 
             await Task.Delay(1500);
             MiddleFieldSection.CollectBets(playerContainer);
@@ -577,7 +634,20 @@ namespace PokerGame.Model
             OnRefreshPlayers();
             await Task.Delay(1500);
 
-            if (numberOfRound == 1)
+
+            bool everyOneFolderButOnePlayer = CheckIfEveryOneFolded();
+            if (everyOneFolderButOnePlayer)
+            {
+                for (int i = MiddleFieldSection.CommonityCards.Count; i < 5; i++)
+                {
+                    MiddleFieldSection.UnfoldNextCard();
+                    await Task.Delay(200);
+                    OnUpdateMiddleSectionEvent();
+                }
+                OnCheckCombinationEvent();
+            }
+
+            if (numberOfRound == 1 && !everyOneFolderButOnePlayer)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -587,7 +657,7 @@ namespace PokerGame.Model
                 }
                 OnCheckCombinationEvent();
             } 
-            else if (numberOfRound < 4)
+            else if (numberOfRound <= 4 && !everyOneFolderButOnePlayer)
             {
                 MiddleFieldSection.UnfoldNextCard();
                 OnUpdateMiddleSectionEvent();
@@ -595,9 +665,19 @@ namespace PokerGame.Model
             }
 
 
-            foreach (var player in playerContainer) player.ClearLastAction();
+            foreach (var player in playerContainer)
+            {
+                if(player.LastAction != Action.FOLD) player.ClearLastAction();
+            } 
+
             await Task.Delay(400);
-            AsyncRound(++numberOfRound);
+            if (everyOneFolderButOnePlayer)
+            {
+                AsyncRound(5);
+            } else
+            {
+                AsyncRound(++numberOfRound);
+            }
         }
 
         public void GameOn()
