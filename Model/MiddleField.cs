@@ -56,23 +56,23 @@ namespace PokerGame.Model
             CommonityBet += ammount;
         }
 
-        private int HeighestBetCalculator()
+        private int HighestBetCalculator()
         {
-            int heighestBet = 0;
+            int highestBet = 0;
             foreach (var playersBet in _playersBet)
             {
-                if (heighestBet < playersBet.Value)
+                if (highestBet < playersBet.Value)
                 {
-                    heighestBet = playersBet.Value;
+                    highestBet = playersBet.Value;
                 }
             }
-            return heighestBet;
+            return highestBet;
         }
 
         public bool PrizeDistribution(List<Player> winners)
         {
             int commonityBetConst = CommonityBet;
-            int heighestBet = HeighestBetCalculator(); //The heighest bet is the normal bet
+            int heighestBet = HighestBetCalculator(); //The heighest bet is the normal bet
             int partsNumber = winners.Count;
             List<Player> fullBetPlayers = new List<Player>();
             List<Player> partBetPlayers = new List<Player>();

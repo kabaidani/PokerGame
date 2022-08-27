@@ -71,6 +71,7 @@ namespace PokerGame.Model
         private Deck _deck;
         private bool _lockingKey;
         private Random rand;
+        private bool _gameOver;
 
         public PokerModel(int playersNumber, int startingMoney = 2000)
         {
@@ -83,6 +84,7 @@ namespace PokerGame.Model
             playersOutOfTheGame = new List<Player>();
             _lockingKey = false;
             previousActions = new List<Tuple<Action, int>>();
+            _gameOver = false;
             OnLockingKeyStateChangeEvent();
         }
 
@@ -112,6 +114,7 @@ namespace PokerGame.Model
 
         private void OnGameOverEvent()
         {
+            _gameOver = true;
             if(GameOverEvent != null)
             {
                 GameOverEvent(this, EventArgs.Empty);
@@ -436,6 +439,7 @@ namespace PokerGame.Model
 
         public async void AsyncStartRound()
         {
+            if (_gameOver == true) return;
             previousActions.Add(new Tuple<Action, int>(Action.BET, BlindValue));
             await Task.Delay(500);
             RemaineTime = 10000; //needs to handle
@@ -476,13 +480,17 @@ namespace PokerGame.Model
             AsyncRound(1);
         }
 
-        private async Task WaitingTimeForPlayers(int thinkingTimeMultiplier)
+        private async Task WaitingTimeForPlayers(int thinkingTimeMultiplier, Player p)
         {
             for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
             {
                 await Task.Delay(20);
                 RemaineTime -= 20;
                 OnRefreshRemainTime();
+            }
+            if(p.StaticName == "MainPlayer" && _end)
+            {
+                MainPlayerAction(Action.FOLD);
             }
         }
 
@@ -492,6 +500,16 @@ namespace PokerGame.Model
             foreach(var p in playerContainer)
             {
                 if (p.LastAction != Action.FOLD) counter++;
+            }
+            return counter == 1;
+        }
+
+        private bool CheckIfEveryOneHasNoLeftMoney()
+        {
+            int counter = 0;
+            foreach (var p in playerContainer)
+            {
+                if (p.Money > 0) counter++;
             }
             return counter == 1;
         }
@@ -595,7 +613,7 @@ namespace PokerGame.Model
                 }
 
                 thinkingTimeMultiplier += 50;
-                await WaitingTimeForPlayers(thinkingTimeMultiplier);
+                await WaitingTimeForPlayers(thinkingTimeMultiplier, p);
 
                 if (p.LastAction == Action.RAISE || p.LastAction == Action.BET)
                 {
@@ -634,7 +652,7 @@ namespace PokerGame.Model
             await Task.Delay(1500);
 
 
-            bool everyOneFolderButOnePlayer = CheckIfEveryOneFolded();
+            bool everyOneFolderButOnePlayer = CheckIfEveryOneFolded() || CheckIfEveryOneHasNoLeftMoney();
             if (everyOneFolderButOnePlayer)
             {
                 for (int i = MiddleFieldSection.CommonityCards.Count; i < 5; i++)
@@ -667,6 +685,7 @@ namespace PokerGame.Model
             foreach (var player in playerContainer)
             {
                 if(player.LastAction != Action.FOLD) player.ClearLastAction();
+                player.AlreadyRaisedInThisRound = false;
             }
 
             previousActions.Clear();

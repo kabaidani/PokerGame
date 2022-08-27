@@ -23,6 +23,7 @@ namespace PokerGame.Model
         private int _gainedPrize;
         public int StartLicitBet { set; get; } //Indicates the licit bet value at the start of each round
         public PokerHandRanks PokerHandRanks { protected set; get; } // need to be carefull with the useage of this
+        public bool AlreadyRaisedInThisRound { set; get; }
 
         protected void OnSetActionOptionsEvent(List<Action> actions)
         {
@@ -46,6 +47,7 @@ namespace PokerGame.Model
             InGame = true;
             InRound = true;
             _gainedPrize = 0;
+            AlreadyRaisedInThisRound = false;
         }
 
         public int GetGainedPrize()
@@ -446,17 +448,25 @@ namespace PokerGame.Model
                     BetChips += RaiseBet;
                 }
                 previousActions.Add(new Tuple<Action, int>(Action.BET, RaiseBet));
+                AlreadyRaisedInThisRound = true;
             }
             else if (chosenAction == Action.RAISE)
             {
-                if (followingRaiseOrBetValue < 2 * lastRaiseValue) throw new PokerGameException("Not legal Raisebet value"); //TODO Correct it
-                if (Money < followingRaiseOrBetValue) throw new PokerGameException("The Raisebet is higher than the actual credit"); //This is the all in 
+                if (followingRaiseOrBetValue < 2 * lastRaiseValue)
+                {
+                    throw new PokerGameException("Not legal Raisebet value"); //TODO Correct it
+                }
+                if (Money < followingRaiseOrBetValue)
+                {
+                    throw new PokerGameException("The Raisebet is higher than the actual credit"); //This is the all in 
+                }
                 RaiseBet = followingRaiseOrBetValue;
                 Money -= RaiseBet;
                 lastRaiseValue = RaiseBet - actualLicitBet;
                 actualLicitBet = RaiseBet + BetChips;
                 BetChips += RaiseBet;
                 previousActions.Add(new Tuple<Action, int>(Action.RAISE, lastRaiseValue));
+                AlreadyRaisedInThisRound = true;
                 //Event for raise
             }
             else if (chosenAction == Action.NOACTION) { }
@@ -491,35 +501,12 @@ namespace PokerGame.Model
             else //Call or Raise
             {
                 minRaiseOrBetValue = lastRaiseValue + actualLicitBet;
-                if(minRaiseOrBetValue <= this.Money)
+                if(minRaiseOrBetValue <= this.Money && AlreadyRaisedInThisRound == false)
                 {
                     actions.Add(Action.RAISE);
                 }
                 actions.Add(Action.CALL);
             }
-            //List<Player> playersWithAction = players.Where(p => p.LastAction != Action.NOACTION).ToList();
-
-            //if (actualLicitBet - BetChips == 0)
-            //{
-            //    actions.Add(Action.CHECK);
-            //    actions.Add(Action.BET);
-            //    minRaiseOrBetValue = bigBlindValue;
-            //} else if (actualLicitBet - BetChips > 0)
-            //{
-            //    actions.Add(Action.CALL);
-            //    actions.Add(Action.RAISE);
-            //    if (actualLicitBet == bigBlindValue)
-            //    {
-            //        minRaiseOrBetValue = bigBlindValue * 2;
-            //    }
-            //    else
-            //    {
-            //        minRaiseOrBetValue = lastRaiseValue * 2; //TODO consider to give the bigBlindValue value to lastRaiseValue after the binds
-            //    }
-            //} else
-            //{
-            //    throw new PokerGameException("Not valid use case when the licit bet is less than the betted value");
-            //}
 
             return actions;
 
@@ -529,7 +516,6 @@ namespace PokerGame.Model
         {
             List<Action> actions = new List<Action>();
             actions.Add(Action.FOLD);
-            List<Player> playersWithAction = players.Where(p => p.LastAction != Action.NOACTION).ToList();
 
             if (actualLicitBet - BetChips > 0)
             {
@@ -539,7 +525,7 @@ namespace PokerGame.Model
             } else if (actualLicitBet - BetChips == 0)
             {
                 actions.Add(Action.CHECK);
-                actions.Add(Action.BET);
+                actions.Add(Action.RAISE);
                 minRaiseOrBetValue = bigBlindValue;
             } else
             {
@@ -583,28 +569,6 @@ namespace PokerGame.Model
             return PossibleActionsForNoneBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue, ref previousActions);
         }
 
-        //protected void SelectValuesForGivenAction(int actualLicitBet, double maxValueForHolding, double maxValueForRaising, 
-        //    double raiseOrBetValue, List<Action> possiblyActions, ref Action followingAction, ref int followingRaiseValue)
-        //{
-        //    //TODO Pay attention to not use random chances
-        //    if (actualLicitBet <= maxValueForHolding) //Hold the crad
-        //    {
-        //        if (possiblyActions.Contains(Action.CHECK)) followingAction = Action.CHECK;
-        //        else if (possiblyActions.Contains(Action.CALL)) followingAction = Action.CALL;
-        //        else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
-        //    }
-        //    else if (actualLicitBet <= maxValueForRaising) //Raise
-        //    {
-        //        if (possiblyActions.Contains(Action.RAISE)) followingAction = Action.RAISE;
-        //        else if (possiblyActions.Contains(Action.BET)) followingAction = Action.BET;
-        //        else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
-        //        followingRaiseValue = (int)raiseOrBetValue; //Completely fucked here both of two value are parameteres
-        //    }
-
-        //    //TODO If there is no right action then make a low chance to call or check and not to fold
-        //    //TODO If the check action is possible do that regardless of what would be the right action to do
-        //}
-
         protected void SelectValuesForGivenActionPlus(bool holding, bool raising,
             double raiseOrBetValue, List<Action> possiblyActions, ref Action followingAction, ref int followingRaiseValue)
         {
@@ -613,18 +577,21 @@ namespace PokerGame.Model
             {
                 if (possiblyActions.Contains(Action.CHECK)) followingAction = Action.CHECK;
                 else if (possiblyActions.Contains(Action.CALL)) followingAction = Action.CALL;
-                else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+                else
+                {
+                    throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+                }
             }
-            if (raising) //Raise
+            if (raising && possiblyActions.Count > 2) //Raise
             {
                 if (possiblyActions.Contains(Action.RAISE)) followingAction = Action.RAISE;
                 else if (possiblyActions.Contains(Action.BET)) followingAction = Action.BET;
-                else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+                else
+                {
+                    throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+                }
                 followingRaiseValue = (int)raiseOrBetValue; //Completely fucked here both of two value are parameteres
             }
-
-            //TODO If there is no right action then make a low chance to call or check and not to fold
-            //TODO If the check action is possible do that regardless of what would be the right action to do
         }
 
 

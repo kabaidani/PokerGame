@@ -110,8 +110,8 @@ namespace PokerGame.ViewModel
                         int smallBlind = _model.BlindValue / 2;
                         return "Call (" + smallBlind.ToString() + ")";
                     }
-                    int tmp = _model.getActualLicitBet();
-                    return "Call (" + _model.getActualLicitBet().ToString() + ")";
+                    int callStrValue = _model.getActualLicitBet() - _model.mainPlayer.BetChips;
+                    return "Call (" + callStrValue.ToString() + ")";
 
                 }
                 else
@@ -253,7 +253,7 @@ namespace PokerGame.ViewModel
             _model.GeneratePlayers(mainPlayerCharacter);
             _model.CardAllocation += OnCardAllocation;
 
-            FoldButtonCommand = new DelegateCommand(p => _model.AsyncTestUnFoldMiddleCards() /*_model.MainPlayerAction(Model.Action.FOLD)*/); // p meanse mainplayer
+            FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseOrBetButtonCommand = new DelegateCommand(p => RaiseOrBetCommand(p));
             ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
