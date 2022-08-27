@@ -110,6 +110,7 @@ namespace PokerGame.ViewModel
                         int smallBlind = _model.BlindValue / 2;
                         return "Call (" + smallBlind.ToString() + ")";
                     }
+                    int tmp = _model.getActualLicitBet();
                     return "Call (" + _model.getActualLicitBet().ToString() + ")";
 
                 }
@@ -273,6 +274,7 @@ namespace PokerGame.ViewModel
             _model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
             _model.mainPlayer.SetActionOptionsEvent += OnSetActionOptionsEvent;
             _model.GameOverEvent += OnGameOverEvent;
+            _model.BlindValuesEvent += OnOnBlindValuesEvent;
 
             _characters = new Dictionary<string, PlayerDatas>();
 
@@ -363,6 +365,8 @@ namespace PokerGame.ViewModel
             if (e.PossibleActions.Contains(PokerGame.Model.Action.CHECK)) CallButtonContextUpdate = "CHECK";
             if (e.PossibleActions.Contains(PokerGame.Model.Action.CALL)) CallButtonContextUpdate = "CALL";
 
+
+            OnPropertyChanged("CallButtonContextUpdate");
             MinRaiseBetValue = _model.mainPlayer.MinRaiseBet;
 
         }
@@ -370,6 +374,11 @@ namespace PokerGame.ViewModel
         private void OnGameOverEvent(Object sender, EventArgs e)
         {
             //MAybe it should be somewhere else in a sperated ViewModel
+        }
+
+        private void OnOnBlindValuesEvent(Object sender, EventArgs e)
+        {
+            OnPropertyChanged("BlindValues");
         }
 
         private void OnPlayerActionEvent(object sender, PokerPlayerEventArgs e)

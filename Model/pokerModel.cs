@@ -40,6 +40,7 @@ namespace PokerGame.Model
         public event EventHandler GameOverEvent;
         public event EventHandler NewGameEvent;
         public event EventHandler CloseGameEvent;
+        public event EventHandler BlindValuesEvent;
 
 
         public bool MainplayerTurn { get; private set; }
@@ -50,6 +51,7 @@ namespace PokerGame.Model
         public MainPlayer mainPlayer;
         public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
         public StatusCards StatusCards { get; private set; }
+        public List<Tuple<Action, int>> previousActions;
 
         private enum Role { DEALER, SMALLBLIND, BIGBLIND}
 
@@ -60,9 +62,7 @@ namespace PokerGame.Model
         private int _actualLicitBet;
         private bool _end; // should give an intuitive name for this
 
-        private Player _raisedPlayer;
         private Player _roundStarterPlayer;
-
 
         public Tuple<PokerHandRanks, List<Card>> _mainPlayerHandRank;
 
@@ -82,6 +82,7 @@ namespace PokerGame.Model
             StatusCards = new StatusCards();
             playersOutOfTheGame = new List<Player>();
             _lockingKey = false;
+            previousActions = new List<Tuple<Action, int>>();
             OnLockingKeyStateChangeEvent();
         }
 
@@ -122,6 +123,14 @@ namespace PokerGame.Model
             if(CloseGameEvent != null)
             {
                 CloseGameEvent(this, EventArgs.Empty);
+            }
+        }
+
+        public void OnBlindValuesEvent()
+        {
+            if(BlindValuesEvent != null)
+            {
+                BlindValuesEvent(this, EventArgs.Empty);
             }
         }
 
@@ -371,7 +380,7 @@ namespace PokerGame.Model
         {
             _end = false;
 
-            mainPlayer.PlayerAction(ref _actualLicitBet, ref _lastRaiseValue, raiseOrBetValue, _blindValue,  action);
+            mainPlayer.PlayerAction(ref _actualLicitBet, ref _lastRaiseValue, raiseOrBetValue, _blindValue, ref previousActions, action);
         }
 
 
@@ -425,25 +434,9 @@ namespace PokerGame.Model
 
         }
 
-        //private void CheckPlayersInGame()
-        //{
-        //    foreach(var p in playerContainer) p.CheckIfInGame();
-
-        //    for(int i = 0; i<playerContainer.Count; i++)
-        //    {
-        //        if (!playerContainer[i].InGame)
-        //        {
-        //            var outOfGame = playerContainer[i];
-        //            playerContainer.RemoveAt(i);
-        //            OnOutOfGamePlayerEvent(outOfGame);
-        //            playersOutOfTheGame.Add(outOfGame);
-        //            i--;
-        //        }
-        //    }
-        //}
-
         public async void AsyncStartRound()
         {
+            previousActions.Add(new Tuple<Action, int>(Action.BET, BlindValue));
             await Task.Delay(500);
             RemaineTime = 10000; //needs to handle
             int delayTime = 150;
@@ -530,6 +523,10 @@ namespace PokerGame.Model
             } 
             OnRefreshPlayers();
             _deck.Refresh();
+
+            _blindValue = _blindValue + 100;
+            OnBlindValuesEvent();
+
             AsyncStartRound();
             return;
         }
@@ -570,7 +567,7 @@ namespace PokerGame.Model
             {
 
                 Player p = nextPlayersQueue.Dequeue();
-                if (!p.InRound)
+                if (!p.InRound || p.Money == 0)
                 {
                     continue;
                 }
@@ -585,17 +582,19 @@ namespace PokerGame.Model
                 if (p.StaticName != "MainPlayer")
                 {
                     BotPlayer actPlayer = p as BotPlayer;
-                    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+
+                    actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
                     thinkingTimeMultiplier = rand.Next(100, 150);
                     thinkingTimeMultiplier = 50;
                 }
                 else
                 {
                     MainPlayer actPlayer = p as MainPlayer;
-                    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue);
+                    actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
                     thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
                 }
 
+                thinkingTimeMultiplier += 50;
                 await WaitingTimeForPlayers(thinkingTimeMultiplier);
 
                 if (p.LastAction == Action.RAISE || p.LastAction == Action.BET)
@@ -668,8 +667,9 @@ namespace PokerGame.Model
             foreach (var player in playerContainer)
             {
                 if(player.LastAction != Action.FOLD) player.ClearLastAction();
-            } 
+            }
 
+            previousActions.Clear();
             await Task.Delay(400);
             if (everyOneFolderButOnePlayer)
             {

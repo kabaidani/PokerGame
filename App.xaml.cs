@@ -27,12 +27,13 @@ namespace PokerGame
         private PokerModel _model;
         private PokerViewModel _viewModel;
         private CharcterSelecter _charcterSelecterWindow;
-        private GameOverWindow _gameOverWindow;
 
 
         private CharacterSelecterModel _characterSelecterModel;
         private CharacterSelecterViewModel _characterSelecterViewModel;
+
         private GameOverViewModel _gameOverViewModel;
+        private GameOverWindow _gameOverWindow;
 
         public App()
         {
@@ -72,6 +73,7 @@ namespace PokerGame
 
             _model.NewGameEvent += OnNewGameEvent;
             _model.CloseGameEvent += OnCloseGameEvent;
+            _model.GameOverEvent += OnGameOverEvent;
 
             _mainWindow.MiddleTopCharacterGrid.DataContext = _viewModel.MiddleTopCharacter;
             _mainWindow.LeftTopCharacterGrid.DataContext = _viewModel.LeftTopCharacter;
@@ -87,15 +89,10 @@ namespace PokerGame
 
 
             _charcterSelecterWindow.Close();
-            //_mainWindow.Show();
+            _mainWindow.Show();
             _viewModel.InitCharacterEventRaise();
-            //_model.GameOn();
+            _model.GameOn();
 
-
-            _gameOverViewModel = new GameOverViewModel(true, CharacterTypes.BOB, _model);
-            _gameOverWindow = new GameOverWindow();
-            _gameOverWindow.DataContext = _gameOverViewModel;
-            _gameOverWindow.Show();
         }
 
         private void OnCloseGameEvent(Object sender, EventArgs e)
@@ -103,9 +100,20 @@ namespace PokerGame
             System.Windows.Application.Current.Shutdown();
         }
 
+        private void OnGameOverEvent(Object sender, EventArgs e)
+        {
+            _gameOverViewModel = new GameOverViewModel(_model.mainPlayer.InGame, _model.mainPlayer.Character, _model);
+            _gameOverWindow = new GameOverWindow();
+
+            _gameOverWindow.DataContext = _gameOverViewModel;
+            _gameOverWindow.Show();
+        }
+
         private void OnNewGameEvent(Object sender, EventArgs e)
         {
+            _mainWindow.Close();
             _gameOverWindow.Close();
+
             _charcterSelecterWindow = new CharcterSelecter();
             _charcterSelecterWindow.DataContext = _characterSelecterViewModel;
             _characterSelecterViewModel.StartGameEvent += OnStartPokerGame;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace PokerGame.Model
@@ -379,9 +380,21 @@ namespace PokerGame.Model
             return InGame;
         }
 
-        public void PlayerAction(ref int actualLicitBet, ref int lastRaiseValue, int followingRaiseOrBetValue,
-            int bigBlind, Action chosenAction = Action.NOACTION)
+        private int AAAATEMP(ref List<Tuple<Action, int>> previousActions)
         {
+            int requiredAmmount = 0;
+            foreach(var action in previousActions)
+            {
+                if (action.Item1 == Action.BET) requiredAmmount = action.Item2;
+                if (action.Item1 == Action.RAISE) requiredAmmount = action.Item2;
+            }
+            return requiredAmmount;
+        }
+
+        public void PlayerAction(ref int actualLicitBet, ref int lastRaiseValue, int followingRaiseOrBetValue,
+            int bigBlind, ref List<Tuple<Action, int>> previousActions, Action chosenAction = Action.NOACTION)
+        {
+            Debug.WriteLine("------------------" + actualLicitBet);
             if (chosenAction == Action.FOLD)
             {
                 this.hand.leftHand.cardType.cardRank = CardRank.NOCARD;
@@ -390,58 +403,24 @@ namespace PokerGame.Model
                 this.hand.rightHand.cardType.cardRank = CardRank.NOCARD;
                 this.hand.rightHand.cardType.cardSuit = CardSuit.NOCARD;
                 InRound = false;
+                previousActions.Add(new Tuple<Action, int>(Action.FOLD, 0));
             }
             else if (chosenAction == Action.CALL)
             {
-                if(LastAction == Action.BIGBLIND)
+
+                int requiredBet = actualLicitBet;
+                int givenValue = requiredBet - this.BetChips;
+                if (Money >= givenValue)
                 {
-                    if(actualLicitBet > bigBlind)
-                    {
-                        int givenValue = actualLicitBet - bigBlind;
-                        if (Money >= givenValue)
-                        {
-                            Money -= givenValue;
-                            BetChips += givenValue;
-                        }
-                        else
-                        {
-                            BetChips += Money;
-                            Money = 0;
-                        }
-                    }
+                    Money -= givenValue;
+                    BetChips += givenValue;
                 }
-                else if(LastAction == Action.SMALLBLIND)
+                else
                 {
-                    int smallBlind = bigBlind / 2;
-                    int givenValue = actualLicitBet - smallBlind;
-                    if (Money >= givenValue)
-                    {
-                        Money -= givenValue;
-                        BetChips += givenValue;
-                    }
-                    else
-                    {
-                        BetChips += Money;
-                        Money = 0;
-                    }
-                } else
-                {
-                    int givenValue = actualLicitBet - BetChips;
-                    if(givenValue < 0)
-                    {
-                        int a = 10;
-                    }
-                    if (Money >= givenValue)
-                    {
-                        Money -= givenValue;
-                        BetChips += givenValue;
-                    }
-                    else
-                    {
-                        BetChips += Money;
-                        Money = 0;
-                    }
+                    BetChips += Money;
+                    Money = 0;
                 }
+
             }
             else if (chosenAction == Action.CHECK)
             {
@@ -466,6 +445,7 @@ namespace PokerGame.Model
                     actualLicitBet = RaiseBet + BetChips;
                     BetChips += RaiseBet;
                 }
+                previousActions.Add(new Tuple<Action, int>(Action.BET, RaiseBet));
             }
             else if (chosenAction == Action.RAISE)
             {
@@ -475,7 +455,8 @@ namespace PokerGame.Model
                 Money -= RaiseBet;
                 lastRaiseValue = RaiseBet - actualLicitBet;
                 actualLicitBet = RaiseBet + BetChips;
-                BetChips += actualLicitBet;
+                BetChips += RaiseBet;
+                previousActions.Add(new Tuple<Action, int>(Action.RAISE, lastRaiseValue));
                 //Event for raise
             }
             else if (chosenAction == Action.NOACTION) { }
@@ -483,33 +464,62 @@ namespace PokerGame.Model
 
         }
 
-        private List<Action> PossibleActionsForNoneBlind(List<Player> players, int bigBlindValue, int actualLicitBet, ref int minRaiseOrBetValue, int lastRaiseValue)
+        private List<Action> PossibleActionsForNoneBlind(List<Player> players, int bigBlindValue, int actualLicitBet, ref int minRaiseOrBetValue, 
+            int lastRaiseValue, ref List<Tuple<Action, int>> previousActions)
         {
             List<Action> actions = new List<Action>();
             actions.Add(Action.FOLD);
-            List<Player> playersWithAction = players.Where(p => p.LastAction != Action.NOACTION).ToList();
 
-            if (actualLicitBet - BetChips == 0)
+            bool checkOrBet = true;
+            foreach (var action in previousActions)
             {
-                actions.Add(Action.CHECK);
-                actions.Add(Action.BET);
-                minRaiseOrBetValue = bigBlindValue;
-            } else if (actualLicitBet - BetChips > 0)
-            {
-                actions.Add(Action.CALL);
-                actions.Add(Action.RAISE);
-                if (actualLicitBet == bigBlindValue)
+                if (action.Item1 == Action.BET || action.Item1 == Action.RAISE)
                 {
-                    minRaiseOrBetValue = bigBlindValue * 2;
+                    lastRaiseValue = action.Item2;
+                    checkOrBet = false;
                 }
-                else
-                {
-                    minRaiseOrBetValue = lastRaiseValue * 2; //TODO consider to give the bigBlindValue value to lastRaiseValue after the binds
-                }
-            } else
-            {
-                throw new PokerGameException("Not valid use case when the licit bet is less than the betted value");
             }
+            if (checkOrBet)
+            {
+                minRaiseOrBetValue = bigBlindValue;
+                if(minRaiseOrBetValue <= Money)
+                {
+                    actions.Add(Action.BET);
+                }
+                actions.Add(Action.CHECK);
+            }
+            else //Call or Raise
+            {
+                minRaiseOrBetValue = lastRaiseValue + actualLicitBet;
+                if(minRaiseOrBetValue <= this.Money)
+                {
+                    actions.Add(Action.RAISE);
+                }
+                actions.Add(Action.CALL);
+            }
+            //List<Player> playersWithAction = players.Where(p => p.LastAction != Action.NOACTION).ToList();
+
+            //if (actualLicitBet - BetChips == 0)
+            //{
+            //    actions.Add(Action.CHECK);
+            //    actions.Add(Action.BET);
+            //    minRaiseOrBetValue = bigBlindValue;
+            //} else if (actualLicitBet - BetChips > 0)
+            //{
+            //    actions.Add(Action.CALL);
+            //    actions.Add(Action.RAISE);
+            //    if (actualLicitBet == bigBlindValue)
+            //    {
+            //        minRaiseOrBetValue = bigBlindValue * 2;
+            //    }
+            //    else
+            //    {
+            //        minRaiseOrBetValue = lastRaiseValue * 2; //TODO consider to give the bigBlindValue value to lastRaiseValue after the binds
+            //    }
+            //} else
+            //{
+            //    throw new PokerGameException("Not valid use case when the licit bet is less than the betted value");
+            //}
 
             return actions;
 
@@ -559,30 +569,53 @@ namespace PokerGame.Model
             return actions;
         }
 
-        protected List<Action> PossibleActions(List<Player> players, int bigBlindValue, int actualLicitBet, ref int minRaiseOrBetValue, int lastRaiseValue)
+        protected List<Action> PossibleActions(List<Player> players, int bigBlindValue, int actualLicitBet, ref int minRaiseOrBetValue, 
+            int lastRaiseValue, ref List<Tuple<Action, int>> previousActions)
         {
             if (LastAction == Action.BIGBLIND)
             {
-                return PossibleActionsForBigBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue);
+                return PossibleActionsForBigBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue); //Correct it
             }
             if (LastAction == Action.SMALLBLIND)
             {
-                return PossibleActionsForSmallBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue);
+                return PossibleActionsForSmallBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue); //Correct it
             }
-            return PossibleActionsForNoneBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue);
+            return PossibleActionsForNoneBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue, ref previousActions);
         }
 
-        protected void SelectValuesForGivenAction(int actualLicitBet, double maxValueForHolding, double maxValueForRaising, 
+        //protected void SelectValuesForGivenAction(int actualLicitBet, double maxValueForHolding, double maxValueForRaising, 
+        //    double raiseOrBetValue, List<Action> possiblyActions, ref Action followingAction, ref int followingRaiseValue)
+        //{
+        //    //TODO Pay attention to not use random chances
+        //    if (actualLicitBet <= maxValueForHolding) //Hold the crad
+        //    {
+        //        if (possiblyActions.Contains(Action.CHECK)) followingAction = Action.CHECK;
+        //        else if (possiblyActions.Contains(Action.CALL)) followingAction = Action.CALL;
+        //        else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+        //    }
+        //    else if (actualLicitBet <= maxValueForRaising) //Raise
+        //    {
+        //        if (possiblyActions.Contains(Action.RAISE)) followingAction = Action.RAISE;
+        //        else if (possiblyActions.Contains(Action.BET)) followingAction = Action.BET;
+        //        else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+        //        followingRaiseValue = (int)raiseOrBetValue; //Completely fucked here both of two value are parameteres
+        //    }
+
+        //    //TODO If there is no right action then make a low chance to call or check and not to fold
+        //    //TODO If the check action is possible do that regardless of what would be the right action to do
+        //}
+
+        protected void SelectValuesForGivenActionPlus(bool holding, bool raising,
             double raiseOrBetValue, List<Action> possiblyActions, ref Action followingAction, ref int followingRaiseValue)
         {
             //TODO Pay attention to not use random chances
-            if (actualLicitBet <= maxValueForHolding) //Hold the crad
+            if (holding) //Hold the crad
             {
                 if (possiblyActions.Contains(Action.CHECK)) followingAction = Action.CHECK;
                 else if (possiblyActions.Contains(Action.CALL)) followingAction = Action.CALL;
                 else throw new PokerGameException("Possibly actions must contain CHECK or CALL");
             }
-            else if (actualLicitBet <= maxValueForRaising) //Raise
+            if (raising) //Raise
             {
                 if (possiblyActions.Contains(Action.RAISE)) followingAction = Action.RAISE;
                 else if (possiblyActions.Contains(Action.BET)) followingAction = Action.BET;
@@ -607,10 +640,10 @@ namespace PokerGame.Model
         }
 
         public void ActualPlayerAction(ref int actualLicitBet, List<Card> commonityCards, 
-            List<Player> players, int bigBlindValue, ref int lastRaiseValue)
+            List<Player> players, int bigBlindValue, ref int lastRaiseValue, ref List<Tuple<Action, int>> previousActions)
         {
             int minRaiseOrBetValue = 0;
-            var actions = PossibleActions(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue);
+            var actions = PossibleActions(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue, ref previousActions);
             List<Card> cards = new List<Card>();
             cards.Add(this.hand.leftHand);
             cards.Add(this.hand.rightHand);
@@ -622,20 +655,18 @@ namespace PokerGame.Model
 
 
             if (actions.Contains(Action.CHECK)) followingAction = Action.CHECK;
-            if (commonityCards.Count == 0)
+            if (commonityCards.Count == 0) //The first set when there is no cards in commonity section
             {
 
                 if( PokerHandRanks == PokerHandRanks.HIGHCARD )
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 2 * bigBlindValue, 0 * bigBlindValue, 0 * minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
+                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
                 } else
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 3 * bigBlindValue, 0 * bigBlindValue, 0 * minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
+                    SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
                 }
                 
-                PlayerAction(ref actualLicitBet, ref lastRaiseValue, followingRaiseValue, bigBlindValue, followingAction);
+                PlayerAction(ref actualLicitBet, ref lastRaiseValue, followingRaiseValue, bigBlindValue, ref previousActions, followingAction);
                 return;
             }
 
@@ -644,19 +675,16 @@ namespace PokerGame.Model
                 //Should examine the probability
                 if (StatusCards.CheckProbablityOfRoyalFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraightFlush(cards) == 1)
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 4 * bigBlindValue, 0 * bigBlindValue, minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
                 else if (StatusCards.CheckProbabilityOfFourOfKind(cards) == 1 || StatusCards.CheckProbabilityOfFullHouse(cards) == 1
                         || StatusCards.CheckProbabilityOfFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraight(cards) == 1)
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 5 * bigBlindValue, 0 * bigBlindValue, minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue); //We should raise here the bet
+                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //We should raise here the bet
                 }
                 else if (StatusCards.CheckProbabilityOfThreeOfKind(cards) == 1 || StatusCards.CheckProbabilityOfTwoPair(cards) == 1)
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 3 * bigBlindValue, 0 * bigBlindValue, minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
             }
             else if ( commonityCards.Count == 4 )
@@ -664,59 +692,50 @@ namespace PokerGame.Model
                 if (StatusCards.CheckProbabilityOfFourOfKind(cards) == 1 || StatusCards.CheckProbabilityOfFullHouse(cards) == 1
                          || StatusCards.CheckProbabilityOfFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraight(cards) == 1)
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 4 * bigBlindValue, 0 * bigBlindValue, minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
                 else if (StatusCards.CheckProbablityOfRoyalFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraightFlush(cards) == 1)
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 3 * bigBlindValue, 0 * bigBlindValue, minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenActionPlus(false, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
                 else if (StatusCards.CheckProbabilityOfThreeOfKind(cards) == 1 || StatusCards.CheckProbabilityOfTwoPair(cards) == 1)
                 {
-                    SelectValuesForGivenAction(actualLicitBet, 2 * bigBlindValue, 0 * bigBlindValue, minRaiseOrBetValue,
-                        actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
             }
 
             if (PokerHandRanks == PokerHandRanks.FOUROFAKIND || PokerHandRanks == PokerHandRanks.STRAIGHTFLUSH || PokerHandRanks == PokerHandRanks.ROYALFLUSH)
             {
-                SelectValuesForGivenAction(0, 0, 0, 1.5 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.FULLHOUSE)
             {
-                SelectValuesForGivenAction(actualLicitBet, 5 * bigBlindValue, 4.5 * bigBlindValue, 1.5 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.FLUSH)
             {
-                SelectValuesForGivenAction(actualLicitBet, 4 * bigBlindValue, 3.5 * bigBlindValue, 1 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.STRAIGHT)
             {
-                SelectValuesForGivenAction(actualLicitBet, 4 * bigBlindValue, 3.5 * bigBlindValue, 1 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+
             }
             else if (PokerHandRanks == PokerHandRanks.THREEOFAKIND)
             {
-                SelectValuesForGivenAction(actualLicitBet, 3 * bigBlindValue, 2.5 * bigBlindValue, 1.5 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.TWOPAIR)
             {
-                SelectValuesForGivenAction(actualLicitBet, 3 * bigBlindValue, 2 * bigBlindValue, 1 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.PAIR)
             {
-                SelectValuesForGivenAction(actualLicitBet, 2 * bigBlindValue, 0 * bigBlindValue, 0 * minRaiseOrBetValue,
-                    actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
+                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //It shouldn't raise value
             }
 
 
-            PlayerAction(ref actualLicitBet, ref lastRaiseValue, followingRaiseValue, bigBlindValue, followingAction);
+            PlayerAction(ref actualLicitBet, ref lastRaiseValue, followingRaiseValue, bigBlindValue, ref previousActions, followingAction);
         }
 
     }
@@ -732,10 +751,10 @@ namespace PokerGame.Model
         }
 
         public void SetPossibleActions(ref int actualLicitBet, List<Card> commonityCards,
-            List<Player> players, int bigBlindValue, ref int lastRaiseValue)
+            List<Player> players, int bigBlindValue, ref int lastRaiseValue, ref List<Tuple<Action, int>> previousActions)
         {
             int minRaiseOrBetValue = 0;
-            var actions = PossibleActions(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue);
+            var actions = PossibleActions(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue, ref previousActions);
             List<Card> cards = new List<Card>();
             MinRaiseBet = minRaiseOrBetValue;
             OnSetActionOptionsEvent(actions);
