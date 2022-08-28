@@ -576,7 +576,7 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Button Content="{Binding RaiseOrBetButtonContent}" Width="175" FontWeight="Bold" Command="{Binding RaiseOrBetButtonCommand}" CommandParameter="{Binding RaiseOrBetButtonContent}" IsEnabled="{Binding IsButtonActive}">
+                        <Button Content="{Binding RaiseOrBetButtonContent}" Width="175" FontWeight="Bold" Command="{Binding RaiseOrBetButtonCommand}" CommandParameter="{Binding RaiseOrBetButtonContent}" IsEnabled="{Binding IsRaiseButtonActive}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Green"/>

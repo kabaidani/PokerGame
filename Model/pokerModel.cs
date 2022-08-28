@@ -145,14 +145,6 @@ namespace PokerGame.Model
             }
         }
 
-        private void OnRefreshGivenPlayers(List<Player> refreshedPlayers)
-        {
-            if(RefreshGivenPlayers != null)
-            {
-                RefreshGivenPlayers(this, new PlayersEventArg(refreshedPlayers));
-            }
-        }
-
         private void OnOutOfGamePlayerEvent(Player p)
         {
             if(OutOfGamePlayerEvent != null)
@@ -407,8 +399,8 @@ namespace PokerGame.Model
                     sortedwinners.Add(player);
                 }
             }
-            sortedwinners.Clear();
-            sortedwinners.Add(mainPlayer);
+            //sortedwinners.Clear();
+            //sortedwinners.Add(mainPlayer);
 
             sortedwinners.Sort((p1, p2) => p1.CompareTo(p2, MiddleFieldSection.CommonityCards));
             sortedwinners.Reverse();

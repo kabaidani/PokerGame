@@ -129,10 +129,25 @@ namespace PokerGame.ViewModel
             }
         }
 
+        private bool _isRaiseButtonActive;
+        public bool IsRaiseButtonActive
+        {
+            get { return _isRaiseButtonActive; }
+            set
+            {
+                if(value != _isRaiseButtonActive)
+                {
+                    _isRaiseButtonActive = value;
+                    OnPropertyChanged("IsRaiseButtonActive");
+                }
+            }
+        }
+
         public bool IsButtonActive
         {
             get
             {
+                IsRaiseButtonActive = _model.MainplayerTurn;
                 return _model.MainplayerTurn;
             }
         }
@@ -152,10 +167,18 @@ namespace PokerGame.ViewModel
                         RaiseBetValue = _model.BlindValue; //TODO Make a function in the model for this purpose
                     }
                 }
-                //else
-                //{
-                //    RaiseBetValue = MinRaiseBetValue;
-                //}
+                if (_raiseOrBetValue > _model.mainPlayer.Money)
+                {
+                    int i = RaiseBetValue;
+                    _raiseOrBetValue = _model.mainPlayer.Money;
+                    RaiseBetValue = _model.mainPlayer.Money;
+
+                    int callValue = _model.getActualLicitBet() - _model.mainPlayer.BetChips;
+                    if (_raiseOrBetValue == callValue || _raiseOrBetValue < callValue)
+                    {
+                        IsRaiseButtonActive = false;
+                    }
+                }
                 return RaiseBetValue.ToString();
             }
         }
