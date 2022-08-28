@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Image\BERRY.png" />
     <None Remove="Image\Bob.png" />
+    <None Remove="Image\BOBO.png" />
+    <None Remove="Image\CAPTAIN.png" />
     <None Remove="Image\cardBack.png" />
     <None Remove="Image\character1.gif" />
     <None Remove="Image\character1.jpg" />
@@ -94,21 +97,39 @@
     <None Remove="Image\Donald.png" />
     <None Remove="Image\JOSEPH.png" />
     <None Remove="Image\Khan.png" />
+    <None Remove="Image\MEGAN.png" />
+    <None Remove="Image\MORTY.png" />
     <None Remove="Image\NoCharacter.png" />
     <None Remove="Image\NOONE.png" />
     <None Remove="Image\Olaf.png" />
     <None Remove="Image\reteg.png" />
+    <None Remove="Image\RICO.png" />
+    <None Remove="Image\SignedCharacters\BERRY.png" />
     <None Remove="Image\SignedCharacters\BOB.png" />
+    <None Remove="Image\SignedCharacters\BOBO.png" />
+    <None Remove="Image\SignedCharacters\CAPTAIN.png" />
     <None Remove="Image\SignedCharacters\DONALD.png" />
     <None Remove="Image\SignedCharacters\JOSEPH.png" />
     <None Remove="Image\SignedCharacters\KHAN.png" />
+    <None Remove="Image\SignedCharacters\MEGAN.png" />
+    <None Remove="Image\SignedCharacters\MORTY.png" />
     <None Remove="Image\SignedCharacters\OLAF.png" />
+    <None Remove="Image\SignedCharacters\RICO.png" />
     <None Remove="Image\SignedCharacters\WANDA.png" />
     <None Remove="Image\WANDA.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Image\BERRY.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Image\BOB.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\BOBO.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\CAPTAIN.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\cardBack.png">
@@ -300,6 +321,12 @@
     <Content Include="Image\KHAN.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Image\MEGAN.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\MORTY.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Image\NoCharacter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -312,7 +339,19 @@
     <Content Include="Image\reteg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Image\RICO.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\BERRY.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Image\SignedCharacters\BOB.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\BOBO.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\CAPTAIN.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\SignedCharacters\DONALD.png">
@@ -324,7 +363,16 @@
     <Content Include="Image\SignedCharacters\KHAN.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Image\SignedCharacters\MEGAN.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\MORTY.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Image\SignedCharacters\OLAF.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Image\SignedCharacters\RICO.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Image\SignedCharacters\WANDA.png">

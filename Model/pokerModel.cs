@@ -252,14 +252,23 @@ namespace PokerGame.Model
 
         public void GeneratePlayers(CharacterTypes mainPlayerCharacterType)
         {
+            List<CharacterTypes> freeCharacters = new List<CharacterTypes>();
+            int count = Enum.GetValues(typeof(CharacterTypes)).Length;
+            for(int i = 0; i<count; i++)
+            {
+                freeCharacters.Add((CharacterTypes)i);
+            }
+            freeCharacters.Remove(mainPlayerCharacterType);
+
             playerContainer = new List<Player>();
 
             mainPlayer = new MainPlayer("Daniel", mainPlayerCharacterType, StartingMoney);
 
             for(int i = 0; i < 5; i++)
             {
-                int tempCharacterType = rand.Next(0, 5);
-                CharacterTypes character = (CharacterTypes)tempCharacterType;
+                int tempCharacterType = rand.Next(0, freeCharacters.Count());
+                CharacterTypes character = freeCharacters[tempCharacterType];
+                freeCharacters.Remove(character);
                 playerContainer.Add(new BotPlayer(character, StartingMoney));
                 if(i == 1)
                 {
@@ -494,22 +503,12 @@ namespace PokerGame.Model
             }
         }
 
-        private bool CheckIfEveryOneFolded()
+        private bool CheckIfEveryOneFoldedOrRunOutOfMoney()
         {
             int counter = 0;
             foreach(var p in playerContainer)
             {
-                if (p.LastAction != Action.FOLD) counter++;
-            }
-            return counter == 1;
-        }
-
-        private bool CheckIfEveryOneHasNoLeftMoney()
-        {
-            int counter = 0;
-            foreach (var p in playerContainer)
-            {
-                if (p.Money > 0) counter++;
+                if (p.LastAction != Action.FOLD && p.Money > 0) counter++;
             }
             return counter == 1;
         }
@@ -652,7 +651,7 @@ namespace PokerGame.Model
             await Task.Delay(1500);
 
 
-            bool everyOneFolderButOnePlayer = CheckIfEveryOneFolded() || CheckIfEveryOneHasNoLeftMoney();
+            bool everyOneFolderButOnePlayer = CheckIfEveryOneFoldedOrRunOutOfMoney();
             if (everyOneFolderButOnePlayer)
             {
                 for (int i = MiddleFieldSection.CommonityCards.Count; i < 5; i++)

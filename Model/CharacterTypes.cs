@@ -7,6 +7,12 @@
         JOSEPH,
         KHAN,
         OLAF,
-        WANDA
+        WANDA,
+        MEGAN,
+        BERRY,
+        MORTY,
+        CAPTAIN,
+        RICO,
+        BOBO
     }
 }

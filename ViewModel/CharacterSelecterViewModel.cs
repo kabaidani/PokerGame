@@ -8,6 +8,19 @@ namespace PokerGame.ViewModel
     {  
         public ObservableCollection<CharacterField> Fields { get; set; }
         public DelegateCommand StartGameCommand { get; set; }
+        private bool _startGameButtonAvaible;
+        public bool StartGameButtonAvaible
+        {
+            get { return _startGameButtonAvaible; }
+            set
+            {
+                if(_startGameButtonAvaible != value)
+                {
+                    _startGameButtonAvaible = value;
+                    OnPropertyChanged("StartGameButtonAvaible");
+                }
+            }
+        }
 
         public CharacterTypes SelectedCharacter { get; private set; }
         public event EventHandler StartGameEvent;
@@ -50,16 +63,18 @@ namespace PokerGame.ViewModel
         public CharacterSelecterViewModel(CharacterSelecterModel characterSelecterModel)
         {
             _startingMoney = 1000;
+            _startGameButtonAvaible = false;
             _characterSelecterModel = characterSelecterModel;
             StartGameCommand = new DelegateCommand(p => StartGame());
             Fields = new ObservableCollection<CharacterField>();
+            int counter = 0;
             for(int i = 0; i<3; i++)
             {
                 for(int j = 0; j<4; j++)
                 {
                     Fields.Add(new CharacterField
                     {
-                        Character = (CharacterTypes)(i + j),
+                        Character = (CharacterTypes)(counter++),
                         X = i,
                         Y = j,
                         Number = i * _characterSelecterModel.GridSize + j,
@@ -72,6 +87,7 @@ namespace PokerGame.ViewModel
 
         private void SelectCharacter(int index)
         {
+            StartGameButtonAvaible = true;
             foreach (var p in Fields) p.Signed = false;
             Fields[index].Signed = true;
         }

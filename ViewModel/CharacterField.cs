@@ -39,6 +39,11 @@ namespace PokerGame.ViewModel
             }
         }
 
+        public string CharacterName
+        {
+            get { return _character.ToString(); }
+        }
+
         public void PropertyChange()
         {
             OnPropertyChanged("CharacterUrl");

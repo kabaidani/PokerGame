@@ -48,11 +48,11 @@
                 <RowDefinition Height="100"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" HorizontalAlignment="Center" Orientation="Horizontal">
-                <TextBlock Text="Set the value of the starting money in range of €(1000-5000) and press enter: " VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,20,0"/>
+                <TextBlock Text="The value of your starting money will be: " VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,20,0"/>
                 <TextBlock Text="€" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,0,5,0"/>
-                <TextBox Text="{Binding StartingMoney}" Background="Transparent" Width="100" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" PreviewTextInput="TextBlock_PreviewTextInput" KeyDown="TextBox_KeyDown"/>
+                <TextBlock Text="{Binding StartingMoney}" Background="Transparent" Width="100" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" PreviewTextInput="TextBlock_PreviewTextInput" KeyDown="TextBox_KeyDown"/>
             </StackPanel>
-            <Button Grid.Row="1" Content="Start the Game" Width="200" Height="70" FontWeight="Bold" Command="{Binding StartGameCommand}" VerticalAlignment="Top" Margin="0,20,0,0">
+            <Button Grid.Row="1" Content="Start the Game" Width="200" Height="70" FontWeight="Bold" Command="{Binding StartGameCommand}" VerticalAlignment="Top" Margin="0,20,0,0" IsEnabled="{Binding StartGameButtonAvaible}">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="Green"/>
