@@ -28,7 +28,7 @@ namespace PokerGame.ViewModel
 
             CharacterUrl = "../../Image/" + character.ToString() + ".png";
 
-            NewGameCommand = new DelegateCommand(p => model.OnNewGameEvent());
+            NewGameCommand = new DelegateCommand(p => model.OnRequestNewGame());
             CloseTheGameCommand = new DelegateCommand(p => model.OnCloseGameEvent());
         }
     }

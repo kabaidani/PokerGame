@@ -38,6 +38,7 @@ namespace PokerGame.Model
         public event EventHandler LockingKeyStateChangeEvent;
         public event EventHandler<PlayersEventArg> UpdateGainedPrizeEvent;
         public event EventHandler GameOverEvent;
+        public event EventHandler RequestNewGame;
         public event EventHandler NewGameEvent;
         public event EventHandler CloseGameEvent;
         public event EventHandler BlindValuesEvent;
@@ -112,7 +113,7 @@ namespace PokerGame.Model
             }
         }
 
-        private void OnGameOverEvent()
+        public void OnGameOverEvent()
         {
             _gameOver = true;
             if(GameOverEvent != null)
@@ -134,6 +135,14 @@ namespace PokerGame.Model
             if(BlindValuesEvent != null)
             {
                 BlindValuesEvent(this, EventArgs.Empty);
+            }
+        }
+
+        public void OnRequestNewGame()
+        {
+            if(RequestNewGame != null)
+            {
+                RequestNewGame(this, EventArgs.Empty);
             }
         }
 
@@ -441,6 +450,7 @@ namespace PokerGame.Model
         public async void AsyncStartRound()
         {
             if (_gameOver == true) return;
+            previousActions.Clear();
             previousActions.Add(new Tuple<Action, int>(Action.BET, BlindValue));
             await Task.Delay(500);
             RemaineTime = 10000; //needs to handle
@@ -675,7 +685,7 @@ namespace PokerGame.Model
 
             foreach (var player in playerContainer)
             {
-                if(player.LastAction != Action.FOLD) player.ClearLastAction();
+                if(player.LastAction != Action.FOLD && player.Money != 0) player.ClearLastAction();
                 player.AlreadyRaisedInThisRound = false;
             }
 

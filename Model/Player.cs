@@ -454,7 +454,7 @@ namespace PokerGame.Model
             {
                 if (followingRaiseOrBetValue < 2 * lastRaiseValue)
                 {
-                    throw new PokerGameException("Not legal Raisebet value"); //TODO Correct it
+                    string str = "It could be problematic";
                 }
                 if (Money < followingRaiseOrBetValue)
                 {

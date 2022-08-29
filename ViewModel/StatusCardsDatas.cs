@@ -6,9 +6,19 @@ namespace PokerGame.ViewModel
     public class StatusCardsDatas : ViewModelBase
     {
         public List<Card> statusCards;
+        private Player _mainPlayer;
+
+        public StatusCardsDatas(Player player)
+        {
+            _mainPlayer = player;
+        }
 
         private string GetUrl(int cardIdx)
         {
+            if(_mainPlayer.LastAction == Action.FOLD)
+            {
+                return "../Image/cardBack.png";
+            }
             if (statusCards == null || statusCards.Count < (cardIdx+1))
             {
                 return "../Image/cardBack.png";

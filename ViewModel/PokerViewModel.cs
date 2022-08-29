@@ -98,6 +98,16 @@ namespace PokerGame.ViewModel
             }
         }
 
+        private int getCallButtonContextInteger()
+        {
+            string callButtonContext = CallButtonContextUpdate;
+            if (callButtonContext == "Check") return -1;
+            var arr = callButtonContext.Split('('); //"CALL 200)"
+            arr = arr[1].Split(')'); // "200"
+            int number = int.Parse(arr[0]);
+            return number;
+        }
+
         private string _callOrCheckButtonContext = "CALL";
         public string CallButtonContextUpdate
         {
@@ -111,6 +121,7 @@ namespace PokerGame.ViewModel
                         return "Call (" + smallBlind.ToString() + ")";
                     }
                     int callStrValue = _model.getActualLicitBet() - _model.mainPlayer.BetChips;
+                    if(callStrValue > _model.mainPlayer.Money) return "Call (" + _model.mainPlayer.Money + ")";
                     return "Call (" + callStrValue.ToString() + ")";
 
                 }
@@ -173,7 +184,7 @@ namespace PokerGame.ViewModel
                     _raiseOrBetValue = _model.mainPlayer.Money;
                     RaiseBetValue = _model.mainPlayer.Money;
 
-                    int callValue = _model.getActualLicitBet() - _model.mainPlayer.BetChips;
+                    int callValue = getCallButtonContextInteger();
                     if (_raiseOrBetValue == callValue || _raiseOrBetValue < callValue)
                     {
                         IsRaiseButtonActive = false;
@@ -276,7 +287,8 @@ namespace PokerGame.ViewModel
             _model.GeneratePlayers(mainPlayerCharacter);
             _model.CardAllocation += OnCardAllocation;
 
-            FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
+            //FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
+            FoldButtonCommand = new DelegateCommand(p => _model.OnGameOverEvent());
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseOrBetButtonCommand = new DelegateCommand(p => RaiseOrBetCommand(p));
             ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
@@ -316,7 +328,7 @@ namespace PokerGame.ViewModel
 
 
             MiddleSection = new CommonitySectionDatas(_model.MiddleFieldSection);
-            StatusCards = new StatusCardsDatas();
+            StatusCards = new StatusCardsDatas(_model.mainPlayer);
 
         }
 
@@ -368,7 +380,7 @@ namespace PokerGame.ViewModel
         {
             foreach (var player in e.Players)
             {
-                _characters[player.StaticName].RoundOverUpdate();
+                if(player.LastAction != Model.Action.FOLD) _characters[player.StaticName].RoundOverUpdate();
             }
         }
 

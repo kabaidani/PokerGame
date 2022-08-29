@@ -69,11 +69,14 @@ namespace PokerGame
             }
 
             _viewModel = new PokerViewModel(_model, _characterSelecterViewModel.SelectedCharacter);
+            var lastMainWindow = _mainWindow;
             _mainWindow = new MainWindow();
+            if (lastMainWindow != null) lastMainWindow.Close();
 
-            _model.NewGameEvent += OnNewGameEvent;
+            _model.NewGameEvent += OnStartPokerGame;
             _model.CloseGameEvent += OnCloseGameEvent;
             _model.GameOverEvent += OnGameOverEvent;
+            _model.RequestNewGame += OnNewGameEvent;
 
             _mainWindow.MiddleTopCharacterGrid.DataContext = _viewModel.MiddleTopCharacter;
             _mainWindow.LeftTopCharacterGrid.DataContext = _viewModel.LeftTopCharacter;
@@ -85,7 +88,6 @@ namespace PokerGame
             _mainWindow.StatusCards.DataContext = _viewModel.StatusCards;
             _mainWindow.StatusBar.DataContext = _viewModel;
             _mainWindow.DataContext = _viewModel;
-
 
 
             _charcterSelecterWindow.Close();
@@ -111,13 +113,8 @@ namespace PokerGame
 
         private void OnNewGameEvent(Object sender, EventArgs e)
         {
-            _mainWindow.Close();
             _gameOverWindow.Close();
-
-            _charcterSelecterWindow = new CharcterSelecter();
-            _charcterSelecterWindow.DataContext = _characterSelecterViewModel;
-            _characterSelecterViewModel.StartGameEvent += OnStartPokerGame;
-            _charcterSelecterWindow.Show();
+            _model.OnNewGameEvent();
         }
     }
 }
