@@ -382,21 +382,9 @@ namespace PokerGame.Model
             return InGame;
         }
 
-        private int AAAATEMP(ref List<Tuple<Action, int>> previousActions)
-        {
-            int requiredAmmount = 0;
-            foreach(var action in previousActions)
-            {
-                if (action.Item1 == Action.BET) requiredAmmount = action.Item2;
-                if (action.Item1 == Action.RAISE) requiredAmmount = action.Item2;
-            }
-            return requiredAmmount;
-        }
-
         public void PlayerAction(ref int actualLicitBet, ref int lastRaiseValue, int followingRaiseOrBetValue,
             int bigBlind, ref List<Tuple<Action, int>> previousActions, Action chosenAction = Action.NOACTION)
         {
-            Debug.WriteLine("------------------" + actualLicitBet);
             if (chosenAction == Action.FOLD)
             {
                 this.hand.leftHand.cardType.cardRank = CardRank.NOCARD;
@@ -426,7 +414,7 @@ namespace PokerGame.Model
             }
             else if (chosenAction == Action.CHECK)
             {
-                //Event for check
+                previousActions.Add(new Tuple<Action, int>(Action.CHECK, 0));
             }
             else if (chosenAction == Action.BET)
             {
@@ -458,7 +446,8 @@ namespace PokerGame.Model
                 }
                 if (Money < followingRaiseOrBetValue)
                 {
-                    throw new PokerGameException("The Raisebet is higher than the actual credit"); //This is the all in 
+                    int mustDeleteMe = 10;
+                    //throw new PokerGameException("The Raisebet is higher than the actual credit"); //This is the all in 
                 }
                 RaiseBet = followingRaiseOrBetValue;
                 Money -= RaiseBet;
@@ -483,7 +472,7 @@ namespace PokerGame.Model
             bool checkOrBet = true;
             foreach (var action in previousActions)
             {
-                if (action.Item1 == Action.BET || action.Item1 == Action.RAISE)
+                if (action.Item1 == Action.BET || action.Item1 == Action.RAISE || action.Item1 == Action.CALL)
                 {
                     lastRaiseValue = action.Item2;
                     checkOrBet = false;
@@ -492,7 +481,7 @@ namespace PokerGame.Model
             if (checkOrBet)
             {
                 minRaiseOrBetValue = bigBlindValue;
-                if(minRaiseOrBetValue <= Money)
+                if(minRaiseOrBetValue <= Money || this.StaticName == "MainPlayer")
                 {
                     actions.Add(Action.BET);
                 }

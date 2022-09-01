@@ -287,8 +287,7 @@ namespace PokerGame.ViewModel
             _model.GeneratePlayers(mainPlayerCharacter);
             _model.CardAllocation += OnCardAllocation;
 
-            //FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
-            FoldButtonCommand = new DelegateCommand(p => _model.OnGameOverEvent());
+            FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
             CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
             RaiseOrBetButtonCommand = new DelegateCommand(p => RaiseOrBetCommand(p));
             ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
@@ -388,12 +387,20 @@ namespace PokerGame.ViewModel
         {
             if (e.PossibleActions.Contains(PokerGame.Model.Action.FOLD)) FoldButtonContent = "FOLD";
 
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.RAISE)) RaiseOrBetButtonContent = "RAISE";
-            if (e.PossibleActions.Contains(PokerGame.Model.Action.BET))
+            if (e.PossibleActions.Contains(PokerGame.Model.Action.RAISE))
             {
+                IsRaiseButtonActive = true;
+                RaiseOrBetButtonContent = "RAISE";
+            } else if (e.PossibleActions.Contains(PokerGame.Model.Action.BET))
+            {
+                IsRaiseButtonActive = true;
                 RaiseBetValue = _model.BlindValue;
                 RaiseOrBetButtonContent = "BET";
+            }else
+            {
+                IsRaiseButtonActive = false;
             }
+
             OnPropertyChanged("MaxRaiseBetValue");
 
 

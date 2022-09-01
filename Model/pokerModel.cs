@@ -469,9 +469,10 @@ namespace PokerGame.Model
             {
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.leftHand = _deck.getCard();
-                    playerContainer[i].hand.leftHand.isUpSideDown = false; //Just temp
+                playerContainer[i].hand.leftHand.isUpSideDown = true;
                 if (playerContainer[i] == mainPlayer)
                 {
+                    playerContainer[i].hand.leftHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
                 }
                 OnCardAllocation(playerContainer[i]);
@@ -481,9 +482,10 @@ namespace PokerGame.Model
             {
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.rightHand = _deck.getCard();
-                    playerContainer[i].hand.rightHand.isUpSideDown = false; //Just temp
+                playerContainer[i].hand.rightHand.isUpSideDown = true;
                 if (playerContainer[i] == mainPlayer)
                 {
+                    playerContainer[i].hand.rightHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
                 }
                 OnCardAllocation(playerContainer[i]);
@@ -603,7 +605,6 @@ namespace PokerGame.Model
                     BotPlayer actPlayer = p as BotPlayer;
 
                     actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
-                    thinkingTimeMultiplier = rand.Next(100, 150);
                     thinkingTimeMultiplier = 50;
                 }
                 else
