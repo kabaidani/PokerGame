@@ -469,9 +469,10 @@ namespace PokerGame.Model
             {
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.leftHand = _deck.getCard();
-                    playerContainer[i].hand.leftHand.isUpSideDown = false; //Just temp
+                playerContainer[i].hand.leftHand.isUpSideDown = false; //Just temp
                 if (playerContainer[i] == mainPlayer)
                 {
+                    playerContainer[i].hand.leftHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
                 }
                 OnCardAllocation(playerContainer[i]);
@@ -481,9 +482,10 @@ namespace PokerGame.Model
             {
                 await Task.Delay(delayTime);
                 playerContainer[i].hand.rightHand = _deck.getCard();
-                    playerContainer[i].hand.rightHand.isUpSideDown = false; //Just temp
+                playerContainer[i].hand.rightHand.isUpSideDown = false; //Just temp
                 if (playerContainer[i] == mainPlayer)
                 {
+                    playerContainer[i].hand.rightHand.isUpSideDown = false;
                     OnCheckCombinationEvent();
                 }
                 OnCardAllocation(playerContainer[i]);
