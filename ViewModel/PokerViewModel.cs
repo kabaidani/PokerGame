@@ -334,6 +334,8 @@ namespace PokerGame.ViewModel
         private void OnMainPlayerTurnEvent(object sender, EventArgs e)
         {
             OnPropertyChanged("IsButtonActive");
+            OnPropertyChanged("ActionButtonsVisible");
+            OnPropertyChanged("IsLockingVisible");
         }
 
         private void OnCombinationEvent(object sender, CommonityCardsEventArgs e)
@@ -477,17 +479,34 @@ namespace PokerGame.ViewModel
         {
             get
             {
-                if (_model.CheckLockingKeyState()) return System.Windows.Visibility.Collapsed;
-                return System.Windows.Visibility.Visible;
+                if (IsButtonActive) return System.Windows.Visibility.Visible;
+                return System.Windows.Visibility.Collapsed;
             }
         }
 
-        public System.Windows.Visibility LockingKeyReleaser
+        //public System.Windows.Visibility LockingKeyReleaser
+        //{
+        //    get
+        //    {
+        //        if (_model.CheckLockingKeyState()) return System.Windows.Visibility.Visible;
+        //        return System.Windows.Visibility.Collapsed;
+        //    }
+        //}
+
+        public System.Windows.Visibility IsLockingVisible
         {
             get
             {
-                if (_model.CheckLockingKeyState()) return System.Windows.Visibility.Visible;
+                if (!IsButtonActive) return System.Windows.Visibility.Visible;
                 return System.Windows.Visibility.Collapsed;
+            }
+        }
+
+        public bool IsLockingKeyEnabled
+        {
+            get
+            {
+                return _model.CheckLockingKeyState();
             }
         }
 
@@ -495,6 +514,8 @@ namespace PokerGame.ViewModel
         {
             OnPropertyChanged("ActionButtonsVisible");
             OnPropertyChanged("LockingKeyReleaser");
+            OnPropertyChanged("IsLockingVisible");
+            OnPropertyChanged("IsLockingKeyEnabled");
         }
 
         public void InitCharacterEventRaise()

@@ -495,14 +495,19 @@
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Visibility="{Binding LockingKeyReleaser}">
-                    <Button Content="Press the button to continue" Width="500" Height="40" FontWeight="Bold" Command="{Binding ReleaseModelLockingKey}">
+                <Grid Grid.Row="0" Visibility="{Binding IsLockingVisible}">
+                    <Button Content="Press the button to continue" Width="500" Height="40" FontWeight="Bold" Command="{Binding ReleaseModelLockingKey}" IsEnabled="{Binding IsLockingKeyEnabled}">
                         <Button.Style>
                             <Style TargetType="Button">
-                                <Setter Property="Background" Value="#cc6f34"/>
+                                <Setter Property="Background" Value="Gray"/>
                                 <Setter Property="Foreground" Value="White"/>
                                 <Setter Property="FontSize" Value="20"/>
                                 <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Background" Value="#cc6f34"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontSize" Value="20"/>
+                                    </Trigger>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="FontSize" Value="25"/>
                                     </Trigger>

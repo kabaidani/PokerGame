@@ -125,7 +125,7 @@ namespace PokerGame.Model
             hand.leftHand = new Card();
             hand.rightHand = new Card();
         }
-
+            
         public List<Card> combinationCards; // This is not in the good place
 
         public PokerHandRanks CheckCombination(List<Card> commonityCards)

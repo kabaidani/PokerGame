@@ -587,6 +587,9 @@ namespace PokerGame.Model
             while (nextPlayersQueue.Count != 0)
             {
 
+                LockLockingKey();
+                while (_lockingKey) await Task.Delay(200);
+
                 Player p = nextPlayersQueue.Dequeue();
                 if (!p.InRound || p.Money == 0)
                 {
