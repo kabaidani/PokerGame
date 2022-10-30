@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace PokerGame.ViewModel
 {
-    public class StatusCardsDatas : ViewModelBase
+    public class StatusCardsData : ViewModelBase
     {
         public List<Card> statusCards;
         private Player _mainPlayer;
 
-        public StatusCardsDatas(Player player)
+        public StatusCardsData(Player player)
         {
             _mainPlayer = player;
         }
@@ -31,12 +31,6 @@ namespace PokerGame.ViewModel
             }
         }
 
-        public string FirstCardUrl { get { return GetUrl(0); } }
-        public string SecondCardUrl { get { return GetUrl(1); } }
-        public string ThirdCardUrl { get { return GetUrl(2); } }
-        public string FourthCardUrl { get { return GetUrl(3); } }
-        public string FifthCardUrl { get { return GetUrl(4); } }
-
         public void PropertyChange()
         {
             OnPropertyChanged("FirstCardUrl");
@@ -45,5 +39,12 @@ namespace PokerGame.ViewModel
             OnPropertyChanged("FourthCardUrl");
             OnPropertyChanged("FifthCardUrl");
         }
+
+        public string FirstCardUrl { get { return GetUrl(0); } }
+        public string SecondCardUrl { get { return GetUrl(1); } }
+        public string ThirdCardUrl { get { return GetUrl(2); } }
+        public string FourthCardUrl { get { return GetUrl(3); } }
+        public string FifthCardUrl { get { return GetUrl(4); } }
+
     }
 }

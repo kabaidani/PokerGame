@@ -7,22 +7,10 @@ namespace PokerGame.Model
     {
         private Dictionary<Player, int> _playersBet;
         private List<Player> _players;
-        public List<Card> CommonityCards { private set; get; }
-        public int CommonityBet { private set; get; }
         private Deck _deck;
 
-        public void ClearTheSection()
-        {
-            CommonityCards.Clear();
-            CommonityBet = 0; //Not sure if it is needed here
-        }
-
-        public Card CardGenerator(Random rand, bool isUpdsideDown = true)
-        { 
-            Card result = _deck.getCard();
-            result.isUpSideDown = isUpdsideDown;
-            return result;
-        }
+        public List<Card> CommonityCards { private set; get; }
+        public int CommonityBet { private set; get; }
 
         public MiddleField(Deck deck, List<Player> players)
         {
@@ -35,6 +23,19 @@ namespace PokerGame.Model
                 _playersBet.Add(player, 0);
                 _players.Add(player);
             } 
+        }
+
+        public void ClearTheSection()
+        {
+            CommonityCards.Clear();
+            CommonityBet = 0; //Not sure if it is needed here
+        }
+
+        public Card CardGenerator(Random rand, bool isUpdsideDown = true)
+        { 
+            Card result = _deck.getCard();
+            result.isUpSideDown = isUpdsideDown;
+            return result;
         }
 
         public void UnfoldNextCard()
@@ -72,7 +73,7 @@ namespace PokerGame.Model
         public bool PrizeDistribution(List<Player> winners)
         {
             int commonityBetConst = CommonityBet;
-            int heighestBet = HighestBetCalculator(); //The heighest bet is the normal bet
+            int heighestBet = HighestBetCalculator(); //The highest bet is the normal bet
             int partsNumber = winners.Count;
             List<Player> fullBetPlayers = new List<Player>();
             List<Player> partBetPlayers = new List<Player>();

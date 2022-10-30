@@ -4,8 +4,9 @@ namespace PokerGame.ViewModel
 {
     public class CharacterField : ViewModelBase
     {
-        private CharacterTypes _character;
         private bool _signed = false;
+        private CharacterTypes _character;
+
         public bool Signed { 
             get { return _signed; } 
             set
@@ -38,20 +39,20 @@ namespace PokerGame.ViewModel
                 }
             }
         }
-
         public string CharacterName
         {
             get { return _character.ToString(); }
         }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Number { get; set; }
+        public DelegateCommand SelectCommand { set; get; }
+
 
         public void PropertyChange()
         {
             OnPropertyChanged("CharacterUrl");
         }
 
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Number { get; set; }
-        public DelegateCommand SelectCommand { set; get; }
     }
 }

@@ -87,6 +87,7 @@ namespace PokerGame.Model
             return result.Count != 0;
         }
 
+
         public static bool CheckRoyalFlush(List<Card> hand, ref List<Card> result)
         {
             for (int i = 0; i < hand.Count - 4; i++)
@@ -191,6 +192,33 @@ namespace PokerGame.Model
             return false;
         }
 
+        public static bool CheckStraight(List<Card> hand, ref List<Card> result)
+        {
+            hand = hand.OrderBy(p => p.cardType.cardRank).ToList();
+            for(int i = hand.Count - 1; i>=0; i--)
+            {
+                var refCard = hand[i];
+                bool res = true;
+                result.Clear();
+                result.Add(refCard);
+                for (int j = 1; j < 5 && res; j++) // it should be a while loop
+                {
+                    var containedRes = CardsContain(hand, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank - j), false), 2);
+                    res = containedRes.Item1;
+                    if (containedRes.Item1)
+                    {
+                        result.Add(containedRes.Item2);
+                    }
+                }
+                if (res)
+                {
+                    result.Reverse();
+                    return true;
+                }
+            }
+            return false;
+        }
+        
         public static bool CheckFourOfAKind(List<Card> hand, ref List<Card> result)
         {
             return CheckParNumberKind(hand, 4, ref result);
@@ -229,34 +257,6 @@ namespace PokerGame.Model
             return CheckParNumberKind(hand, 2, ref result);
         }
 
-
-        public static bool CheckStraight(List<Card> hand, ref List<Card> result)
-        {
-            hand = hand.OrderBy(p => p.cardType.cardRank).ToList();
-            for(int i = hand.Count - 1; i>=0; i--)
-            {
-                var refCard = hand[i];
-                bool res = true;
-                result.Clear();
-                result.Add(refCard);
-                for (int j = 1; j < 5 && res; j++) // it should be a while loop
-                {
-                    var containedRes = CardsContain(hand, new Card(new CardType(CardSuit.NOCARD, refCard.cardType.cardRank - j), false), 2);
-                    res = containedRes.Item1;
-                    if (containedRes.Item1)
-                    {
-                        result.Add(containedRes.Item2);
-                    }
-                }
-                if (res)
-                {
-                    result.Reverse();
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public static bool CheckHighCard(List<Card> hand, ref List<Card> result)
         {
             result.Clear();
@@ -275,6 +275,7 @@ namespace PokerGame.Model
             return true;
         }
 
+        
         public static PokerHandRanks checkPokerCombination(List<Card> cards, ref List<Card> result)
         {
             result.Clear();
@@ -316,20 +317,6 @@ namespace PokerGame.Model
         }
 
 
-        public static int CheckProbabilityOfTwoPair(List<Card> cards)
-        {
-            List<Card> tmp = new List<Card>();
-            if(StatusCards.CheckTwoPair(cards, ref tmp))
-            {
-                return 0;
-            }
-            if (StatusCards.CheckPair(cards, ref tmp))
-            {
-                return 1;
-            } 
-            return -1; //If we don't have a pair can't get 2 pairs with one shot
-        }
-
         public static void NumberOfPairs(List<Card> cards, ref int result)
         {
             List<Card> tmp = new List<Card>();
@@ -350,23 +337,6 @@ namespace PokerGame.Model
                 }
                 NumberOfPairs(updatedCards, ref result);
             }
-        }
-
-        public static int CheckProbabilityOfThreeOfKind(List<Card> cards)
-        {
-            List<Card> tmp = new List<Card>();
-            if (StatusCards.CheckThreeOfAKind(cards, ref tmp))
-            {
-                return 0;
-            }
-            int pairNumber = 0;
-            NumberOfPairs(cards, ref pairNumber);
-
-            if (pairNumber != 0)
-            {
-                return 1;
-            }
-            return -1;
         }
 
         public static bool CheckXNumberOfCardStraight(List<Card> cards, ref List<Card> result, int x)
@@ -394,6 +364,37 @@ namespace PokerGame.Model
                 }
             }
             return false;
+        }
+
+        public static int CheckProbabilityOfTwoPair(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if(StatusCards.CheckTwoPair(cards, ref tmp))
+            {
+                return 0;
+            }
+            if (StatusCards.CheckPair(cards, ref tmp))
+            {
+                return 1;
+            } 
+            return -1; //If we don't have a pair can't get 2 pairs with one shot
+        }
+
+        public static int CheckProbabilityOfThreeOfKind(List<Card> cards)
+        {
+            List<Card> tmp = new List<Card>();
+            if (StatusCards.CheckThreeOfAKind(cards, ref tmp))
+            {
+                return 0;
+            }
+            int pairNumber = 0;
+            NumberOfPairs(cards, ref pairNumber);
+
+            if (pairNumber != 0)
+            {
+                return 1;
+            }
+            return -1;
         }
 
         public static int CheckProbabilityOfStraight(List<Card> cards)

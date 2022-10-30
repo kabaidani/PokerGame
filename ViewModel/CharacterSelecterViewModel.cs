@@ -6,9 +6,12 @@ namespace PokerGame.ViewModel
 {
     public class CharacterSelecterViewModel : ViewModelBase
     {  
-        public ObservableCollection<CharacterField> Fields { get; set; }
-        public DelegateCommand StartGameCommand { get; set; }
         private bool _startGameButtonAvaible;
+        private int _startingMoney;
+
+        
+        public DelegateCommand StartGameCommand { get; set; }
+        public ObservableCollection<CharacterField> Fields { get; set; }
         public bool StartGameButtonAvaible
         {
             get { return _startGameButtonAvaible; }
@@ -21,12 +24,7 @@ namespace PokerGame.ViewModel
                 }
             }
         }
-
         public CharacterTypes SelectedCharacter { get; private set; }
-        public event EventHandler StartGameEvent;
-
-        private int _startingMoney;
-
         public string StartingMoney
         {
             get
@@ -59,12 +57,14 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private CharacterSelecterModel _characterSelecterModel;
-        public CharacterSelecterViewModel(CharacterSelecterModel characterSelecterModel)
+
+        public event EventHandler StartGameEvent;
+        
+
+        public CharacterSelecterViewModel(int gridSize)
         {
             _startingMoney = 1000;
             _startGameButtonAvaible = false;
-            _characterSelecterModel = characterSelecterModel;
             StartGameCommand = new DelegateCommand(p => StartGame());
             Fields = new ObservableCollection<CharacterField>();
             int counter = 0;
@@ -77,13 +77,14 @@ namespace PokerGame.ViewModel
                         Character = (CharacterTypes)(counter++),
                         X = i,
                         Y = j,
-                        Number = i * _characterSelecterModel.GridSize + j,
+                        Number = i * gridSize + j,
                         SelectCommand = new DelegateCommand(param => SelectCharacter(System.Convert.ToInt32(param)))
 
                     });
                 }
             }
         }
+
 
         private void SelectCharacter(int index)
         {

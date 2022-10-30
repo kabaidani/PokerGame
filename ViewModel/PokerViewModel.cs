@@ -11,22 +11,76 @@ namespace PokerGame.ViewModel
     public class PokerViewModel : ViewModelBase
     {
         private PokerModel _model;
+        private Dictionary<string, PlayerData> _characters;
+
+        public PlayerData LeftTopCharacter;
+        public PlayerData MiddleTopCharacter;
+        public PlayerData RightTopCharacter;
+        public PlayerData RightBottomCharacter;
+        public PlayerData MainPlayer;
+        public PlayerData LeftBottomCharacter;
+        public CommonitySectionData MiddleSection;
+        public StatusCardsData StatusCards;
+
+
 
         public DelegateCommand FoldButtonCommand { get; set; }
         public DelegateCommand CallOrCheckButtonCommand { get; set; }
         public DelegateCommand RaiseOrBetButtonCommand { get; set; }
         public DelegateCommand ReleaseModelLockingKey { get; set; }
 
-        public event EventHandler<PlayersEventArg> InitCharacters;
+        //public event EventHandler<PlayersEventArg> InitCharacters;
+        
 
-        public PlayerDatas LeftTopCharacter;
-        public PlayerDatas MiddleTopCharacter;
-        public PlayerDatas RightTopCharacter;
-        public PlayerDatas RightBottomCharacter;
-        public PlayerDatas MainPlayer;
-        public PlayerDatas LeftBottomCharacter;
-        public CommonitySectionDatas MiddleSection;
-        public StatusCardsDatas StatusCards;
+        public PokerViewModel(PokerModel model, CharacterTypes mainPlayerCharacter)
+        {
+            _model = model;
+            _model.GeneratePlayers(mainPlayerCharacter);
+            //_model.CardAllocation += OnCardAllocation;
+
+            FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
+            CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
+            RaiseOrBetButtonCommand = new DelegateCommand(p => RaiseOrBetCommand(p));
+            ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
+
+
+            _model.UpdateMiddleSectionEvent += OnUpdateMiddleSectionEvent;
+            _model.PlayerActionEvent += OnPlayerActionEvent;
+            //_model.SignPlayerEvent += OnSignPlayerEvent;
+            //_model.OutOfGamePlayerEvent += OnRoundOverForPlayersEvent;
+            _model.RefreshRemainTime += OnRefreshRemainTime;
+            //_model.DealerChipPass += OnDealerChipPass;
+            _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
+            _model.CheckCombinationEvent += OnCombinationEvent;
+            _model.RefreshPlayers += OnRefreshPlayers;
+            //_model.RefreshGivenPlayers += OnRefreshGivenPlayers;
+            //_model.RefreshCommonityBet += OnRefreshCommonityBet;
+            _model.LockingKeyStateChangeEvent += OnLockingKeyStateChangeEvent;
+            //_model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
+            _model.mainPlayer.SetActionOptionsEvent += OnSetActionOptionsEvent;
+            _model.GameOverEvent += OnGameOverEvent;
+            _model.BlindValuesEvent += OnOnBlindValuesEvent;
+
+            _characters = new Dictionary<string, PlayerData>();
+
+            RightTopCharacter = new PlayerData(_model.playerContainer[0]);
+            _characters[_model.playerContainer[0].StaticName] = RightTopCharacter;
+            RightBottomCharacter = new PlayerData(_model.playerContainer[1]);
+            _characters[_model.playerContainer[1].StaticName] = RightBottomCharacter;
+            MainPlayer = new PlayerData(_model.playerContainer[2]);
+            _characters[_model.playerContainer[2].StaticName] = MainPlayer;
+            LeftBottomCharacter = new PlayerData(_model.playerContainer[3]);
+            _characters[_model.playerContainer[3].StaticName] = LeftBottomCharacter;
+            LeftTopCharacter = new PlayerData(_model.playerContainer[4]);
+            _characters[_model.playerContainer[4].StaticName] = LeftTopCharacter;
+            MiddleTopCharacter = new PlayerData(_model.playerContainer[5]);
+            _characters[_model.playerContainer[5].StaticName] = MiddleTopCharacter;
+
+
+            MiddleSection = new CommonitySectionData(_model.MiddleFieldSection);
+            StatusCards = new StatusCardsData(_model.mainPlayer);
+
+        }
 
 
 
@@ -98,15 +152,6 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private int getCallButtonContextInteger()
-        {
-            string callButtonContext = CallButtonContextUpdate;
-            if (callButtonContext == "Check") return -1;
-            var arr = callButtonContext.Split('('); //"CALL 200)"
-            arr = arr[1].Split(')'); // "200"
-            int number = int.Parse(arr[0]);
-            return number;
-        }
 
         private string _callOrCheckButtonContext = "CALL";
         public string CallButtonContextUpdate
@@ -242,7 +287,6 @@ namespace PokerGame.ViewModel
             }
         }
 
-
         public string BlindValues
         {
             get
@@ -251,19 +295,46 @@ namespace PokerGame.ViewModel
             }
         }
 
-
-        private void OnCardAllocation(object sender, PokerPlayerEventArgs e)
+        public System.Windows.Visibility ActionButtonsVisible
         {
-            _characters[e.Player.StaticName].PropertyChange();
-        }
-
-        private void OnInitCharacters(List<Player> players)
-        {
-            if(InitCharacters != null)
+            get
             {
-                InitCharacters(this, new PlayersEventArg(players));
+                if (IsButtonActive) return System.Windows.Visibility.Visible;
+                return System.Windows.Visibility.Collapsed;
             }
         }
+
+        public System.Windows.Visibility IsLockingVisible
+        {
+            get
+            {
+                if (!IsButtonActive) return System.Windows.Visibility.Visible;
+                return System.Windows.Visibility.Collapsed;
+            }
+        }
+
+        public bool IsLockingKeyEnabled
+        {
+            get
+            {
+                return _model.CheckLockingKeyState();
+            }
+        }
+
+
+
+        //private void OnCardAllocation(object sender, PokerPlayerEventArgs e)
+        //{
+        //    _characters[e.Player.StaticName].PropertyChange();
+        //}
+
+        //private void OnInitCharacters(List<Player> players)
+        //{
+        //    if(InitCharacters != null)
+        //    {
+        //        InitCharacters(this, new PlayersEventArg(players));
+        //    }
+        //}
 
         private void OnRefreshPlayers(object sender, EventArgs e) //Is it used???
         {
@@ -273,63 +344,10 @@ namespace PokerGame.ViewModel
             }
         }
 
-        private void OnRefreshGivenPlayers(object sender, PlayersEventArg e)
-        {
-            foreach (var p in e.Players) _characters[p.StaticName].PropertyChange();
-        }
-
-
-        private Dictionary<string, PlayerDatas> _characters;
-
-        public PokerViewModel(PokerModel model, CharacterTypes mainPlayerCharacter)
-        {
-            _model = model;
-            _model.GeneratePlayers(mainPlayerCharacter);
-            _model.CardAllocation += OnCardAllocation;
-
-            FoldButtonCommand = new DelegateCommand(p => _model.MainPlayerAction(Model.Action.FOLD)); // p meanse mainplayer
-            CallOrCheckButtonCommand = new DelegateCommand(t => CallOrCheckCommand(t));
-            RaiseOrBetButtonCommand = new DelegateCommand(p => RaiseOrBetCommand(p));
-            ReleaseModelLockingKey = new DelegateCommand(p => _model.ReleaseLockingKey());
-
-
-            _model.UpdateMiddleSectionEvent += OnUpdateMiddleSectionEvent;
-            _model.PlayerActionEvent += OnPlayerActionEvent;
-            _model.SignPlayerEvent += OnSignPlayerEvent;
-            _model.RoundOverForPlayersEvent += OnRoundOverForPlayersEvent;
-            _model.RefreshRemainTime += OnRefreshRemainTime;
-            _model.DealerChipPass += OnDealerChipPass;
-            _model.MainPlayerTurnEvent += OnMainPlayerTurnEvent;
-            _model.CheckCombinationEvent += OnCombinationEvent;
-            _model.RefreshPlayers += OnRefreshPlayers;
-            _model.RefreshGivenPlayers += OnRefreshGivenPlayers;
-            _model.RefreshCommonityBet += OnRefreshCommonityBet;
-            _model.LockingKeyStateChangeEvent += OnLockingKeyStateChangeEvent;
-            _model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
-            _model.mainPlayer.SetActionOptionsEvent += OnSetActionOptionsEvent;
-            _model.GameOverEvent += OnGameOverEvent;
-            _model.BlindValuesEvent += OnOnBlindValuesEvent;
-
-            _characters = new Dictionary<string, PlayerDatas>();
-
-            RightTopCharacter = new PlayerDatas(_model.playerContainer[0]);
-            _characters[_model.playerContainer[0].StaticName] = RightTopCharacter;
-            RightBottomCharacter = new PlayerDatas(_model.playerContainer[1]);
-            _characters[_model.playerContainer[1].StaticName] = RightBottomCharacter;
-            MainPlayer = new PlayerDatas(_model.playerContainer[2]);
-            _characters[_model.playerContainer[2].StaticName] = MainPlayer;
-            LeftBottomCharacter = new PlayerDatas(_model.playerContainer[3]);
-            _characters[_model.playerContainer[3].StaticName] = LeftBottomCharacter;
-            LeftTopCharacter = new PlayerDatas(_model.playerContainer[4]);
-            _characters[_model.playerContainer[4].StaticName] = LeftTopCharacter;
-            MiddleTopCharacter = new PlayerDatas(_model.playerContainer[5]);
-            _characters[_model.playerContainer[5].StaticName] = MiddleTopCharacter;
-
-
-            MiddleSection = new CommonitySectionDatas(_model.MiddleFieldSection);
-            StatusCards = new StatusCardsDatas(_model.mainPlayer);
-
-        }
+        //private void OnRefreshGivenPlayers(object sender, PlayersEventArg e)
+        //{
+        //    foreach (var p in e.Players) _characters[p.StaticName].PropertyChange();
+        //}
 
         private void OnMainPlayerTurnEvent(object sender, EventArgs e)
         {
@@ -361,29 +379,28 @@ namespace PokerGame.ViewModel
             RemainTime = _model.RemaineTime;
         }
 
-        private void OnDealerChipPass(object sender, EventArgs e)
-        {
-            LeftTopCharacter.PropertyChange("DealerChipPictureVisibility");
-            MiddleTopCharacter.PropertyChange("DealerChipPictureVisibility");
-            RightTopCharacter.PropertyChange("DealerChipPictureVisibility");
-            LeftBottomCharacter.PropertyChange("DealerChipPictureVisibility");
-            MainPlayer.PropertyChange("DealerChipPictureVisibility");
-            RightBottomCharacter.PropertyChange("DealerChipPictureVisibility");
-        }
+        //private void OnDealerChipPass(object sender, EventArgs e)
+        //{
+        //    LeftTopCharacter.PropertyChange("DealerChipPictureVisibility");
+        //    MiddleTopCharacter.PropertyChange("DealerChipPictureVisibility");
+        //    RightTopCharacter.PropertyChange("DealerChipPictureVisibility");
+        //    LeftBottomCharacter.PropertyChange("DealerChipPictureVisibility");
+        //    MainPlayer.PropertyChange("DealerChipPictureVisibility");
+        //    RightBottomCharacter.PropertyChange("DealerChipPictureVisibility");
+        //}
 
+        //private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
+        //{
+        //    _characters[e.Player.StaticName].PropertyChange("ProfilePictureURL");
+        //}
 
-        private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
-        {
-            _characters[e.Player.StaticName].PropertyChange("ProfilePictureURL");
-        }
-
-        private void OnRoundOverForPlayersEvent(object sender, PlayersEventArg e)
-        {
-            foreach (var player in e.Players)
-            {
-                if(player.LastAction != Model.Action.FOLD) _characters[player.StaticName].RoundOverUpdate();
-            }
-        }
+        //private void OnRoundOverForPlayersEvent(object sender, PlayersEventArg e)
+        //{
+        //    foreach (var player in e.Players)
+        //    {
+        //        if(player.LastAction != Model.Action.FOLD) _characters[player.StaticName].RoundOverUpdate();
+        //    }
+        //}
 
         private void OnSetActionOptionsEvent(object sender, PossibleActionsEventArgs e)
         {
@@ -430,13 +447,32 @@ namespace PokerGame.ViewModel
             _characters[e.Player.StaticName].PropertyChange();
         }
 
-        private void OnUpdateGainedPrizeEvent(object sender, PlayersEventArg e)
+        //private void OnUpdateGainedPrizeEvent(object sender, PlayersEventArg e)
+        //{
+        //    foreach(var player in e.Players)
+        //    {
+        //        _characters[player.StaticName].ShowGainedPrize();
+        //    }
+        //}
+
+        public void OnUpdateMiddleSectionEvent(Object sender, EventArgs e)
         {
-            foreach(var player in e.Players)
-            {
-                _characters[player.StaticName].ShowGainedPrize();
-            }
+            MiddleSection.PropertyChange();
         }
+
+        //public void OnRefreshCommonityBet(object sender, EventArgs e)
+        //{
+        //    MiddleSection.CommonityBetpropertyChange();
+        //}
+
+        public void OnLockingKeyStateChangeEvent(object sender, EventArgs e)
+        {
+            OnPropertyChanged("ActionButtonsVisible");
+            OnPropertyChanged("LockingKeyReleaser");
+            OnPropertyChanged("IsLockingVisible");
+            OnPropertyChanged("IsLockingKeyEnabled");
+        }
+
 
 
         private void CallOrCheckCommand(object o)
@@ -464,26 +500,21 @@ namespace PokerGame.ViewModel
             }
         }
 
-        public void OnUpdateMiddleSectionEvent(Object sender, EventArgs e)
+        private int getCallButtonContextInteger()
         {
-            MiddleSection.PropertyChange();
+            string callButtonContext = CallButtonContextUpdate;
+            if (callButtonContext == "Check") return -1;
+            var arr = callButtonContext.Split('('); //"CALL 200)"
+            arr = arr[1].Split(')'); // "200"
+            int number = int.Parse(arr[0]);
+            return number;
         }
-
-        public void OnRefreshCommonityBet(object sender, EventArgs e)
-        {
-            MiddleSection.CommonityBetpropertyChange();
-        }
-
-
-        public System.Windows.Visibility ActionButtonsVisible
-        {
-            get
-            {
-                if (IsButtonActive) return System.Windows.Visibility.Visible;
-                return System.Windows.Visibility.Collapsed;
-            }
-        }
-
+        
+        //public void InitCharacterEventRaise()
+        //{
+        //    OnInitCharacters(_model.playerContainer);
+        //}
+        
         //public System.Windows.Visibility LockingKeyReleaser
         //{
         //    get
@@ -492,37 +523,5 @@ namespace PokerGame.ViewModel
         //        return System.Windows.Visibility.Collapsed;
         //    }
         //}
-
-        public System.Windows.Visibility IsLockingVisible
-        {
-            get
-            {
-                if (!IsButtonActive) return System.Windows.Visibility.Visible;
-                return System.Windows.Visibility.Collapsed;
-            }
-        }
-
-        public bool IsLockingKeyEnabled
-        {
-            get
-            {
-                return _model.CheckLockingKeyState();
-            }
-        }
-
-        public void OnLockingKeyStateChangeEvent(object sender, EventArgs e)
-        {
-            OnPropertyChanged("ActionButtonsVisible");
-            OnPropertyChanged("LockingKeyReleaser");
-            OnPropertyChanged("IsLockingVisible");
-            OnPropertyChanged("IsLockingKeyEnabled");
-        }
-
-        public void InitCharacterEventRaise()
-        {
-            OnInitCharacters(_model.playerContainer);
-        }
-
-
     }
 }

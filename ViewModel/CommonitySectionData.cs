@@ -3,11 +3,11 @@ using PokerGame.Model;
 
 namespace PokerGame.ViewModel
 {
-    public class CommonitySectionDatas : ViewModelBase
+    public class CommonitySectionData : ViewModelBase
     {
         private MiddleField _middleSection;
 
-        public CommonitySectionDatas(MiddleField middleField)
+        public CommonitySectionData(MiddleField middleField)
         {
             _middleSection = middleField;
         }
@@ -221,12 +221,12 @@ namespace PokerGame.ViewModel
             OnPropertyChanged("CommonityBetPictureAndValueVisibility");
         }
 
-        public void CommonityBetpropertyChange()
-        {
-            OnPropertyChanged("CommonityBetPictureUrl");
-            OnPropertyChanged("CommonityBetValue");
-            OnPropertyChanged("CommonityBetPictureAndValueVisibility");
-        }
+        //public void CommonityBetpropertyChange()
+        //{
+        //    OnPropertyChanged("CommonityBetPictureUrl");
+        //    OnPropertyChanged("CommonityBetValue");
+        //    OnPropertyChanged("CommonityBetPictureAndValueVisibility");
+        //}
 
     }
 }

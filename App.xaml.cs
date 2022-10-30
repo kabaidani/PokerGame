@@ -29,7 +29,6 @@ namespace PokerGame
         private CharcterSelecter _charcterSelecterWindow;
 
 
-        private CharacterSelecterModel _characterSelecterModel;
         private CharacterSelecterViewModel _characterSelecterViewModel;
 
         private GameOverViewModel _gameOverViewModel;
@@ -43,8 +42,7 @@ namespace PokerGame
 
         private void App_Startup(object sender, StartupEventArgs e)
         {
-            _characterSelecterModel = new CharacterSelecterModel();
-            _characterSelecterViewModel = new CharacterSelecterViewModel(_characterSelecterModel);
+            _characterSelecterViewModel = new CharacterSelecterViewModel(4);
             _charcterSelecterWindow = new CharcterSelecter();
 
             _charcterSelecterWindow.DataContext = _characterSelecterViewModel;
@@ -92,7 +90,7 @@ namespace PokerGame
 
             _charcterSelecterWindow.Close();
             _mainWindow.Show();
-            _viewModel.InitCharacterEventRaise();
+            //_viewModel.InitCharacterEventRaise();
             _model.GameOn();
 
         }

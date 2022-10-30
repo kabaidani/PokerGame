@@ -4,17 +4,18 @@ using PokerGame.Model;
 namespace PokerGame.ViewModel
 {
 
-    public class PlayerDatas : ViewModelBase
+    public class PlayerData : ViewModelBase
     {
         private Player _player;
         private bool _roundOverState;
         private bool _showGainedPrize;
         
-        public PlayerDatas(Player player)
+        public PlayerData(Player player)
         {
             _player = player;
             _roundOverState = false;
         }
+
 
         public Visibility GridVisibility
         {
@@ -196,6 +197,7 @@ namespace PokerGame.ViewModel
                 }
             }
         }
+
 
         public void PropertyChange(string propertyName = "")
         {

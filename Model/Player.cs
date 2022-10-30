@@ -7,8 +7,14 @@ namespace PokerGame.Model
 {
     public abstract class Player
     {
-        public event EventHandler<PossibleActionsEventArgs> SetActionOptionsEvent;
-        //public string PlayerName { private set; get; }
+        
+        public Role Role;
+        public List<Card> combinationCards; // This is not in the good place
+        private int _gainedPrize;
+
+        public int StartLicitBet { set; get; } //Indicates the licit bet value at the start of each round
+        public PokerHandRanks PokerHandRanks { protected set; get; } // need to be carefull with the useage of this
+        public bool AlreadyRaisedInThisRound { set; get; }
         public string StaticName { protected set; get; }
         public CharacterTypes Character { protected set; get; }
         public int BetChips { protected set; get; }
@@ -19,12 +25,10 @@ namespace PokerGame.Model
         public Hand hand; // the set should be more safer
         public int RaiseBet { set; get; }
         public bool Signed { set; get; }
-        public Role Role;
-        private int _gainedPrize;
-        public int StartLicitBet { set; get; } //Indicates the licit bet value at the start of each round
-        public PokerHandRanks PokerHandRanks { protected set; get; } // need to be carefull with the useage of this
-        public bool AlreadyRaisedInThisRound { set; get; }
 
+        public event EventHandler<PossibleActionsEventArgs> SetActionOptionsEvent;
+
+        
         protected void OnSetActionOptionsEvent(List<Action> actions)
         {
             if (SetActionOptionsEvent != null)
@@ -33,6 +37,7 @@ namespace PokerGame.Model
             }
         }
 
+        
         public Player(string staticName, CharacterTypes character, int money)
         {
             Role = new Role();
@@ -126,7 +131,6 @@ namespace PokerGame.Model
             hand.rightHand = new Card();
         }
             
-        public List<Card> combinationCards; // This is not in the good place
 
         public PokerHandRanks CheckCombination(List<Card> commonityCards)
         {
@@ -558,7 +562,7 @@ namespace PokerGame.Model
             return PossibleActionsForNoneBlind(players, bigBlindValue, actualLicitBet, ref minRaiseOrBetValue, lastRaiseValue, ref previousActions);
         }
 
-        protected void SelectValuesForGivenActionPlus(bool holding, bool raising,
+        protected void SelectValuesForGivenAction(bool holding, bool raising,
             double raiseOrBetValue, List<Action> possiblyActions, ref Action followingAction, ref int followingRaiseValue)
         {
             //TODO Pay attention to not use random chances
@@ -582,8 +586,6 @@ namespace PokerGame.Model
                 followingRaiseValue = (int)raiseOrBetValue; //Completely fucked here both of two value are parameteres
             }
         }
-
-
 
     }
 
@@ -616,10 +618,10 @@ namespace PokerGame.Model
 
                 if( PokerHandRanks == PokerHandRanks.HIGHCARD )
                 {
-                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
+                    SelectValuesForGivenAction(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
                 } else
                 {
-                    SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
+                    SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //No Raise in case of PAIR
                 }
                 
                 PlayerAction(ref actualLicitBet, ref lastRaiseValue, followingRaiseValue, bigBlindValue, ref previousActions, followingAction);
@@ -631,16 +633,16 @@ namespace PokerGame.Model
                 //Should examine the probability
                 if (StatusCards.CheckProbablityOfRoyalFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraightFlush(cards) == 1)
                 {
-                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenAction(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
                 else if (StatusCards.CheckProbabilityOfFourOfKind(cards) == 1 || StatusCards.CheckProbabilityOfFullHouse(cards) == 1
                         || StatusCards.CheckProbabilityOfFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraight(cards) == 1)
                 {
-                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //We should raise here the bet
+                    SelectValuesForGivenAction(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //We should raise here the bet
                 }
                 else if (StatusCards.CheckProbabilityOfThreeOfKind(cards) == 1 || StatusCards.CheckProbabilityOfTwoPair(cards) == 1)
                 {
-                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenAction(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
             }
             else if ( commonityCards.Count == 4 )
@@ -648,46 +650,46 @@ namespace PokerGame.Model
                 if (StatusCards.CheckProbabilityOfFourOfKind(cards) == 1 || StatusCards.CheckProbabilityOfFullHouse(cards) == 1
                          || StatusCards.CheckProbabilityOfFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraight(cards) == 1)
                 {
-                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenAction(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
                 else if (StatusCards.CheckProbablityOfRoyalFlush(cards) == 1 || StatusCards.CheckProbabilityOfStraightFlush(cards) == 1)
                 {
-                    SelectValuesForGivenActionPlus(false, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenAction(false, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
                 else if (StatusCards.CheckProbabilityOfThreeOfKind(cards) == 1 || StatusCards.CheckProbabilityOfTwoPair(cards) == 1)
                 {
-                    SelectValuesForGivenActionPlus(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                    SelectValuesForGivenAction(true, false, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
                 }
             }
 
             if (PokerHandRanks == PokerHandRanks.FOUROFAKIND || PokerHandRanks == PokerHandRanks.STRAIGHTFLUSH || PokerHandRanks == PokerHandRanks.ROYALFLUSH)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.FULLHOUSE)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.FLUSH)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.STRAIGHT)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
 
             }
             else if (PokerHandRanks == PokerHandRanks.THREEOFAKIND)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.TWOPAIR)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue);
             }
             else if (PokerHandRanks == PokerHandRanks.PAIR)
             {
-                SelectValuesForGivenActionPlus(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //It shouldn't raise value
+                SelectValuesForGivenAction(true, true, minRaiseOrBetValue, actions, ref followingAction, ref followingRaiseValue); //It shouldn't raise value
             }
 
 
