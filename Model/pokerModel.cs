@@ -14,7 +14,7 @@ namespace PokerGame.Model
     {
         //public event EventHandler<PokerPlayerEventArgs> CardAllocation; //Good
         public event EventHandler UpdateMiddleSectionEvent; //Good
-        public event EventHandler<PokerPlayerEventArgs> PlayerActionEvent; //Good
+        public event EventHandler<PlayersEventArg> PlayerActionEvent; //Good
         //public event EventHandler<PokerPlayerEventArgs> SignPlayerEvent; // Good
         //public event EventHandler<PlayersEventArg> RoundOverForPlayersEvent; //Good
 
@@ -251,7 +251,7 @@ namespace PokerGame.Model
         {
             if( PlayerActionEvent != null)
             {
-                PlayerActionEvent(this, new PokerPlayerEventArgs(player));
+                PlayerActionEvent(this, new PlayersEventArg(new List<Player> { player }));
             }
         }
 

@@ -442,9 +442,12 @@ namespace PokerGame.ViewModel
             OnPropertyChanged("BlindValues");
         }
 
-        private void OnPlayerActionEvent(object sender, PokerPlayerEventArgs e)
+        private void OnPlayerActionEvent(object sender, PlayersEventArg e)
         {
-            _characters[e.Player.StaticName].PropertyChange();
+            foreach (var player in e.Players)
+            {
+                _characters[player.StaticName].PropertyChange();
+            }
         }
 
         private void OnUpdateGainedPrizeEvent(object sender, PlayersEventArg e)

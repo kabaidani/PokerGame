@@ -224,17 +224,19 @@ namespace PokerGame.ViewModel
             }
         }
 
-        public void RoundOverUpdate()
-        {
-            _roundOverState = true;
-            PropertyChange("ProfilePictureURL");
-            OnPropertyChanged("");
-        }
+        //public void RoundOverUpdate()
+        //{
+        //    _roundOverState = true;
+        //    PropertyChange("ProfilePictureURL");
+        //    OnPropertyChanged("");
+        //}
 
         public void ShowGainedPrize()
         {
             _showGainedPrize = true;
-            OnPropertyChanged("MoneyTextBox");
+            _roundOverState = true;
+            PropertyChange();
+            //OnPropertyChanged("MoneyTextBox");
         }
     }
 }
