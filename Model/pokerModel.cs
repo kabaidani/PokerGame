@@ -27,7 +27,7 @@ namespace PokerGame.Model
         //public event EventHandler<PlayersEventArg> RefreshGivenPlayers;
         //public event EventHandler RefreshCommonityBet;
         public event EventHandler LockingKeyStateChangeEvent;
-        //public event EventHandler<PlayersEventArg> UpdateGainedPrizeEvent;
+        public event EventHandler<PlayersEventArg> UpdateGainedPrizeEvent;
         public event EventHandler GameOverEvent;
         public event EventHandler RequestNewGame;
         public event EventHandler NewGameEvent;
@@ -126,13 +126,13 @@ namespace PokerGame.Model
             }
         }
 
-        //private void OnUpdateGainedPrizeEvent(List<Player> players)
-        //{
-        //    if(UpdateGainedPrizeEvent != null)
-        //    {
-        //        UpdateGainedPrizeEvent(this, new PlayersEventArg(players));
-        //    }
-        //}
+        private void OnUpdateGainedPrizeEvent(List<Player> players)
+        {
+            if (UpdateGainedPrizeEvent != null)
+            {
+                UpdateGainedPrizeEvent(this, new PlayersEventArg(players));
+            }
+        }
 
         public void OnGameOverEvent()
         {
@@ -516,7 +516,7 @@ namespace PokerGame.Model
 
         private async Task RoundNumberFive()
         {
-            await Task.Delay(1000);
+            await Task.Delay(200); //original value 1000
             MiddleFieldSection.CollectBets(playerContainer);
             foreach (var player in playerContainer)
             {
@@ -526,13 +526,14 @@ namespace PokerGame.Model
             MiddleFieldSection.CollectBets(playerContainer);
             //OnRoundOverForPlayersEvent(playerContainer);
             OnRefreshPlayers();
-            //OnUpdateGainedPrizeEvent(playerContainer);
+            OnUpdateGainedPrizeEvent(playerContainer);
+            
             LockLockingKey();
             while (_lockingKey) await Task.Delay(200);
 
             ChangePlayersOrder(true);
             EndOfTheRoundUpdates();
-            await Task.Delay(2500);
+            await Task.Delay(200); //original value 2500
             OnUpdateMiddleSectionEvent();
             foreach (var player in playerContainer)
             {
@@ -583,16 +584,15 @@ namespace PokerGame.Model
 
             while (nextPlayersQueue.Count != 0)
             {
-
-                LockLockingKey();
-                while (_lockingKey) await Task.Delay(200);
-
                 Player p = nextPlayersQueue.Dequeue();
+
                 if (!p.InRound || p.Money == 0)
                 {
                     continue;
                 }
-
+                
+                LockLockingKey();
+                while (_lockingKey) await Task.Delay(200);
 
                 if (p.StaticName == "MainPlayer") OnMainPlayerTurn(true);
                 p.Signed = true;
@@ -606,13 +606,13 @@ namespace PokerGame.Model
                     BotPlayer actPlayer = p as BotPlayer;
 
                     actPlayer.ActualPlayerAction(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
-                    thinkingTimeMultiplier = 50;
+                    thinkingTimeMultiplier = 0;
                 }
                 else
                 {
                     MainPlayer actPlayer = p as MainPlayer;
                     actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
-                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds
+                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds with 500
                 }
 
                 thinkingTimeMultiplier += 50;
@@ -627,7 +627,7 @@ namespace PokerGame.Model
                 OnPlayerActionEvent(p);
                 if (p.StaticName == "MainPlayer") OnMainPlayerTurn(false);
                 p.Signed = false;
-                await Task.Delay(150);
+                await Task.Delay(50); //original value
                 //OnSignPlayerEvent(p);
                 OnPlayerActionEvent(p);
 
@@ -649,13 +649,13 @@ namespace PokerGame.Model
             await PlayersTurn(numberOfRound == 1);
 
 
-            await Task.Delay(1500);
+            await Task.Delay(250); //original value 1500
             MiddleFieldSection.CollectBets(playerContainer);
             //OnRefreshCommonityBet();
             OnUpdateMiddleSectionEvent();
 
             OnRefreshPlayers();
-            await Task.Delay(1500);
+            await Task.Delay(250); //original value 1500
 
 
             bool everyOneFolderButOnePlayer = CheckIfEveryOneFoldedOrRunOutOfMoney();
@@ -695,7 +695,7 @@ namespace PokerGame.Model
             }
 
             previousActions.Clear();
-            await Task.Delay(400);
+            await Task.Delay(100); //original value 400
             if (everyOneFolderButOnePlayer)
             {
                 AsyncRound(5);

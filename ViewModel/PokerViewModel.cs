@@ -56,7 +56,7 @@ namespace PokerGame.ViewModel
             //_model.RefreshGivenPlayers += OnRefreshGivenPlayers;
             //_model.RefreshCommonityBet += OnRefreshCommonityBet;
             _model.LockingKeyStateChangeEvent += OnLockingKeyStateChangeEvent;
-            //_model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
+            _model.UpdateGainedPrizeEvent += OnUpdateGainedPrizeEvent;
             _model.mainPlayer.SetActionOptionsEvent += OnSetActionOptionsEvent;
             _model.GameOverEvent += OnGameOverEvent;
             _model.BlindValuesEvent += OnOnBlindValuesEvent;
@@ -447,13 +447,13 @@ namespace PokerGame.ViewModel
             _characters[e.Player.StaticName].PropertyChange();
         }
 
-        //private void OnUpdateGainedPrizeEvent(object sender, PlayersEventArg e)
-        //{
-        //    foreach(var player in e.Players)
-        //    {
-        //        _characters[player.StaticName].ShowGainedPrize();
-        //    }
-        //}
+        private void OnUpdateGainedPrizeEvent(object sender, PlayersEventArg e)
+        {
+            foreach (var player in e.Players)
+            {
+                _characters[player.StaticName].ShowGainedPrize();
+            }
+        }
 
         public void OnUpdateMiddleSectionEvent(Object sender, EventArgs e)
         {
