@@ -7,7 +7,7 @@ namespace PokerGame.Model
     public enum PokerHandRanks { HIGHCARD, PAIR, TWOPAIR, THREEOFAKIND, STRAIGHT, FLUSH, FULLHOUSE, FOUROFAKIND, STRAIGHTFLUSH, ROYALFLUSH } //Should segregate into a new class
     public class StatusCards
     {
-        private static Tuple<bool, Card> CardsContain(List<Card> cards, Card card, int checkLevel)
+        public static Tuple<bool, Card> CardsContain(List<Card> cards, Card card, int checkLevel)
         {
             if ((int)card.cardType.cardRank == 1)
             {

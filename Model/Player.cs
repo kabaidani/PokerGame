@@ -147,10 +147,53 @@ namespace PokerGame.Model
         {
             var ownCombination = this.CheckCombination(commonityCards);
             var pCombination = p.CheckCombination(commonityCards);
+
+
             if (ownCombination > pCombination) return 1;
             if (ownCombination < pCombination) return -1;
             if (ownCombination == pCombination)
             {
+
+                List<Card> ownFullHand = new List<Card>();
+                List<Card> pFullHand = new List<Card>();
+
+                foreach (Card c in commonityCards)
+                {
+                    ownFullHand.Add(c);
+                    pFullHand.Add(c);
+                }
+                ownFullHand.Add(this.hand.leftHand);
+                ownFullHand.Add(this.hand.rightHand);
+                pFullHand.Add(p.hand.leftHand);
+                pFullHand.Add(p.hand.rightHand);
+
+                List<Card> ownCardsInCombination = new List<Card>();
+                List<Card> pCardsInCombination = new List<Card>();
+                List<Card> ownCardsNotInCombination = new List<Card>();
+                List<Card> pCardsNotInCombination = new List<Card>();
+
+                StatusCards.checkPokerCombination(ownFullHand, ref ownCardsInCombination);
+                StatusCards.checkPokerCombination(pFullHand, ref pCardsInCombination);
+
+                foreach (Card c in ownFullHand)
+                {
+                    var t = StatusCards.CardsContain(ownCardsInCombination, c, 0);
+                    if (!t.Item1)
+                    {
+                        ownCardsNotInCombination.Add(c);
+                    }
+                }
+                foreach (Card c in pFullHand)
+                {
+                    var t = StatusCards.CardsContain(pCardsInCombination, c, 0);
+                    if (!t.Item1)
+                    {
+                        pCardsNotInCombination.Add(c);
+                    }
+                }
+                ownCardsNotInCombination = ownCardsNotInCombination.OrderBy(p => p.cardType.cardRank).ToList();
+                pCardsNotInCombination = pCardsNotInCombination.OrderBy(p => p.cardType.cardRank).ToList();
+
                 if (ownCombination == PokerHandRanks.FULLHOUSE)
                 {
                     int res = (StatusCards.FullHouseRankThreeOfKind(this.combinationCards) - StatusCards.FullHouseRankThreeOfKind(p.combinationCards));
@@ -174,40 +217,40 @@ namespace PokerGame.Model
                     return 0;
                 } else if (ownCombination == PokerHandRanks.FOUROFAKIND)
                 {
+                    List<Card> cardsInFourOfKind = new List<Card>();
+                    Card cardNotInTheCombination = new Card();
+                    StatusCards.checkPokerCombination(commonityCards, ref cardsInFourOfKind);
+
+                    foreach(Card c in commonityCards)
+                    {
+                        var t = StatusCards.CardsContain(cardsInFourOfKind, c, 0);
+                        if(!t.Item1) //means that the checking card was not part of the FourOfAKind combination
+                        {
+                            cardNotInTheCombination = c;
+                        }
+
+                    }
+
+
                     CardRank ownRank = this.combinationCards[0].cardType.cardRank;
                     CardRank pRank = p.combinationCards[0].cardType.cardRank;
                     if(ownRank == pRank)
                     {
                         List<Card> ownSortedHandCards = new List<Card>();
                         List<Card> pSortedHandCards = new List<Card>();
-                        if (this.hand.leftHand.cardType.cardRank >= this.hand.rightHand.cardType.cardRank)
-                        {
-                            ownSortedHandCards.Add(this.hand.leftHand);
-                            ownSortedHandCards.Add(this.hand.rightHand);
-                        }
-                        else
-                        {
-                            ownSortedHandCards.Add(this.hand.rightHand);
-                            ownSortedHandCards.Add(this.hand.leftHand);
-                        }
-                        if (p.hand.leftHand.cardType.cardRank >= p.hand.rightHand.cardType.cardRank)
-                        {
-                            pSortedHandCards.Add(p.hand.leftHand);
-                            pSortedHandCards.Add(p.hand.rightHand);
-                        }
-                        else
-                        {
-                            pSortedHandCards.Add(p.hand.rightHand);
-                            pSortedHandCards.Add(p.hand.leftHand);
-                        }
-                        if (ownSortedHandCards[0].cardType.cardRank == pSortedHandCards[0].cardType.cardRank)
-                        {
-                            return ownSortedHandCards[1].cardType.cardRank - pSortedHandCards[1].cardType.cardRank;
-                        }
-                        else
-                        {
-                            return ownSortedHandCards[0].cardType.cardRank - pSortedHandCards[0].cardType.cardRank;
-                        }
+                        ownSortedHandCards.Add(this.hand.leftHand);
+                        ownSortedHandCards.Add(this.hand.rightHand);
+                        ownSortedHandCards.Add(cardNotInTheCombination);
+
+                        pSortedHandCards.Add(p.hand.leftHand);
+                        pSortedHandCards.Add(p.hand.rightHand);
+                        pSortedHandCards.Add(cardNotInTheCombination);
+
+                        ownSortedHandCards = ownSortedHandCards.OrderBy(p => p.cardType.cardRank).ToList();
+                        pSortedHandCards = pSortedHandCards.OrderBy(p => p.cardType.cardRank).ToList();
+
+                        return ownSortedHandCards[ownSortedHandCards.Count - 1].cardType.cardRank - pSortedHandCards[pSortedHandCards.Count - 1].cardType.cardRank;
+
                     } else
                     {
                         return ownRank - pRank;
@@ -231,38 +274,19 @@ namespace PokerGame.Model
                 {
                     CardRank ownRank = this.combinationCards[0].cardType.cardRank;
                     CardRank pRank = p.combinationCards[0].cardType.cardRank;
+                    
+
                     if (ownRank == pRank)
                     {
-                        List<Card> ownSortedHandCards = new List<Card>();
-                        List<Card> pSortedHandCards = new List<Card>();
-                        if(this.hand.leftHand.cardType.cardRank >= this.hand.rightHand.cardType.cardRank)
+                        for(int i = 0; i<2 && i<ownCardsNotInCombination.Count && i<pCardsNotInCombination.Count; i++)
                         {
-                            ownSortedHandCards.Add(this.hand.leftHand);
-                            ownSortedHandCards.Add(this.hand.rightHand);
-                        }else
-                        {
-                            ownSortedHandCards.Add(this.hand.rightHand);
-                            ownSortedHandCards.Add(this.hand.leftHand);
+                            int result = ownCardsNotInCombination[ownCardsNotInCombination.Count - i - 1].cardType.cardRank - pCardsNotInCombination[pCardsNotInCombination.Count - i - 1].cardType.cardRank;
+                            if(result != 0)
+                            {
+                                return result;
+                            }
                         }
-                        if (p.hand.leftHand.cardType.cardRank >= p.hand.rightHand.cardType.cardRank)
-                        {
-                            pSortedHandCards.Add(p.hand.leftHand);
-                            pSortedHandCards.Add(p.hand.rightHand);
-                        }
-                        else
-                        {
-                            pSortedHandCards.Add(p.hand.rightHand);
-                            pSortedHandCards.Add(p.hand.leftHand);
-                        }
-                        if(ownSortedHandCards[0].cardType.cardRank == pSortedHandCards[0].cardType.cardRank)
-                        {
-                            return ownSortedHandCards[1].cardType.cardRank - pSortedHandCards[1].cardType.cardRank;
-                        }
-                        else
-                        {
-                            return ownSortedHandCards[0].cardType.cardRank - pSortedHandCards[0].cardType.cardRank;
-                        }
-
+                        return 0;
                     } else
                     {
                         return ownRank - pRank;
@@ -271,42 +295,22 @@ namespace PokerGame.Model
                 {
                     CardRank ownHigherCardRank = StatusCards.TwoPairHigher(this.combinationCards);
                     CardRank pHigherCardRank = StatusCards.TwoPairHigher(p.combinationCards);
+
                     if(ownHigherCardRank == pHigherCardRank)
                     {
                         CardRank ownLowerCardRank = StatusCards.TwoPairLower(this.combinationCards);
                         CardRank pLowerCardRank = StatusCards.TwoPairLower(p.combinationCards);
                         if(ownLowerCardRank == pLowerCardRank)
                         {
-                            List<Card> ownSortedHandCards = new List<Card>();
-                            List<Card> pSortedHandCards = new List<Card>();
-                            if (this.hand.leftHand.cardType.cardRank >= this.hand.rightHand.cardType.cardRank)
+                            for (int i = 0; i < 1 && i < ownCardsNotInCombination.Count && i < pCardsNotInCombination.Count; i++)
                             {
-                                ownSortedHandCards.Add(this.hand.leftHand);
-                                ownSortedHandCards.Add(this.hand.rightHand);
+                                int result = ownCardsNotInCombination[ownCardsNotInCombination.Count - i - 1].cardType.cardRank - pCardsNotInCombination[pCardsNotInCombination.Count - i - 1].cardType.cardRank;
+                                if (result != 0)
+                                {
+                                    return result;
+                                }
                             }
-                            else
-                            {
-                                ownSortedHandCards.Add(this.hand.rightHand);
-                                ownSortedHandCards.Add(this.hand.leftHand);
-                            }
-                            if (p.hand.leftHand.cardType.cardRank >= p.hand.rightHand.cardType.cardRank)
-                            {
-                                pSortedHandCards.Add(p.hand.leftHand);
-                                pSortedHandCards.Add(p.hand.rightHand);
-                            }
-                            else
-                            {
-                                pSortedHandCards.Add(p.hand.rightHand);
-                                pSortedHandCards.Add(p.hand.leftHand);
-                            }
-                            if (ownSortedHandCards[0].cardType.cardRank == pSortedHandCards[0].cardType.cardRank)
-                            {
-                                return ownSortedHandCards[1].cardType.cardRank - pSortedHandCards[1].cardType.cardRank;
-                            }
-                            else
-                            {
-                                return ownSortedHandCards[0].cardType.cardRank - pSortedHandCards[0].cardType.cardRank;
-                            }
+                            return 0;
                         }
                         else
                         {
@@ -323,36 +327,15 @@ namespace PokerGame.Model
                     CardRank pCardRank = p.combinationCards[0].cardType.cardRank;
                     if(ownCardRank == pCardRank)
                     {
-                        List<Card> ownSortedHandCards = new List<Card>();
-                        List<Card> pSortedHandCards = new List<Card>();
-                        if (this.hand.leftHand.cardType.cardRank >= this.hand.rightHand.cardType.cardRank)
+                        for (int i = 0; i < 3 && i < ownCardsNotInCombination.Count && i < pCardsNotInCombination.Count; i++)
                         {
-                            ownSortedHandCards.Add(this.hand.leftHand);
-                            ownSortedHandCards.Add(this.hand.rightHand);
+                            int result = ownCardsNotInCombination[ownCardsNotInCombination.Count - i - 1].cardType.cardRank - pCardsNotInCombination[pCardsNotInCombination.Count - i - 1].cardType.cardRank;
+                            if (result != 0)
+                            {
+                                return result;
+                            }
                         }
-                        else
-                        {
-                            ownSortedHandCards.Add(this.hand.rightHand);
-                            ownSortedHandCards.Add(this.hand.leftHand);
-                        }
-                        if (p.hand.leftHand.cardType.cardRank >= p.hand.rightHand.cardType.cardRank)
-                        {
-                            pSortedHandCards.Add(p.hand.leftHand);
-                            pSortedHandCards.Add(p.hand.rightHand);
-                        }
-                        else
-                        {
-                            pSortedHandCards.Add(p.hand.rightHand);
-                            pSortedHandCards.Add(p.hand.leftHand);
-                        }
-                        if (ownSortedHandCards[0].cardType.cardRank == pSortedHandCards[0].cardType.cardRank)
-                        {
-                            return ownSortedHandCards[1].cardType.cardRank - pSortedHandCards[1].cardType.cardRank;
-                        }
-                        else
-                        {
-                            return ownSortedHandCards[0].cardType.cardRank - pSortedHandCards[0].cardType.cardRank;
-                        }
+                        return 0;
                     } else
                     {
                         return ownCardRank - pCardRank;

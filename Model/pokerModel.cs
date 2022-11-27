@@ -37,7 +37,7 @@ namespace PokerGame.Model
 
         public bool MainplayerTurn { get; private set; }
         public int StartingMoney { private get; set; } // Not sure if it is okey
-        public int PlayersNum { private get; set; }
+        //public int PlayersNum { private get; set; }
         public MiddleField MiddleFieldSection { get; private set; } // need to be private but needs to handle the events
         public StatusCards StatusCards { get; private set; }
         public int BlindValue { get { return _blindValue; } }
@@ -98,7 +98,7 @@ namespace PokerGame.Model
         {
             rand = new Random();
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
-            PlayersNum = playersNumber;
+            //PlayersNum = playersNumber;
             StartingMoney = startingMoney;
             _deck = new Deck();
             StatusCards = new StatusCards();
@@ -134,7 +134,7 @@ namespace PokerGame.Model
             }
         }
 
-        public void OnGameOverEvent()
+        private void OnGameOverEvent()
         {
             _gameOver = true;
             if(GameOverEvent != null)
@@ -151,7 +151,7 @@ namespace PokerGame.Model
             }
         }
 
-        public void OnBlindValuesEvent()
+        private void OnBlindValuesEvent()
         {
             if(BlindValuesEvent != null)
             {

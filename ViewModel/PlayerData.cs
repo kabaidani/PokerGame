@@ -169,7 +169,8 @@ namespace PokerGame.ViewModel
                 if (_roundOverState)
                 {
                     _roundOverState = false;
-                    return _player.PokerHandRanks.ToString();
+                    if (!_player.InRound || !_player.InGame) return "";
+                    else return _player.PokerHandRanks.ToString();
                 }
                 if (!_player.InGame || _player.LastAction == Action.NOACTION) return "";
                 return _player.LastAction.ToString();
