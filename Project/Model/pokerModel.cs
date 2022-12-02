@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Windows.Threading;
 using System.Threading;
 using System.Linq;
+using System.IO;
 
 namespace PokerGame.Model
 {
@@ -53,7 +54,9 @@ namespace PokerGame.Model
         private int _blindValue = 100;
         private int _lastRaiseValue;
 
+        private StreamWriter _result;
         
+
         private int _actualLicitBet;
         private bool _end; // should give an intuitive name for this
 
@@ -98,7 +101,6 @@ namespace PokerGame.Model
         {
             rand = new Random();
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
-            //PlayersNum = playersNumber;
             StartingMoney = startingMoney;
             _deck = new Deck();
             StatusCards = new StatusCards();
@@ -106,17 +108,9 @@ namespace PokerGame.Model
             _lockingKey = false;
             previousActions = new List<Tuple<Action, int>>();
             _gameOver = false;
+            _result = new StreamWriter("results.txt");
             OnLockingKeyStateChangeEvent();
         }
-
-
-        //private void OnRefreshCommonityBet()
-        //{
-        //    if(RefreshCommonityBet != null)
-        //    {
-        //        RefreshCommonityBet(this, EventArgs.Empty);
-        //    }
-        //}
 
         private void OnLockingKeyStateChangeEvent()
         {
@@ -137,6 +131,7 @@ namespace PokerGame.Model
         private void OnGameOverEvent()
         {
             _gameOver = true;
+            _result.Close();
             if(GameOverEvent != null)
             {
                 GameOverEvent(this, EventArgs.Empty);
@@ -175,14 +170,6 @@ namespace PokerGame.Model
             }
         }
 
-        //private void OnOutOfGamePlayerEvent(Player p)
-        //{
-        //    if(OutOfGamePlayerEvent != null)
-        //    {
-        //        OutOfGamePlayerEvent(this, new PokerPlayerEventArgs(p));
-        //    }
-        //}
-
         private void OnRefreshPlayers()
         {
             if(RefreshPlayers != null)
@@ -215,14 +202,6 @@ namespace PokerGame.Model
             }
         }
 
-        //private void OnDealerChipRound()
-        //{
-        //    if(DealerChipPass != null)
-        //    {
-        //        DealerChipPass(this, EventArgs.Empty);
-        //    }
-        //}
-
         private void OnRefreshRemainTime()
         {
             if(RefreshRemainTime != null)
@@ -230,22 +209,6 @@ namespace PokerGame.Model
                 RefreshRemainTime(this, EventArgs.Empty);
             }
         }
-
-        //private void OnRoundOverForPlayersEvent(List<Player> players)
-        //{
-        //    if(RoundOverForPlayersEvent != null)
-        //    {
-        //        RoundOverForPlayersEvent(this, new PlayersEventArg(players));
-        //    }
-        //}
-
-        //private void OnSignPlayerEvent(Player player)
-        //{
-        //    if(SignPlayerEvent != null)
-        //    {
-        //        SignPlayerEvent(this, new PokerPlayerEventArgs(player));
-        //    }
-        //}
 
         private void OnPlayerActionEvent(Player player)
         {
@@ -262,15 +225,6 @@ namespace PokerGame.Model
                 UpdateMiddleSectionEvent(this, EventArgs.Empty);
             }
         }
-
-        //private void OnCardAllocation(Player player)
-        //{
-        //    if (CardAllocation != null)
-        //    {
-        //        CardAllocation(this, new PokerPlayerEventArgs(player));
-        //    }
-        //}
-
 
 
         public void GeneratePlayers(CharacterTypes mainPlayerCharacterType)
@@ -345,27 +299,6 @@ namespace PokerGame.Model
             OnRefreshPlayers();
             OnUpdateMiddleSectionEvent();
         }
-
-
-        //public async void AsyncTestUnFoldMiddleCards()
-        //{
-        //    _end = false;
-        //    if (MiddleFieldSection.CommonityCards.Count == 0)
-        //    {
-        //        for (int i = 0; i < 3; i++)
-        //        {
-        //            MiddleFieldSection.UnfoldNextCard();
-        //            await Task.Delay(200);
-        //            OnUpdateMiddleSectionEvent();
-        //        }
-        //    }
-        //    else if (MiddleFieldSection.CommonityCards.Count < 5)
-        //    {
-        //        MiddleFieldSection.UnfoldNextCard();
-        //        OnUpdateMiddleSectionEvent();
-        //    }
-        //    OnCheckCombinationEvent();
-        //}
 
         public void ReleaseLockingKey()
         {
@@ -514,6 +447,38 @@ namespace PokerGame.Model
             return counter == 1;
         }
 
+        private void LogResults()
+        {
+
+            foreach(var card in MiddleFieldSection.CommonityCards)
+            {
+                _result.Write(card.cardType.cardRank.ToString() + " " + card.cardType.cardSuit.ToString() + "\n");
+                _result.Flush();
+            }
+            foreach(var player in playerContainer)
+            {
+                _result.Write(
+                    player.Character.ToString() +
+                    ": " +
+                    player.hand.rightHand.cardType.cardSuit.ToString() +
+                    " " +
+                    player.hand.rightHand.cardType.cardRank.ToString() +
+                    " " +
+                    player.hand.rightHand.cardType.cardSuit.ToString() +
+                    " " +
+                    player.hand.rightHand.cardType.cardRank.ToString() +
+                    " " +
+                    player.PokerHandRanks.ToString() +
+                    " " +
+                    "+€" + player.GetGainedPrize().ToString()
+                    + "\n"
+                    );
+                _result.Flush();
+            }
+            _result.WriteLine("\n");
+            _result.Flush();
+        }
+
         private async Task RoundNumberFive()
         {
             await Task.Delay(200); //original value 1000
@@ -524,6 +489,7 @@ namespace PokerGame.Model
             }
             CheckWinner();
             MiddleFieldSection.CollectBets(playerContainer);
+            LogResults();
             //OnRoundOverForPlayersEvent(playerContainer);
             OnRefreshPlayers();
             OnUpdateGainedPrizeEvent(playerContainer);
@@ -612,7 +578,7 @@ namespace PokerGame.Model
                 {
                     MainPlayer actPlayer = p as MainPlayer;
                     actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
-                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds with 500
+                    thinkingTimeMultiplier = 5000000; //Max waiting time ~ 10 seconds with 500
                 }
 
                 thinkingTimeMultiplier += 50;
