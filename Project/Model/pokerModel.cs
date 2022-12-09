@@ -68,6 +68,7 @@ namespace PokerGame.Model
         private bool _lockingKey;
         private Random rand;
         private bool _gameOver;
+        int magicCounter = 70;
 
 
         //getters
@@ -425,11 +426,22 @@ namespace PokerGame.Model
 
         private async Task WaitingTimeForPlayers(int thinkingTimeMultiplier, Player p)
         {
-            for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
+            int delayPeriod = magicCounter;
+            if (p.StaticName == "MainPlayer")
             {
-                await Task.Delay(20);
+                magicCounter = 20;
+                delayPeriod = 140;
+            }
+            //for (int j = 0; j < thinkingTimeMultiplier && _end; j++)
+            int j = 0;
+            while(RemaineTime > 0 && _end)
+            {
+                await Task.Delay(delayPeriod);
                 RemaineTime -= 20;
                 OnRefreshRemainTime();
+                if(j++ == 50 && p.StaticName != "MainPlayer"){
+                    break;
+                }
             }
             if(p.StaticName == "MainPlayer" && _end)
             {
@@ -470,7 +482,7 @@ namespace PokerGame.Model
                     " " +
                     player.PokerHandRanks.ToString() +
                     " " +
-                    "+€" + player.GetGainedPrize().ToString()
+                    "+€" + player._gainedPrize.ToString()
                     + "\n"
                     );
                 _result.Flush();
@@ -578,7 +590,7 @@ namespace PokerGame.Model
                 {
                     MainPlayer actPlayer = p as MainPlayer;
                     actPlayer.SetPossibleActions(ref _actualLicitBet, MiddleFieldSection.CommonityCards, playerContainer, _blindValue, ref _lastRaiseValue, ref previousActions);
-                    thinkingTimeMultiplier = 5000000; //Max waiting time ~ 10 seconds with 500
+                    thinkingTimeMultiplier = 500; //Max waiting time ~ 10 seconds with 500
                 }
 
                 thinkingTimeMultiplier += 50;

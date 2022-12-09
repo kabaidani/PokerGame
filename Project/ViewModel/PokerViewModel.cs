@@ -379,29 +379,6 @@ namespace PokerGame.ViewModel
             RemainTime = _model.RemaineTime;
         }
 
-        //private void OnDealerChipPass(object sender, EventArgs e)
-        //{
-        //    LeftTopCharacter.PropertyChange("DealerChipPictureVisibility");
-        //    MiddleTopCharacter.PropertyChange("DealerChipPictureVisibility");
-        //    RightTopCharacter.PropertyChange("DealerChipPictureVisibility");
-        //    LeftBottomCharacter.PropertyChange("DealerChipPictureVisibility");
-        //    MainPlayer.PropertyChange("DealerChipPictureVisibility");
-        //    RightBottomCharacter.PropertyChange("DealerChipPictureVisibility");
-        //}
-
-        //private void OnSignPlayerEvent(object sender, PokerPlayerEventArgs e)
-        //{
-        //    _characters[e.Player.StaticName].PropertyChange("ProfilePictureURL");
-        //}
-
-        //private void OnRoundOverForPlayersEvent(object sender, PlayersEventArg e)
-        //{
-        //    foreach (var player in e.Players)
-        //    {
-        //        if(player.LastAction != Model.Action.FOLD) _characters[player.StaticName].RoundOverUpdate();
-        //    }
-        //}
-
         private void OnSetActionOptionsEvent(object sender, PossibleActionsEventArgs e)
         {
             if (e.PossibleActions.Contains(PokerGame.Model.Action.FOLD)) FoldButtonContent = "FOLD";

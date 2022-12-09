@@ -10,7 +10,7 @@ namespace PokerGame.Model
         
         public Role Role;
         public List<Card> combinationCards; // This is not in the good place
-        private int _gainedPrize;
+        public int _gainedPrize;
 
         public int StartLicitBet { set; get; } //Indicates the licit bet value at the start of each round
         public PokerHandRanks PokerHandRanks { protected set; get; } // need to be carefull with the useage of this
