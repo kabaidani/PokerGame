@@ -69,6 +69,7 @@ namespace PokerGame.Model
         private Random rand;
         private bool _gameOver;
         int magicCounter = 70;
+        public bool logging;
 
 
         //getters
@@ -98,7 +99,7 @@ namespace PokerGame.Model
             throw new PokerGameException("Big blind can not be found");
         }
 
-        public PokerModel(int playersNumber, int startingMoney = 2000)
+        public PokerModel(int playersNumber, int startingMoney = 2000, bool log = true)
         {
             rand = new Random();
             if (playersNumber > 5 || playersNumber < 1) throw new ArgumentException();
@@ -109,7 +110,8 @@ namespace PokerGame.Model
             _lockingKey = false;
             previousActions = new List<Tuple<Action, int>>();
             _gameOver = false;
-            _result = new StreamWriter("results.txt");
+            logging = log;
+            if (logging) _result = new StreamWriter("results.txt");
             OnLockingKeyStateChangeEvent();
         }
 
@@ -501,7 +503,7 @@ namespace PokerGame.Model
             }
             CheckWinner();
             MiddleFieldSection.CollectBets(playerContainer);
-            LogResults();
+            if (logging) LogResults();
             //OnRoundOverForPlayersEvent(playerContainer);
             OnRefreshPlayers();
             OnUpdateGainedPrizeEvent(playerContainer);

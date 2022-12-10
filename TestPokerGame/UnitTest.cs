@@ -10,7 +10,7 @@ namespace PokerModelUnitTests
     [TestClass]
     public class TestPokerCombinations
     {
-        private PokerModel _model = new PokerModel(5);
+        private PokerModel _model = new PokerModel(5, 2000, false);
         [TestMethod]
         public void RoyalFlushTestMethod()
         {
@@ -291,7 +291,7 @@ namespace PokerModelUnitTests
     [TestClass]
     public class TestPokerCombinationsOrder
     {
-        private PokerModel _model = new PokerModel(5);
+        private PokerModel _model = new PokerModel(5, 2000, false);
         private MiddleField _middleSection = new MiddleField(new Deck(), new List<Player>());
         private Player p1 = new MainPlayer("player1", CharacterTypes.BOB, 2000);
         private Player p2 = new MainPlayer("player2", CharacterTypes.DONALD, 2000);
