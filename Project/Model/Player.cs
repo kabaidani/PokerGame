@@ -360,7 +360,8 @@ namespace PokerGame.Model
                     return 0;
                 }
             }
-            throw new PokerGameException("not able to find to suitable combination");
+            return -100;
+            //throw new PokerGameException("not able to find to suitable combination");
         }
         
         public bool CheckIfInGame()
@@ -505,7 +506,7 @@ namespace PokerGame.Model
                 minRaiseOrBetValue = bigBlindValue;
             } else
             {
-                throw new PokerGameException("Not valid use case when the licit bet is less than the betted value");
+                //throw new PokerGameException("Not valid use case when the licit bet is less than the betted value");
             }
 
             return actions;
@@ -555,7 +556,7 @@ namespace PokerGame.Model
                 else if (possiblyActions.Contains(Action.CALL)) followingAction = Action.CALL;
                 else
                 {
-                    throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+                    //throw new PokerGameException("Possibly actions must contain CHECK or CALL");
                 }
             }
             if (raising && possiblyActions.Count > 2) //Raise
@@ -564,7 +565,7 @@ namespace PokerGame.Model
                 else if (possiblyActions.Contains(Action.BET)) followingAction = Action.BET;
                 else
                 {
-                    throw new PokerGameException("Possibly actions must contain CHECK or CALL");
+                    //throw new PokerGameException("Possibly actions must contain CHECK or CALL");
                 }
                 followingRaiseValue = (int)raiseOrBetValue; //Completely fucked here both of two value are parameteres
             }
